@@ -3,6 +3,26 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script>
+  // ===== Google Ads: PREENCHER estes 3 valores (Google Ads > Metas > Conversões > Configuração da tag) =====
+  window.ADS_ID = 'AW-XXXXXXXXX';                 // ID de conversão (igual nas duas ações)
+  window.CONV = {
+    whatsapp: 'AW-XXXXXXXXX/LABEL_WHATSAPP',       // ação "Clique WhatsApp"
+    ligacao:  'AW-XXXXXXXXX/LABEL_TELEFONE'        // ação "Clique Telefone"
+  };
+  // ==========================================================================================================
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  // Enquanto o ID não for preenchido, a tag não é carregada (nada é enviado ao Google).
+  if (window.ADS_ID.indexOf('XXX') === -1) {
+    var s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id=' + window.ADS_ID;
+    document.head.appendChild(s);
+    gtag('js', new Date());
+    gtag('config', window.ADS_ID);
+  }
+</script>
 <title>Laje Treliçada em Franca | Carvalho Pré-Moldados</title>
 <meta name="description" content="Laje treliçada com lajota ou EPS, steel deck Trelifácil, ferro e arames direto da fábrica em Franca-SP. Orçamento pela planta no WhatsApp e entrega com caminhão próprio em Franca e região (até 70 km).">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -180,14 +200,19 @@
 </a>
 
 <script>
-  // Conversões do Google Ads: preencher CONV_WHATS e CONV_LIG depois de criar as ações de conversão.
-  document.querySelectorAll('[data-conv]').forEach(function(a){
-    a.addEventListener('click', function(){
-      if (typeof gtag !== 'function' || !window.CONV) return;
-      var alvo = window.CONV[a.dataset.conv];
-      if (alvo) gtag('event', 'conversion', {send_to: alvo});
-    });
-  });
+  // Conversões do Google Ads: qualquer clique em link de WhatsApp ou tel: (inclusive links novos).
+  (function () {
+    var RE_WHATS = /^(https?:\/\/)?(wa\.me|api\.whatsapp\.com|web\.whatsapp\.com)\b|^whatsapp:/i;
+    document.addEventListener('click', function (e) {
+      if (window.ADS_ID.indexOf('XXX') !== -1) return; // ainda não configurado
+      var a = e.target.closest && e.target.closest('a[href]');
+      if (!a) return;
+      var href = (a.getAttribute('href') || '').trim();
+      var tipo = RE_WHATS.test(href) ? 'whatsapp' : (/^tel:/i.test(href) ? 'ligacao' : null);
+      if (!tipo || !window.CONV[tipo] || window.CONV[tipo].indexOf('LABEL_') !== -1) return;
+      gtag('event', 'conversion', { send_to: window.CONV[tipo], transport_type: 'beacon' });
+    }, true);
+  })();
 </script>
 </body>
 </html>
