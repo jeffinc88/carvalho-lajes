@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <script>
   // ===== Google Ads: PREENCHER estes 3 valores (Google Ads > Metas > Conversões > Configuração da tag) =====
-  window.ADS_ID = 'AW-XXXXXXXXX';                 // ID de conversão (igual nas duas ações)
+  window.ADS_ID = 'AW-695034554';                 // ID de conversão (igual nas duas ações)
   window.CONV = {
     whatsapp: 'AW-XXXXXXXXX/LABEL_WHATSAPP',       // ação "Clique WhatsApp"
     ligacao:  'AW-XXXXXXXXX/LABEL_TELEFONE'        // ação "Clique Telefone"
@@ -209,8 +209,20 @@
       if (!a) return;
       var href = (a.getAttribute('href') || '').trim();
       var tipo = RE_WHATS.test(href) ? 'whatsapp' : (/^tel:/i.test(href) ? 'ligacao' : null);
-      if (!tipo || !window.CONV[tipo] || window.CONV[tipo].indexOf('LABEL_') !== -1) return;
-      gtag('event', 'conversion', { send_to: window.CONV[tipo], transport_type: 'beacon' });
+      if (!tipo) return;
+      // 1) "Página virtual": aciona as conversões de Carregamento de página com URL contendo
+      //    clique-whatsapp / clique-telefone. O visitante não é redirecionado.
+      var caminho = tipo === 'whatsapp' ? '/clique-whatsapp' : '/clique-telefone';
+      gtag('event', 'page_view', {
+        page_location: location.origin + caminho,
+        page_path: caminho,
+        send_to: window.ADS_ID,
+        transport_type: 'beacon'
+      });
+      // 2) Se os rótulos forem preenchidos em window.CONV, envia também a conversão direta.
+      if (window.CONV[tipo] && window.CONV[tipo].indexOf('LABEL_') === -1) {
+        gtag('event', 'conversion', { send_to: window.CONV[tipo], transport_type: 'beacon' });
+      }
     }, true);
   })();
 </script>
