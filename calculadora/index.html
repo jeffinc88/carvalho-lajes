@@ -173,7 +173,7 @@ figure{margin:0}
         <label for="capa">Capa de concreto
           <select id="capa"><option value="0.04">4 cm</option><option value="0.05">5 cm</option><option value="0.06">6 cm</option></select></label>
         <label for="inicio">Junto às paredes
-          <select id="inicio"><option value="ench">Começa e termina com enchimento</option><option value="vig">Começa e termina com vigota</option><option value="misto">Começa com vigota e termina com enchimento</option></select></label>
+          <select id="inicio"><option value="ench">Começa e termina com enchimento</option><option value="vig">Começa e termina com vigota</option><option value="misto">Começa com enchimento e termina com vigota</option></select></label>
         <label for="epsh" id="epsh-l" hidden>Altura do EPS
           <select id="epsh"><option value="0.07">7 cm</option><option value="0.11">11 cm</option><option value="0.15">15 cm</option><option value="0.19">19 cm</option></select></label>
       </div>
@@ -377,7 +377,7 @@ figure{margin:0}
     // vigotas
     var vw=Math.max(2.2,0.12*sx), passo=INTEREIXO*sx;
     for(var i=0;i<r.nVig;i++){
-      var cx = (r.inicio==='vig'||r.inicio==='misto') ? x0 + Math.min(w, i*passo) : x0 + (i+1)*passo;
+      var cx = r.inicio==='vig' ? x0 + Math.min(w, i*passo) : x0 + Math.min(w, (i+1)*passo);
       if(cx>x0+w+0.5) cx=x0+w;
       s+='<rect x="'+(cx-vw/2)+'" y="'+(y0-esp*0.8)+'" width="'+vw+'" height="'+(h+esp*1.6)+'" fill="var(--vigota)"/>';
     }
@@ -432,7 +432,7 @@ figure{margin:0}
       (u.trav?'Linhas de travamento: '+u.trav+' ('+u.canal+' canaletas H6 × 30 cm; '+u.acoTxt.join('; ')+')\n':'')+
       'Concreto estimado: '+fmt(u.vol,1)+' m³'+
       ($('parede').value.trim()?'\n\nParede sobre a laje: '+$('parede').value.trim():'')+
-      (o.av?'\n\nDetalhes técnicos: treliça '+(o.trelica||'a definir')+', apoio '+Math.round(o.apoio*100)+' cm, capa '+Math.round(o.capa*100)+' cm, '+({vig:'começa e termina com vigota',misto:'começa com vigota e termina com enchimento',ench:'começa e termina com enchimento'})[o.inicio]:'');
+      (o.av?'\n\nDetalhes técnicos: treliça '+(o.trelica||'a definir')+', apoio '+Math.round(o.apoio*100)+' cm, capa '+Math.round(o.capa*100)+' cm, '+({vig:'começa e termina com vigota',misto:'começa com enchimento e termina com vigota',ench:'começa e termina com enchimento'})[o.inicio]:'');
     $('enviar').href='https://wa.me/'+ZAP+'?text='+encodeURIComponent(t);
   }
   ['nome','cidade','prev','parede'].forEach(function(id){$(id).addEventListener('input',atualizaLink);$(id).addEventListener('change',atualizaLink)});
