@@ -58,6 +58,12 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 .etapa h2{margin:0;font-size:16px;font-weight:800;display:flex;align-items:center;gap:10px}
 .etapa h2 span{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;flex:none}
 .dica{margin:0;color:var(--muted);font-size:13px}
+.guia{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;background:var(--accent-soft);border-radius:10px;padding:12px}
+.guia svg{width:120px;height:auto;display:block}
+.guia ul{margin:0;padding-left:18px;font-size:13px;display:grid;gap:4px}
+@media (max-width:480px){.guia{grid-template-columns:minmax(0,1fr)}.guia svg{width:140px;justify-self:center}}
+.vazio{display:grid;gap:8px;justify-items:center;text-align:center;padding:28px 12px;color:var(--muted);font-size:14px;border:1.5px dashed var(--line);border-radius:10px}
+.vazio b{color:var(--fg);font-size:15px}
 .opcoes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .op{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:12px;text-align:left;cursor:pointer;font:inherit;display:grid;gap:2px}
 .op b{font-size:14px}.op small{color:var(--muted);font-size:12px}
@@ -152,8 +158,13 @@ figure{margin:0}
     </section>
 
     <section class="etapa" aria-labelledby="t3">
-      <h2 id="t3"><span>3</span>Medidas dos cômodos <span class="exemplo" id="tag-ex" style="width:auto;height:auto;background:var(--accent-soft);color:var(--accent);border-radius:999px">exemplo</span></h2>
-      <p class="dica">Medidas internas, de parede a parede, em metros. A vigota vai sempre no lado menor.</p>
+      <h2 id="t3"><span>3</span>Medidas dos cômodos</h2>
+      <div class="guia">
+        <svg viewBox="0 0 140 100" aria-hidden="true"><rect x="8" y="8" width="124" height="84" fill="none" stroke="var(--muted)" stroke-width="6"/><rect x="11" y="11" width="118" height="78" fill="var(--surface)"/>
+          <g stroke="var(--accent)" stroke-width="2" fill="var(--accent)"><line x1="16" y1="30" x2="124" y2="30"/><path d="M16 30l6-4v8z M124 30l-6-4v8z"/><line x1="104" y1="16" x2="104" y2="84"/><path d="M104 16l-4 6h8z M104 84l-4-6h8z"/></g>
+          <text x="58" y="25" font-size="10" font-weight="700" fill="var(--fg)" font-family="Montserrat,Arial,sans-serif">largura</text><text x="0" y="0" font-size="10" font-weight="700" fill="var(--fg)" font-family="Montserrat,Arial,sans-serif" transform="translate(99 72) rotate(-90)">compr.</text></svg>
+        <ul><li>Meça <b>por dentro</b>, de parede a parede, em metros (ex.: 3,50).</li><li>Um cômodo por linha. A ordem largura/comprimento não importa.</li><li>A vigota vai no lado menor do cômodo.</li></ul>
+      </div>
       <div id="comodos" style="display:grid;gap:10px"></div>
       <button type="button" class="add" id="add">+ Adicionar cômodo</button>
     </section>
@@ -263,8 +274,7 @@ figure{margin:0}
 
   var st = {
     ench:'lajota', grupo:'Casa e piso', uso:USOS['Casa e piso'][0],
-    comodos:[{nome:'Sala',a:4.0,b:3.5},{nome:'Quarto',a:3.0,b:3.0},{nome:'Cozinha',a:3.2,b:2.8}],
-    exemplo:true
+    comodos:[{nome:'',a:null,b:null}]
   };
   var $ = function(id){return document.getElementById(id)};
   var fmt = function(n,d){return n.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d})};
@@ -295,23 +305,22 @@ figure{margin:0}
   function desenhaComodos(){
     $('comodos').innerHTML = st.comodos.map(function(c,i){
       return '<div class="comodo" data-i="'+i+'">'+
-        '<label class="nome" for="cn'+i+'">Cômodo<input id="cn'+i+'" data-k="nome" value="'+esc(c.nome)+'"></label>'+
-        '<label for="ca'+i+'">Largura (m)<input id="ca'+i+'" data-k="a" type="number" inputmode="decimal" min="0.5" max="12" step="0.05" value="'+c.a+'"></label>'+
-        '<label for="cb'+i+'">Comprimento (m)<input id="cb'+i+'" data-k="b" type="number" inputmode="decimal" min="0.5" max="20" step="0.05" value="'+c.b+'"></label>'+
+        '<label class="nome" for="cn'+i+'">Cômodo<input id="cn'+i+'" data-k="nome" placeholder="'+(['Ex.: Sala','Ex.: Quarto','Ex.: Cozinha'][i]||'Ex.: Banheiro')+'" value="'+esc(c.nome)+'"></label>'+
+        '<label for="ca'+i+'">Largura (m)<input id="ca'+i+'" data-k="a" type="number" inputmode="decimal" min="0.5" max="12" step="0.05" placeholder="0,00" value="'+(c.a==null?'':c.a)+'"></label>'+
+        '<label for="cb'+i+'">Comprimento (m)<input id="cb'+i+'" data-k="b" type="number" inputmode="decimal" min="0.5" max="20" step="0.05" placeholder="0,00" value="'+(c.b==null?'':c.b)+'"></label>'+
         '<button type="button" class="rem" aria-label="Remover '+esc(c.nome||'cômodo')+'" data-rem="'+i+'">×</button>'+
         '<label class="sentido" for="cs'+i+'">Sentido da vigota<select id="cs'+i+'" data-k="inv"><option value="">No lado menor (padrão)</option><option value="1"'+(c.inv?' selected':'')+'>No lado maior</option></select></label></div>';
     }).join('');
-    $('tag-ex').hidden = !st.exemplo;
   }
   $('comodos').addEventListener('input',function(e){
     var row=e.target.closest('.comodo'); if(!row) return;
     var c=st.comodos[+row.dataset.i], k=e.target.dataset.k;
     c[k] = k==='nome' ? e.target.value : k==='inv' ? !!e.target.value : parseFloat(String(e.target.value).replace(',','.'))||0;
-    st.exemplo=false; $('tag-ex').hidden=true; calc();
+    calc();
   });
   $('comodos').addEventListener('change',function(e){if(e.target.dataset.k==='inv'){st.comodos[+e.target.closest('.comodo').dataset.i].inv=!!e.target.value;calc();}});
-  $('comodos').addEventListener('click',function(e){var b=e.target.closest('[data-rem]');if(!b)return;st.comodos.splice(+b.dataset.rem,1);st.exemplo=false;desenhaComodos();calc();});
-  $('add').addEventListener('click',function(){st.comodos.push({nome:'Cômodo '+(st.comodos.length+1),a:3,b:3});st.exemplo=false;desenhaComodos();calc();var ins=$('comodos').querySelectorAll('input[data-k=a]');ins[ins.length-1].focus();});
+  $('comodos').addEventListener('click',function(e){var b=e.target.closest('[data-rem]');if(!b)return;st.comodos.splice(+b.dataset.rem,1);if(!st.comodos.length)st.comodos.push({nome:'',a:null,b:null});desenhaComodos();calc();});
+  $('add').addEventListener('click',function(){st.comodos.push({nome:'',a:null,b:null});desenhaComodos();calc();var ins=$('comodos').querySelectorAll('input[data-k=nome]');ins[ins.length-1].focus();});
 
   // ---------- avançado
   $('avanc-on').addEventListener('change',function(){$('avanc').hidden=!this.checked;$('comodos').classList.toggle('av',this.checked);if(!this.checked){st.comodos.forEach(function(c){c.inv=false});desenhaComodos();$('trelica').value='';$('apoio').value='0.10';$('capa').value='0.04';$('inicio').value='ench';$('epsh').value='0.07';}calc();});
@@ -387,9 +396,9 @@ figure{margin:0}
   var ultimo=null;
   function calc(){
     var o=opts(), rs=[], area=0, vol=0, pecas=0, meias=0, vigs={}, aco={}, trav=0, canal=0, alertas=[];
-    st.comodos.forEach(function(c){var r=calcComodo(c,o); if(!r) return; rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; trav+=r.nTrav; canal+=r.canaletas; if(r.barras){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.barras*r.barraComp;} vigs[r.comp]=(vigs[r.comp]||0)+r.nVig; if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
+    st.comodos.forEach(function(c,i){var r=calcComodo(c,o); if(!r) return; r.nome=(c.nome||'').trim()||'Cômodo '+(i+1); rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; trav+=r.nTrav; canal+=r.canaletas; if(r.barras){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.barras*r.barraComp;} vigs[r.comp]=(vigs[r.comp]||0)+r.nVig; if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
     $('area').innerHTML=fmt(area,2)+' <small>m²</small>';
-    $('desenhos').innerHTML = rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m · '+r.nVig+' vigotas'+(r.nTrav?' · '+r.nTrav+' travamento'+(r.nTrav>1?'s':''):'')+'</figcaption></figure>'}).join('') : '<p class="dica">Informe pelo menos um cômodo com medidas acima de 0,5 m.</p>';
+    $('desenhos').innerHTML = rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m · '+r.nVig+' vigotas'+(r.nTrav?' · '+r.nTrav+' travamento'+(r.nTrav>1?'s':''):'')+'</figcaption></figure>'}).join('') : '<div class="vazio"><b>O desenho da sua laje aparece aqui</b>Preencha a largura e o comprimento de pelo menos um cômodo.</div>';
     $('leg-ench').style.background = st.ench==='lajota'?'var(--lajota)':'var(--eps)';
     $('leg-ench-t').textContent = st.ench==='lajota'?'Lajota':'EPS';
     $('alertas').innerHTML = alertas.map(function(a){return '<p class="alerta">'+esc(a)+'</p>'}).join('');
@@ -408,6 +417,7 @@ figure{margin:0}
       (trav?'<div class="linha"><span>Linhas de travamento ('+trav+')</span><ul class="vig-list"><li>'+fmt(canal,0)+' canaletas H6 × 30 cm</li>'+acoTxt.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div>':'')+
       '<div class="linha"><span>Concreto (capa de '+Math.round(o.capa*100)+' cm + nervuras)</span><b>≈ '+fmt(volR,1)+' m³</b></div>'+
       '<div class="linha"><span>Treliça</span><b>'+(o.trelica?esc(o.trelica):'A definir pelo vendedor')+'</b></div>';
+    $('lista').hidden = !rs.length; $('area').hidden = !rs.length; document.querySelector('.legenda').hidden = !rs.length;
     ultimo={o:o,rs:rs,area:area,comps:comps,vigs:vigs,totVig:totVig,pecas:pecas,meias:meias,nomeMeia:nomeMeia,trav:trav,canal:canal,acoTxt:acoTxt,nomeEnch:nomeEnch,vol:volR};
     atualizaLink();
   }
