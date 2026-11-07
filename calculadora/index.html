@@ -20,7 +20,7 @@
   --bg:#f3f5f9; --surface:#ffffff; --ink:#15203a; --muted:#56617a; --line:#dbe1eb;
   --brand:#193769; --brand-ink:#ffffff; --accent:#e68219; --accent-soft:#fdf0e3;
   --zap:#1f9d55; --zap-ink:#ffffff;
-  --lajota:#d9733a; --eps:#e9edf3; --eps-line:#b7c1d1; --vigota:#5b6578; --parede:#9aa3b2;
+  --lajota:#d9733a; --eps:#e9edf3; --trav:#193769; --eps-line:#b7c1d1; --vigota:#5b6578; --parede:#9aa3b2;
   --f-display:'Archivo Black','Arial Black',Arial,sans-serif;
   --f-body:'Montserrat','Segoe UI',Arial,sans-serif;
   --r:10px;
@@ -29,13 +29,13 @@
   --bg:#0e1422; --surface:#161f33; --ink:#e9edf5; --muted:#a2acc2; --line:#2a3550;
   --brand:#2a4a8c; --brand-ink:#ffffff; --accent:#f08f2a; --accent-soft:#2f2316;
   --zap:#23a85c; --zap-ink:#ffffff;
-  --lajota:#d97a44; --eps:#dfe5ee; --eps-line:#8d99ad; --vigota:#c3cad8; --parede:#5f6a80;
+  --lajota:#d97a44; --eps:#dfe5ee; --trav:#6f8fd6; --eps-line:#8d99ad; --vigota:#c3cad8; --parede:#5f6a80;
   color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0e1422; --surface:#161f33; --ink:#e9edf5; --muted:#a2acc2; --line:#2a3550;
   --brand:#2a4a8c; --brand-ink:#ffffff; --accent:#f08f2a; --accent-soft:#2f2316;
   --zap:#23a85c; --zap-ink:#ffffff;
-  --lajota:#d97a44; --eps:#dfe5ee; --eps-line:#8d99ad; --vigota:#c3cad8; --parede:#5f6a80;
+  --lajota:#d97a44; --eps:#dfe5ee; --trav:#6f8fd6; --eps-line:#8d99ad; --vigota:#c3cad8; --parede:#5f6a80;
   color-scheme:dark}
 *{box-sizing:border-box}
 body{margin:0}
@@ -181,7 +181,7 @@ figure{margin:0}
     <div class="painel">
       <div class="painel-cab"><h2 id="tr">Sua laje</h2><div class="area" id="area">0 <small>m²</small></div></div>
       <div class="desenhos" id="desenhos"></div>
-      <div class="legenda"><span><i id="leg-ench" style="background:var(--lajota)"></i><span id="leg-ench-t">Lajota</span></span><span><i style="background:var(--vigota)"></i>Vigota</span><span><i style="background:var(--parede)"></i>Parede</span></div>
+      <div class="legenda"><span><i id="leg-ench" style="background:var(--lajota)"></i><span id="leg-ench-t">Lajota</span></span><span><i style="background:var(--vigota)"></i>Vigota</span><span><i style="background:var(--parede)"></i>Parede</span><span id="leg-trav"><i style="background:var(--trav)"></i>Linha de travamento</span></div>
       <div id="alertas"></div>
       <div class="lista" id="lista"></div>
       <p class="aviso">Quantidades estimadas com os padrões de fabricação da Carvalho Pré-Moldados. O projeto final é conferido pela nossa equipe técnica antes da entrega.</p>
@@ -332,13 +332,22 @@ figure{margin:0}
     else { nFaixas = Math.max(2, faixas); nVig = nFaixas-1; }
     var comp = Math.ceil((vao + 2*o.apoio)*10 - 1e-6)/10;
     var pecaLen = st.ench==='lajota'?0.20:0.49;
-    var porFaixa = Math.ceil(vao/pecaLen - 1e-9);
-    // Lajota: se a sobra da largura é de até meia faixa, essa última faixa leva meia lajota
+    // Linhas de travamento (perpendiculares às vigotas): vão < 4 m nenhuma; 4 a 6 m uma no meio; acima de 6 m duas, a cada 1/3
+    var nTrav = vao < 4 - 1e-9 ? 0 : (vao <= 6 + 1e-9 ? 1 : 2);
+    var LARG_TRAV = 0.10;
+    // cada linha abre um canal de 10 cm no enchimento de todas as faixas
+    var porFaixa = Math.ceil((vao - nTrav*LARG_TRAV)/pecaLen - 1e-9);
+    // Se a sobra da largura é de até meia faixa (21 cm), essa última faixa leva meia peça (lajota ou EPS)
     var inteiras = Math.floor(larg/INTEREIXO + 1e-9), sobra = larg - inteiras*INTEREIXO;
-    var meiaFaixa = (st.ench==='lajota' && sobra > 0.005 && sobra <= INTEREIXO/2 + 1e-9) ? 1 : 0;
+    var meiaFaixa = (sobra > 0.005 && sobra <= INTEREIXO/2 + 1e-9) ? 1 : 0;
     var hEnch = st.ench==='lajota'?0.06:o.epsh;
-    var vol = vao*larg*o.capa + nVig*vao*(INTEREIXO-0.33)*hEnch;
-    return {nome:c.nome||'Cômodo',a:a,b:b,vao:vao,larg:larg,area:vao*larg,nVig:nVig,nFaixas:nFaixas,comp:comp,pecas:(nFaixas-meiaFaixa)*porFaixa,meias:meiaFaixa*porFaixa,porFaixa:porFaixa,vol:vol,inicio:o.inicio};
+    // Aço do travamento: 2 barras por linha (uma embaixo, uma em cima), ancoradas nas vigas de borda;
+    // Ø 6,3 mm até 5,5 m de vão e cargas até 200 kgf/m²; Ø 8,0 mm em vão maior ou carga maior
+    var bitola = (vao > 5.5 || st.uso[2] > 200) ? '8,0' : '6,3';
+    var barraComp = Math.ceil((larg + 2*o.apoio)*10 - 1e-6)/10;
+    var vol = vao*larg*o.capa + nVig*vao*(INTEREIXO-0.33)*hEnch + nTrav*larg*LARG_TRAV*hEnch;
+    return {nome:c.nome||'Cômodo',a:a,b:b,vao:vao,larg:larg,area:vao*larg,nVig:nVig,nFaixas:nFaixas,comp:comp,pecas:(nFaixas-meiaFaixa)*porFaixa,meias:meiaFaixa*porFaixa,porFaixa:porFaixa,vol:vol,inicio:o.inicio,
+      nTrav:nTrav,barras:nTrav*2,bitola:bitola,barraComp:barraComp};
   }
   function svgComodo(r){
     // desenho em planta: vigotas na vertical (sentido do vão), largura na horizontal
@@ -351,6 +360,11 @@ figure{margin:0}
     // linhas de peças (juntas do enchimento)
     var pl = (st.ench==='lajota'?0.20:0.49)*sx;
     for(var y=y0+pl;y<y0+h-0.5;y+=pl){s+='<line x1="'+x0+'" y1="'+y+'" x2="'+(x0+w)+'" y2="'+y+'" stroke="'+(st.ench==='lajota'?'rgba(0,0,0,.18)':'var(--eps-line)')+'" stroke-width="0.6"/>';}
+    // linhas de travamento
+    for(var k=1;k<=r.nTrav;k++){
+      var ty = y0 + h*k/(r.nTrav+1), th = Math.max(3, 0.10*sx);
+      s+='<rect x="'+x0+'" y="'+(ty-th/2)+'" width="'+w+'" height="'+th+'" fill="var(--trav)"/>';
+    }
     // vigotas
     var vw=Math.max(2.2,0.12*sx), passo=INTEREIXO*sx;
     for(var i=0;i<r.nVig;i++){
@@ -363,10 +377,10 @@ figure{margin:0}
   }
   var ultimo=null;
   function calc(){
-    var o=opts(), rs=[], area=0, vol=0, pecas=0, meias=0, vigs={}, alertas=[];
-    st.comodos.forEach(function(c){var r=calcComodo(c,o); if(!r) return; rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; vigs[r.comp]=(vigs[r.comp]||0)+r.nVig; if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
+    var o=opts(), rs=[], area=0, vol=0, pecas=0, meias=0, vigs={}, aco={}, trav=0, alertas=[];
+    st.comodos.forEach(function(c){var r=calcComodo(c,o); if(!r) return; rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; trav+=r.nTrav; if(r.barras){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.barras*r.barraComp;} vigs[r.comp]=(vigs[r.comp]||0)+r.nVig; if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
     $('area').innerHTML=fmt(area,2)+' <small>m²</small>';
-    $('desenhos').innerHTML = rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m · '+r.nVig+' vigotas</figcaption></figure>'}).join('') : '<p class="dica">Informe pelo menos um cômodo com medidas acima de 0,5 m.</p>';
+    $('desenhos').innerHTML = rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m · '+r.nVig+' vigotas'+(r.nTrav?' · '+r.nTrav+' travamento'+(r.nTrav>1?'s':''):'')+'</figcaption></figure>'}).join('') : '<p class="dica">Informe pelo menos um cômodo com medidas acima de 0,5 m.</p>';
     $('leg-ench').style.background = st.ench==='lajota'?'var(--lajota)':'var(--eps)';
     $('leg-ench-t').textContent = st.ench==='lajota'?'Lajota':'EPS';
     $('alertas').innerHTML = alertas.map(function(a){return '<p class="alerta">'+esc(a)+'</p>'}).join('');
@@ -374,14 +388,18 @@ figure{margin:0}
     var totVig = comps.reduce(function(s,k){return s+vigs[k]},0);
     var nomeEnch = st.ench==='lajota'?'Lajotas cerâmicas 33×20':'Placas de EPS 49×33 (H'+Math.round(o.epsh*100)+')';
     var volR = Math.ceil(vol*10-1e-9)/10;
+    $('leg-trav').hidden = !trav;
+    var nomeMeia = st.ench==='lajota'?'Meias lajotas':'Meias placas de EPS';
+    var acoTxt = Object.keys(aco).sort().map(function(b){var m=aco[b];return fmt(m,1)+' m de ferro Ø '+b+' mm (≈ '+Math.ceil(m/12-1e-9)+' barra'+(Math.ceil(m/12-1e-9)>1?'s':'')+' de 12 m)'});
     $('lista').innerHTML =
       '<div class="linha"><span>Uso</span><b>'+esc(st.uso[1])+' · '+fmt(st.uso[2],0)+' kgf/m²</b></div>'+
       '<div class="linha"><span>Vigotas treliçadas ('+totVig+')</span><ul class="vig-list">'+comps.map(function(k){return '<li>'+vigs[k]+' × '+fmt(k,2)+' m</li>'}).join('')+'</ul></div>'+
       '<div class="linha"><span>'+nomeEnch+'</span><b>'+fmt(pecas,0)+' peças</b></div>'+
-      (meias?'<div class="linha"><span>Meias lajotas (acabamento junto à parede)</span><b>'+fmt(meias,0)+' peças</b></div>':'')+
+      (meias?'<div class="linha"><span>'+nomeMeia+' (junto à parede)</span><b>'+fmt(meias,0)+' peças</b></div>':'')+
+      (trav?'<div class="linha"><span>Linhas de travamento ('+trav+')</span><ul class="vig-list">'+acoTxt.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div>':'')+
       '<div class="linha"><span>Concreto (capa de '+Math.round(o.capa*100)+' cm + nervuras)</span><b>≈ '+fmt(volR,1)+' m³</b></div>'+
       '<div class="linha"><span>Treliça</span><b>'+(o.trelica?esc(o.trelica):'A definir pelo vendedor')+'</b></div>';
-    ultimo={o:o,rs:rs,area:area,comps:comps,vigs:vigs,totVig:totVig,pecas:pecas,meias:meias,nomeEnch:nomeEnch,vol:volR};
+    ultimo={o:o,rs:rs,area:area,comps:comps,vigs:vigs,totVig:totVig,pecas:pecas,meias:meias,nomeMeia:nomeMeia,trav:trav,acoTxt:acoTxt,nomeEnch:nomeEnch,vol:volR};
     atualizaLink();
   }
 
@@ -401,7 +419,8 @@ figure{margin:0}
       'Área total: '+fmt(u.area,2)+' m²\n'+
       'Vigotas: '+u.comps.map(function(k){return u.vigs[k]+' × '+fmt(k,2)+' m'}).join('; ')+'\n'+
       u.nomeEnch+': '+u.pecas+' peças\n'+
-      (u.meias?'Meias lajotas: '+u.meias+' peças\n':'')+
+      (u.meias?u.nomeMeia+': '+u.meias+' peças\n':'')+
+      (u.trav?'Linhas de travamento: '+u.trav+' ('+u.acoTxt.join('; ')+')\n':'')+
       'Concreto estimado: '+fmt(u.vol,1)+' m³'+
       (o.av?'\n\nDetalhes técnicos: treliça '+(o.trelica||'a definir')+', apoio '+Math.round(o.apoio*100)+' cm, capa '+Math.round(o.capa*100)+' cm, '+(o.inicio==='vig'?'começa com vigota':'começa com enchimento'):'');
     $('enviar').href='https://wa.me/'+ZAP+'?text='+encodeURIComponent(t);
