@@ -1,0 +1,397 @@
+<title>Calculadora de Laje Carvalho</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="Desenhe os cômodos da sua obra e veja na hora quantas vigotas, lajotas ou EPS a sua laje treliçada precisa. Carvalho Pré-Moldados, Franca-SP.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Montserrat:wght@500;600;700;800&display=swap">
+<style>
+/* Layout: formulário em etapas à esquerda, laje desenhada e quantidades fixas à direita; uma coluna no celular */
+:root{
+  --bg:#f3f5f9; --surface:#ffffff; --ink:#15203a; --muted:#56617a; --line:#dbe1eb;
+  --brand:#193769; --brand-ink:#ffffff; --accent:#e68219; --accent-soft:#fdf0e3;
+  --zap:#1f9d55; --zap-ink:#ffffff;
+  --lajota:#d9733a; --eps:#e9edf3; --eps-line:#b7c1d1; --vigota:#5b6578; --parede:#9aa3b2;
+  --f-display:'Archivo Black','Arial Black',Arial,sans-serif;
+  --f-body:'Montserrat','Segoe UI',Arial,sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1422; --surface:#161f33; --ink:#e9edf5; --muted:#a2acc2; --line:#2a3550;
+  --brand:#2a4a8c; --brand-ink:#ffffff; --accent:#f08f2a; --accent-soft:#2f2316;
+  --zap:#23a85c; --zap-ink:#ffffff;
+  --lajota:#d97a44; --eps:#dfe5ee; --eps-line:#8d99ad; --vigota:#c3cad8; --parede:#5f6a80;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1422; --surface:#161f33; --ink:#e9edf5; --muted:#a2acc2; --line:#2a3550;
+  --brand:#2a4a8c; --brand-ink:#ffffff; --accent:#f08f2a; --accent-soft:#2f2316;
+  --zap:#23a85c; --zap-ink:#ffffff;
+  --lajota:#d97a44; --eps:#dfe5ee; --eps-line:#8d99ad; --vigota:#c3cad8; --parede:#5f6a80;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.topo{background:var(--brand);color:var(--brand-ink)}
+.topo-in,.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.topo-in{padding-block:18px 26px;display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;justify-content:space-between}
+.marca{display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none}
+.marca b{font-family:var(--f-display);font-weight:400;font-size:22px;letter-spacing:2px;line-height:1;display:block}
+.marca small{display:block;font-weight:700;font-size:10px;letter-spacing:3.4px;color:var(--accent);margin-top:4px}
+.topo h1{font-family:var(--f-display);font-weight:400;font-size:clamp(24px,4vw,36px);line-height:1.1;margin:18px 0 6px;text-wrap:balance}
+.topo p{margin:0;max-width:60ch;color:#d6deee}
+.topo-txt{flex:1 1 420px;min-width:0}
+.wrap{padding-block:24px 48px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:24px;align-items:start}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}}
+.etapa{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:grid;gap:14px}
+.col{display:grid;gap:16px;min-width:0}
+.etapa h2{margin:0;font-size:16px;font-weight:800;display:flex;align-items:center;gap:10px}
+.etapa h2 span{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;flex:none}
+.dica{margin:0;color:var(--muted);font-size:13px}
+.opcoes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.op{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:12px;text-align:left;cursor:pointer;font:inherit;display:grid;gap:2px}
+.op b{font-size:14px}.op small{color:var(--muted);font-size:12px}
+.op[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.op:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.abas{display:flex;flex-wrap:wrap;gap:6px}
+.aba{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.aba[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.usos{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;max-height:300px;overflow:auto;padding:2px}
+.usos .op{padding:10px}
+.usos .carga{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent);font-size:12px}
+.grupo-tit{grid-column:1/-1;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:4px}
+.comodo{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:end}
+@media (max-width:480px){.comodo{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}.comodo .nome{grid-column:1/-1}}
+label{display:grid;gap:4px;font-size:12px;font-weight:600;color:var(--muted)}
+input,select{font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-width:0}
+input[type=number]{font-variant-numeric:tabular-nums}
+.rem{border:0;background:transparent;color:var(--muted);font-size:20px;line-height:1;padding:10px 8px;cursor:pointer;border-radius:6px}
+.rem:hover{color:var(--ink);background:var(--bg)}
+.add{border:1.5px dashed var(--line);background:transparent;color:var(--accent);font:inherit;font-weight:700;padding:10px;border-radius:8px;cursor:pointer}
+.avanc-tog{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer}
+.avanc-tog input{width:18px;height:18px;accent-color:var(--accent)}
+.avanc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:480px){.avanc{grid-template-columns:minmax(0,1fr)}}
+.res{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+@media (max-width:900px){.res{position:static}}
+.painel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.painel-cab{background:var(--brand);color:var(--brand-ink);padding:16px 20px;display:flex;flex-wrap:wrap;gap:6px 24px;align-items:baseline;justify-content:space-between}
+.painel-cab h2{margin:0;font-family:var(--f-display);font-weight:400;font-size:20px;letter-spacing:.5px}
+.area{font-variant-numeric:tabular-nums;font-weight:800;font-size:28px}
+.area small{font-size:14px;font-weight:600;color:#d6deee}
+.desenhos{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;padding:16px 20px}
+.des{display:grid;gap:4px;min-width:0}
+.des svg{width:100%;height:auto;display:block}
+.des figcaption{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.des figcaption b{color:var(--ink)}
+figure{margin:0}
+.lista{padding:4px 20px 16px;display:grid;gap:0}
+.linha{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.linha span{color:var(--muted)}
+.linha b{text-align:right}
+.vig-list{margin:0;padding:0;list-style:none;text-align:right;font-weight:700}
+.legenda{display:flex;flex-wrap:wrap;gap:6px 16px;padding:0 20px 14px;font-size:12px;color:var(--muted)}
+.legenda i{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-2px;margin-right:6px}
+.aviso{margin:0;padding:12px 20px;background:var(--accent-soft);font-size:12.5px;color:var(--ink);border-top:1px solid var(--line)}
+.alerta{margin:0 20px 14px;padding:10px 12px;border-radius:8px;background:var(--accent-soft);font-size:13px;font-weight:600}
+.lead{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.lead .cheio{grid-column:1/-1}
+@media (max-width:480px){.lead{grid-template-columns:minmax(0,1fr)}}
+.enviar{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--zap);color:var(--zap-ink);border:0;border-radius:10px;padding:15px 18px;font:inherit;font-size:16px;font-weight:800;text-decoration:none;cursor:pointer}
+.enviar:hover{filter:brightness(1.06)}
+.enviar[aria-disabled="true"]{opacity:.55;pointer-events:none}
+.miud{font-size:12px;color:var(--muted);margin:0}
+.exemplo{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:999px}
+@media (prefers-reduced-motion:no-preference){.des svg rect,.des svg line{transition:all .2s}}
+</style>
+
+<header class="topo">
+  <div class="topo-in">
+    <div class="topo-txt">
+      <a class="marca" href="https://carvalholajes.com.br/">
+        <svg width="64" height="19" viewBox="90 126 296 86" aria-hidden="true"><path d="M100 137 H371 M100 137 V201 M371 137 V201 M100 137 L168 201 L236 137 L303 201 L371 137" fill="none" stroke="#E68219" stroke-width="10" stroke-linejoin="round"/><rect x="96" y="196" width="280" height="10" fill="#ffffff"/><circle cx="100" cy="137" r="10" fill="#ffffff"/><circle cx="236" cy="137" r="10" fill="#ffffff"/><circle cx="371" cy="137" r="10" fill="#ffffff"/><circle cx="168" cy="201" r="9" fill="#E68219"/><circle cx="303" cy="201" r="9" fill="#E68219"/></svg>
+        <span><b>CARVALHO</b><small>PRÉ-MOLDADOS</small></span>
+      </a>
+      <h1>Calcule a sua laje treliçada</h1>
+      <p>Informe os cômodos da obra e veja na hora o desenho da laje e quantas vigotas e lajotas (ou EPS) ela leva. Depois é só pedir o orçamento no WhatsApp.</p>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="col">
+    <section class="etapa" aria-labelledby="t1">
+      <h2 id="t1"><span>1</span>Tipo de enchimento</h2>
+      <div class="opcoes" id="ench">
+        <button type="button" class="op" id="ench-lajota" data-v="lajota" aria-pressed="true"><b>Lajota cerâmica</b><small>Tradicional, 33 × 20 cm</small></button>
+        <button type="button" class="op" id="ench-eps" data-v="eps" aria-pressed="false"><b>EPS (isopor)</b><small>Leve e isolante, 49 × 33 cm</small></button>
+      </div>
+    </section>
+
+    <section class="etapa" aria-labelledby="t2">
+      <h2 id="t2"><span>2</span>Para que a laje vai servir?</h2>
+      <p class="dica">O uso define o peso que a laje precisa aguentar.</p>
+      <div class="abas" id="abas" role="group" aria-label="Grupo de uso"></div>
+      <div class="usos" id="usos"></div>
+    </section>
+
+    <section class="etapa" aria-labelledby="t3">
+      <h2 id="t3"><span>3</span>Medidas dos cômodos <span class="exemplo" id="tag-ex" style="width:auto;height:auto;background:var(--accent-soft);color:var(--accent);border-radius:999px">exemplo</span></h2>
+      <p class="dica">Medidas internas, de parede a parede, em metros. A vigota vai sempre no lado menor.</p>
+      <div id="comodos" style="display:grid;gap:10px"></div>
+      <button type="button" class="add" id="add">+ Adicionar cômodo</button>
+    </section>
+
+    <section class="etapa" aria-labelledby="t4">
+      <label class="avanc-tog" for="avanc-on"><input type="checkbox" id="avanc-on"> Sou pedreiro ou engenheiro: ajustar detalhes técnicos</label>
+      <div class="avanc" id="avanc" hidden>
+        <label for="trelica">Treliça
+          <select id="trelica">
+            <option value="">A definir pelo vendedor</option>
+            <option>TR08 6/3/4</option><option>TR08 6/4/4</option><option>TR08 6/4/5</option>
+            <option>TR12 6/3/4</option><option>TR12 6/4/5</option><option>TR12 6/4/6</option>
+            <option>TR16 7/4/5</option><option>TR20 7/4/5</option><option>TR25 8/5/7</option>
+          </select></label>
+        <label for="apoio">Apoio da vigota em cada parede
+          <select id="apoio"><option value="0.10">10 cm</option><option value="0.05">5 cm</option></select></label>
+        <label for="capa">Capa de concreto
+          <select id="capa"><option value="0.04">4 cm</option><option value="0.05">5 cm</option><option value="0.06">6 cm</option></select></label>
+        <label for="inicio">Junto às paredes
+          <select id="inicio"><option value="ench">Começa e termina com enchimento</option><option value="vig">Começa e termina com vigota</option></select></label>
+        <label for="epsh" id="epsh-l" hidden>Altura do EPS
+          <select id="epsh"><option value="0.07">7 cm</option><option value="0.11">11 cm</option><option value="0.15">15 cm</option><option value="0.19">19 cm</option></select></label>
+      </div>
+    </section>
+  </div>
+
+  <aside class="col res" aria-labelledby="tr">
+    <div class="painel">
+      <div class="painel-cab"><h2 id="tr">Sua laje</h2><div class="area" id="area">0 <small>m²</small></div></div>
+      <div class="desenhos" id="desenhos"></div>
+      <div class="legenda"><span><i id="leg-ench" style="background:var(--lajota)"></i><span id="leg-ench-t">Lajota</span></span><span><i style="background:var(--vigota)"></i>Vigota</span><span><i style="background:var(--parede)"></i>Parede</span></div>
+      <div id="alertas"></div>
+      <div class="lista" id="lista"></div>
+      <p class="aviso">Quantidades estimadas com os padrões de fabricação da Carvalho Pré-Moldados. O projeto final é conferido pela nossa equipe técnica antes da entrega.</p>
+    </div>
+
+    <section class="etapa" aria-labelledby="t5">
+      <h2 id="t5"><span>4</span>Receba o orçamento</h2>
+      <p class="dica">Enviamos tudo pronto para o nosso WhatsApp. O vendedor responde com o preço e o prazo de entrega.</p>
+      <form class="lead" id="lead" novalidate>
+        <label for="nome">Seu nome<input id="nome" autocomplete="name" required></label>
+        <label for="cidade">Cidade da obra
+          <select id="cidade" required></select></label>
+        <label class="cheio" for="prev">Quando pretende fazer a laje?
+          <select id="prev"><option>Este mês</option><option>Em 1 a 3 meses</option><option>Só pesquisando por enquanto</option></select></label>
+        <a class="enviar cheio" id="enviar" href="#" target="_blank" rel="noopener" aria-disabled="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3Z"/></svg>
+          Receber o orçamento no WhatsApp</a>
+        <p class="miud cheio" id="lead-msg">Preencha seu nome e a cidade para enviar.</p>
+        <p class="miud cheio">Se o WhatsApp não abrir, chame no <b>(16) 99291-4461</b>.</p>
+      </form>
+    </section>
+  </aside>
+</main>
+
+<script>
+(function(){
+  var ZAP = '5516992914461';
+  var INTEREIXO = 0.42;
+  var USOS = {
+    'Casa e piso': [
+      ['Casa','Quarto, sala e cozinha',150,'Banheiro e corredor também'],
+      ['Casa','Área de serviço',200,'Lavanderia e despensa'],
+      ['Comércio','Quarto de hotel',150,'Pousada também'],
+      ['Comércio','Escritório',250,'Sala comercial'],
+      ['Comércio','Restaurante',300,'Salão de lanchonete'],
+      ['Comércio','Cozinha de restaurante',300,'Cozinha que não é de casa'],
+      ['Comércio','Galeria de arte',300,'Exposições e mostras'],
+      ['Comércio','Loja',400,'Roupas, calçados, eletrônicos'],
+      ['Áreas comuns','Corredor e hall',300,'Circulação de prédio'],
+      ['Áreas comuns','Salão de festas',300,'Salão de jogos também'],
+      ['Áreas comuns','Academia de condomínio',300,'Aparelhos de ginástica'],
+      ['Áreas comuns','Academia de clube',500,'Academia comercial e dança'],
+      ['Áreas comuns','Quadra esportiva',500,'Jogos com corrida e pulos'],
+      ['Escola, igreja e saúde','Quarto de hospital',200,'Enfermaria'],
+      ['Escola, igreja e saúde','Sala de aula',300,'Escolas e cursos'],
+      ['Escola, igreja e saúde','Biblioteca',300,'Sala de leitura'],
+      ['Escola, igreja e saúde','Igreja ou auditório',400,'Cadeiras fixas no chão'],
+      ['Escola, igreja e saúde','Igreja ou auditório',500,'Cadeiras soltas'],
+      ['Depósito e área técnica','Barrilete',150,'Canos e registros da caixa d’água'],
+      ['Depósito e área técnica','Área técnica',300,'Máquinas e equipamentos'],
+      ['Depósito e área técnica','Depósito de mercadorias',750,'Pilhas até 2,5 m de altura'],
+      ['Depósito e área técnica','Casa de máquinas',3000,'Elevador até 1 m/s'],
+      ['Depósito e área técnica','Casa de máquinas',5000,'Elevador acima de 1 m/s']
+    ],
+    'Forro e cobertura': [
+      ['Forro e cobertura','Forro sob telhado',100,'Só manutenção'],
+      ['Forro e cobertura','Cobertura sem telhado',100,'Ou tampa de caixa d’água'],
+      ['Forro e cobertura','Laje jardim',100,'Sem acesso de pessoas'],
+      ['Forro e cobertura','Placas solares',150,'Cobertura com placas solares'],
+      ['Forro e cobertura','Sótão',200,'Forro usado para guardar coisas']
+    ],
+    'Terraço e varanda': [
+      ['Terraço','Casa ou apartamento',250,'Varanda, sacada e terraço'],
+      ['Terraço','Comércio ou escritório',300,'Terraço de loja ou empresa'],
+      ['Terraço','Terraço jardim',300,'Com acesso de pessoas'],
+      ['Terraço','Acesso público',400,'Hotel, escola, hospital']
+    ],
+    'Garagem': [
+      ['Garagem','Carros de passeio',300,'Veículos até 3 t'],
+      ['Garagem','Vans e utilitários',500,'Veículos até 9 t']
+    ]
+  };
+  var CIDADES = ['Franca','Batatais','Brodowski','Buritizal','Capetinga','Cássia','Claraval','Cristais Paulista','Delfinópolis','Guará','Ibiraci','Itirapuã','Ituverava','Nuporanga','Orlândia','Patrocínio Paulista','Pedregulho','Restinga','Ribeirão Corrente','Rifaina','Sales Oliveira','São José da Bela Vista','São Sebastião do Paraíso','São Tomás de Aquino','Outra cidade'];
+
+  var st = {
+    ench:'lajota', grupo:'Casa e piso', uso:USOS['Casa e piso'][0],
+    comodos:[{nome:'Sala',a:4.0,b:3.5},{nome:'Quarto',a:3.0,b:3.0},{nome:'Cozinha',a:3.2,b:2.8}],
+    exemplo:true
+  };
+  var $ = function(id){return document.getElementById(id)};
+  var fmt = function(n,d){return n.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d})};
+  var esc = function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+
+  // ---------- etapa 1
+  [$('ench-lajota'),$('ench-eps')].forEach(function(b){
+    b.addEventListener('click',function(){st.ench=b.dataset.v;
+      $('ench-lajota').setAttribute('aria-pressed',st.ench==='lajota');$('ench-eps').setAttribute('aria-pressed',st.ench==='eps');
+      $('epsh-l').hidden = st.ench!=='eps'; calc();});
+  });
+
+  // ---------- etapa 2
+  function desenhaUsos(){
+    $('abas').innerHTML = Object.keys(USOS).map(function(g){return '<button type="button" class="aba" aria-pressed="'+(g===st.grupo)+'" data-g="'+esc(g)+'">'+esc(g)+'</button>'}).join('');
+    var html='', ult='';
+    USOS[st.grupo].forEach(function(u,i){
+      if(u[0]!==ult && st.grupo==='Casa e piso'){html+='<div class="grupo-tit">'+esc(u[0])+'</div>';ult=u[0];}
+      var on = st.uso===u;
+      html+='<button type="button" class="op" aria-pressed="'+on+'" data-i="'+i+'"><b>'+esc(u[1])+'</b><small>'+esc(u[3])+'</small><span class="carga">'+fmt(u[2],0)+' kgf/m²</span></button>';
+    });
+    $('usos').innerHTML=html;
+  }
+  $('abas').addEventListener('click',function(e){var b=e.target.closest('.aba');if(!b)return;st.grupo=b.dataset.g;desenhaUsos();});
+  $('usos').addEventListener('click',function(e){var b=e.target.closest('.op');if(!b)return;st.uso=USOS[st.grupo][+b.dataset.i];desenhaUsos();calc();});
+
+  // ---------- etapa 3
+  function desenhaComodos(){
+    $('comodos').innerHTML = st.comodos.map(function(c,i){
+      return '<div class="comodo" data-i="'+i+'">'+
+        '<label class="nome" for="cn'+i+'">Cômodo<input id="cn'+i+'" data-k="nome" value="'+esc(c.nome)+'"></label>'+
+        '<label for="ca'+i+'">Largura (m)<input id="ca'+i+'" data-k="a" type="number" inputmode="decimal" min="0.5" max="12" step="0.05" value="'+c.a+'"></label>'+
+        '<label for="cb'+i+'">Comprimento (m)<input id="cb'+i+'" data-k="b" type="number" inputmode="decimal" min="0.5" max="20" step="0.05" value="'+c.b+'"></label>'+
+        '<button type="button" class="rem" aria-label="Remover '+esc(c.nome||'cômodo')+'" data-rem="'+i+'">×</button></div>';
+    }).join('');
+    $('tag-ex').hidden = !st.exemplo;
+  }
+  $('comodos').addEventListener('input',function(e){
+    var row=e.target.closest('.comodo'); if(!row) return;
+    var c=st.comodos[+row.dataset.i], k=e.target.dataset.k;
+    c[k] = k==='nome' ? e.target.value : parseFloat(String(e.target.value).replace(',','.'))||0;
+    st.exemplo=false; $('tag-ex').hidden=true; calc();
+  });
+  $('comodos').addEventListener('click',function(e){var b=e.target.closest('[data-rem]');if(!b)return;st.comodos.splice(+b.dataset.rem,1);st.exemplo=false;desenhaComodos();calc();});
+  $('add').addEventListener('click',function(){st.comodos.push({nome:'Cômodo '+(st.comodos.length+1),a:3,b:3});st.exemplo=false;desenhaComodos();calc();var ins=$('comodos').querySelectorAll('input[data-k=a]');ins[ins.length-1].focus();});
+
+  // ---------- avançado
+  $('avanc-on').addEventListener('change',function(){$('avanc').hidden=!this.checked;if(!this.checked){$('trelica').value='';$('apoio').value='0.10';$('capa').value='0.04';$('inicio').value='ench';$('epsh').value='0.07';}calc();});
+  ['trelica','apoio','capa','inicio','epsh'].forEach(function(id){$(id).addEventListener('change',calc)});
+
+  // ---------- conta
+  function opts(){
+    var av=$('avanc-on').checked;
+    return {
+      apoio: av?parseFloat($('apoio').value):0.10,
+      capa: av?parseFloat($('capa').value):0.04,
+      inicio: av?$('inicio').value:'ench',
+      trelica: av?$('trelica').value:'',
+      epsh: parseFloat($('epsh').value),
+      av: av
+    };
+  }
+  function calcComodo(c,o){
+    var a=Math.max(0,c.a||0), b=Math.max(0,c.b||0);
+    if(a<0.5||b<0.5) return null;
+    var vao=Math.min(a,b), larg=Math.max(a,b);
+    var faixas = Math.max(1, Math.ceil(larg/INTEREIXO - 1e-9));
+    var nVig, nFaixas;
+    if(o.inicio==='vig'){ nVig = faixas+1; nFaixas = faixas; }
+    else { nFaixas = Math.max(2, faixas); nVig = nFaixas-1; }
+    var comp = Math.ceil((vao + 2*o.apoio)*10 - 1e-6)/10;
+    var pecaLen = st.ench==='lajota'?0.20:0.49;
+    var porFaixa = Math.ceil(vao/pecaLen - 1e-9);
+    var hEnch = st.ench==='lajota'?0.06:o.epsh;
+    var vol = vao*larg*o.capa + nVig*vao*(INTEREIXO-0.33)*hEnch;
+    return {nome:c.nome||'Cômodo',a:a,b:b,vao:vao,larg:larg,area:vao*larg,nVig:nVig,nFaixas:nFaixas,comp:comp,pecas:nFaixas*porFaixa,porFaixa:porFaixa,vol:vol,inicio:o.inicio};
+  }
+  function svgComodo(r){
+    // desenho em planta: vigotas na vertical (sentido do vão), largura na horizontal
+    var W=200, pad=10, esp=8;
+    var sx=(W-2*pad-2*esp)/r.larg, H=Math.round(r.vao*sx+2*pad+2*esp);
+    var x0=pad+esp, y0=pad+esp, w=r.larg*sx, h=r.vao*sx;
+    var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Planta da laje '+esc(r.nome)+'">';
+    s+='<rect x="'+pad+'" y="'+pad+'" width="'+(w+2*esp)+'" height="'+(h+2*esp)+'" fill="var(--parede)" rx="2"/>';
+    s+='<rect x="'+x0+'" y="'+y0+'" width="'+w+'" height="'+h+'" fill="'+(st.ench==='lajota'?'var(--lajota)':'var(--eps)')+'"/>';
+    // linhas de peças (juntas do enchimento)
+    var pl = (st.ench==='lajota'?0.20:0.49)*sx;
+    for(var y=y0+pl;y<y0+h-0.5;y+=pl){s+='<line x1="'+x0+'" y1="'+y+'" x2="'+(x0+w)+'" y2="'+y+'" stroke="'+(st.ench==='lajota'?'rgba(0,0,0,.18)':'var(--eps-line)')+'" stroke-width="0.6"/>';}
+    // vigotas
+    var vw=Math.max(2.2,0.12*sx), passo=INTEREIXO*sx;
+    for(var i=0;i<r.nVig;i++){
+      var cx = r.inicio==='vig' ? x0 + Math.min(w, i*passo) : x0 + (i+1)*passo;
+      if(cx>x0+w+0.5) cx=x0+w;
+      s+='<rect x="'+(cx-vw/2)+'" y="'+(y0-esp*0.8)+'" width="'+vw+'" height="'+(h+esp*1.6)+'" fill="var(--vigota)"/>';
+    }
+    s+='</svg>';
+    return s;
+  }
+  var ultimo=null;
+  function calc(){
+    var o=opts(), rs=[], area=0, vol=0, pecas=0, vigs={}, alertas=[];
+    st.comodos.forEach(function(c){var r=calcComodo(c,o); if(!r) return; rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; vigs[r.comp]=(vigs[r.comp]||0)+r.nVig; if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
+    $('area').innerHTML=fmt(area,2)+' <small>m²</small>';
+    $('desenhos').innerHTML = rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m · '+r.nVig+' vigotas</figcaption></figure>'}).join('') : '<p class="dica">Informe pelo menos um cômodo com medidas acima de 0,5 m.</p>';
+    $('leg-ench').style.background = st.ench==='lajota'?'var(--lajota)':'var(--eps)';
+    $('leg-ench-t').textContent = st.ench==='lajota'?'Lajota':'EPS';
+    $('alertas').innerHTML = alertas.map(function(a){return '<p class="alerta">'+esc(a)+'</p>'}).join('');
+    var comps = Object.keys(vigs).map(Number).sort(function(a,b){return b-a});
+    var totVig = comps.reduce(function(s,k){return s+vigs[k]},0);
+    var nomeEnch = st.ench==='lajota'?'Lajotas cerâmicas 33×20':'Placas de EPS 49×33 (H'+Math.round(o.epsh*100)+')';
+    var volR = Math.ceil(vol*10-1e-9)/10;
+    $('lista').innerHTML =
+      '<div class="linha"><span>Uso</span><b>'+esc(st.uso[1])+' · '+fmt(st.uso[2],0)+' kgf/m²</b></div>'+
+      '<div class="linha"><span>Vigotas treliçadas ('+totVig+')</span><ul class="vig-list">'+comps.map(function(k){return '<li>'+vigs[k]+' × '+fmt(k,2)+' m</li>'}).join('')+'</ul></div>'+
+      '<div class="linha"><span>'+nomeEnch+'</span><b>'+fmt(pecas,0)+' peças</b></div>'+
+      '<div class="linha"><span>Concreto (capa de '+Math.round(o.capa*100)+' cm + nervuras)</span><b>≈ '+fmt(volR,1)+' m³</b></div>'+
+      '<div class="linha"><span>Treliça</span><b>'+(o.trelica?esc(o.trelica):'A definir pelo vendedor')+'</b></div>';
+    ultimo={o:o,rs:rs,area:area,comps:comps,vigs:vigs,totVig:totVig,pecas:pecas,nomeEnch:nomeEnch,vol:volR};
+    atualizaLink();
+  }
+
+  // ---------- lead
+  $('cidade').innerHTML = '<option value="">Escolha…</option>'+CIDADES.map(function(c){return '<option>'+c+'</option>'}).join('');
+  function atualizaLink(){
+    var nome=$('nome').value.trim(), cid=$('cidade').value, ok = nome.length>=2 && cid && ultimo && ultimo.rs.length;
+    $('enviar').setAttribute('aria-disabled', ok?'false':'true');
+    $('lead-msg').textContent = ok ? 'Abre o WhatsApp com a mensagem pronta. É só enviar.' : 'Preencha seu nome e a cidade para enviar.';
+    if(!ok){$('enviar').href='#';return;}
+    var u=ultimo, o=u.o;
+    var t='Olá! Fiz a simulação da laje no site da Carvalho e quero o orçamento.\n\n'+
+      'Nome: '+nome+'\nCidade: '+cid+'\nPrevisão: '+$('prev').value+'\n\n'+
+      'Uso: '+u.rs.length+' cômodo(s), '+st.uso[1]+' ('+st.uso[2]+' kgf/m²)\n'+
+      'Enchimento: '+(st.ench==='lajota'?'lajota cerâmica':'EPS H'+Math.round(o.epsh*100))+'\n'+
+      'Cômodos:\n'+u.rs.map(function(r){return '• '+r.nome+': '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m'}).join('\n')+'\n\n'+
+      'Área total: '+fmt(u.area,2)+' m²\n'+
+      'Vigotas: '+u.comps.map(function(k){return u.vigs[k]+' × '+fmt(k,2)+' m'}).join('; ')+'\n'+
+      u.nomeEnch+': '+u.pecas+' peças\n'+
+      'Concreto estimado: '+fmt(u.vol,1)+' m³'+
+      (o.av?'\n\nDetalhes técnicos: treliça '+(o.trelica||'a definir')+', apoio '+Math.round(o.apoio*100)+' cm, capa '+Math.round(o.capa*100)+' cm, '+(o.inicio==='vig'?'começa com vigota':'começa com enchimento'):'');
+    $('enviar').href='https://wa.me/'+ZAP+'?text='+encodeURIComponent(t);
+  }
+  ['nome','cidade','prev'].forEach(function(id){$(id).addEventListener('input',atualizaLink);$(id).addEventListener('change',atualizaLink)});
+  $('lead').addEventListener('submit',function(e){e.preventDefault()});
+  $('enviar').addEventListener('click',function(e){
+    if(this.getAttribute('aria-disabled')==='true'){e.preventDefault();return;}
+    try{ if(window.gtag && window.CONV && window.CONV.whatsapp) window.gtag('event','conversion',{send_to:window.CONV.whatsapp,transport_type:'beacon'}); }catch(err){}
+  });
+
+  desenhaUsos(); desenhaComodos(); calc();
+})();
+</script>
