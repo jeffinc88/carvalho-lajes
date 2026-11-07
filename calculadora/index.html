@@ -72,6 +72,9 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 .grupo-tit{grid-column:1/-1;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:4px}
 .comodo{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:end}
 @media (max-width:480px){.comodo{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}.comodo .nome{grid-column:1/-1}}
+.comodo .sentido{grid-column:1/-1}
+#comodos:not(.av) .sentido{display:none}
+textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-width:0;resize:vertical}
 label{display:grid;gap:4px;font-size:12px;font-weight:600;color:var(--muted)}
 input,select{font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-width:0}
 input[type=number]{font-variant-numeric:tabular-nums}
@@ -170,7 +173,7 @@ figure{margin:0}
         <label for="capa">Capa de concreto
           <select id="capa"><option value="0.04">4 cm</option><option value="0.05">5 cm</option><option value="0.06">6 cm</option></select></label>
         <label for="inicio">Junto às paredes
-          <select id="inicio"><option value="ench">Começa e termina com enchimento</option><option value="vig">Começa e termina com vigota</option></select></label>
+          <select id="inicio"><option value="ench">Começa e termina com enchimento</option><option value="vig">Começa e termina com vigota</option><option value="misto">Começa com vigota e termina com enchimento</option></select></label>
         <label for="epsh" id="epsh-l" hidden>Altura do EPS
           <select id="epsh"><option value="0.07">7 cm</option><option value="0.11">11 cm</option><option value="0.15">15 cm</option><option value="0.19">19 cm</option></select></label>
       </div>
@@ -194,6 +197,8 @@ figure{margin:0}
         <label for="nome">Seu nome<input id="nome" autocomplete="name" required></label>
         <label for="cidade">Cidade da obra
           <select id="cidade" required></select></label>
+        <label class="cheio" for="parede">Tem parede apoiada em cima da laje? Onde? <span style="font-weight:500">(opcional)</span>
+          <textarea id="parede" rows="2" placeholder="Ex.: parede do banheiro do andar de cima, no meio da sala"></textarea></label>
         <label class="cheio" for="prev">Quando pretende fazer a laje?
           <select id="prev"><option>Este mês</option><option>Em 1 a 3 meses</option><option>Só pesquisando por enquanto</option></select></label>
         <a class="enviar cheio" id="enviar" href="#" target="_blank" rel="noopener" aria-disabled="true">
@@ -293,21 +298,23 @@ figure{margin:0}
         '<label class="nome" for="cn'+i+'">Cômodo<input id="cn'+i+'" data-k="nome" value="'+esc(c.nome)+'"></label>'+
         '<label for="ca'+i+'">Largura (m)<input id="ca'+i+'" data-k="a" type="number" inputmode="decimal" min="0.5" max="12" step="0.05" value="'+c.a+'"></label>'+
         '<label for="cb'+i+'">Comprimento (m)<input id="cb'+i+'" data-k="b" type="number" inputmode="decimal" min="0.5" max="20" step="0.05" value="'+c.b+'"></label>'+
-        '<button type="button" class="rem" aria-label="Remover '+esc(c.nome||'cômodo')+'" data-rem="'+i+'">×</button></div>';
+        '<button type="button" class="rem" aria-label="Remover '+esc(c.nome||'cômodo')+'" data-rem="'+i+'">×</button>'+
+        '<label class="sentido" for="cs'+i+'">Sentido da vigota<select id="cs'+i+'" data-k="inv"><option value="">No lado menor (padrão)</option><option value="1"'+(c.inv?' selected':'')+'>No lado maior</option></select></label></div>';
     }).join('');
     $('tag-ex').hidden = !st.exemplo;
   }
   $('comodos').addEventListener('input',function(e){
     var row=e.target.closest('.comodo'); if(!row) return;
     var c=st.comodos[+row.dataset.i], k=e.target.dataset.k;
-    c[k] = k==='nome' ? e.target.value : parseFloat(String(e.target.value).replace(',','.'))||0;
+    c[k] = k==='nome' ? e.target.value : k==='inv' ? !!e.target.value : parseFloat(String(e.target.value).replace(',','.'))||0;
     st.exemplo=false; $('tag-ex').hidden=true; calc();
   });
+  $('comodos').addEventListener('change',function(e){if(e.target.dataset.k==='inv'){st.comodos[+e.target.closest('.comodo').dataset.i].inv=!!e.target.value;calc();}});
   $('comodos').addEventListener('click',function(e){var b=e.target.closest('[data-rem]');if(!b)return;st.comodos.splice(+b.dataset.rem,1);st.exemplo=false;desenhaComodos();calc();});
   $('add').addEventListener('click',function(){st.comodos.push({nome:'Cômodo '+(st.comodos.length+1),a:3,b:3});st.exemplo=false;desenhaComodos();calc();var ins=$('comodos').querySelectorAll('input[data-k=a]');ins[ins.length-1].focus();});
 
   // ---------- avançado
-  $('avanc-on').addEventListener('change',function(){$('avanc').hidden=!this.checked;if(!this.checked){$('trelica').value='';$('apoio').value='0.10';$('capa').value='0.04';$('inicio').value='ench';$('epsh').value='0.07';}calc();});
+  $('avanc-on').addEventListener('change',function(){$('avanc').hidden=!this.checked;$('comodos').classList.toggle('av',this.checked);if(!this.checked){st.comodos.forEach(function(c){c.inv=false});desenhaComodos();$('trelica').value='';$('apoio').value='0.10';$('capa').value='0.04';$('inicio').value='ench';$('epsh').value='0.07';}calc();});
   ['trelica','apoio','capa','inicio','epsh'].forEach(function(id){$(id).addEventListener('change',calc)});
 
   // ---------- conta
@@ -325,10 +332,12 @@ figure{margin:0}
   function calcComodo(c,o){
     var a=Math.max(0,c.a||0), b=Math.max(0,c.b||0);
     if(a<0.5||b<0.5) return null;
-    var vao=Math.min(a,b), larg=Math.max(a,b);
+    var inv = o.av && c.inv;
+    var vao=inv?Math.max(a,b):Math.min(a,b), larg=inv?Math.min(a,b):Math.max(a,b);
     var faixas = Math.max(1, Math.ceil(larg/INTEREIXO - 1e-9));
     var nVig, nFaixas;
     if(o.inicio==='vig'){ nVig = faixas+1; nFaixas = faixas; }
+    else if(o.inicio==='misto'){ nVig = faixas; nFaixas = faixas; }
     else { nFaixas = Math.max(2, faixas); nVig = nFaixas-1; }
     var comp = Math.ceil((vao + 2*o.apoio)*10 - 1e-6)/10;
     var pecaLen = st.ench==='lajota'?0.20:0.49;
@@ -347,7 +356,7 @@ figure{margin:0}
     var barraComp = Math.ceil((larg + 2*o.apoio)*10 - 1e-6)/10;
     var vol = vao*larg*o.capa + nVig*vao*(INTEREIXO-0.33)*hEnch + nTrav*larg*LARG_TRAV*hEnch;
     return {nome:c.nome||'Cômodo',a:a,b:b,vao:vao,larg:larg,area:vao*larg,nVig:nVig,nFaixas:nFaixas,comp:comp,pecas:(nFaixas-meiaFaixa)*porFaixa,meias:meiaFaixa*porFaixa,porFaixa:porFaixa,vol:vol,inicio:o.inicio,
-      nTrav:nTrav,barras:nTrav*2,bitola:bitola,barraComp:barraComp};
+      nTrav:nTrav,canaletas:nTrav*nFaixas,barras:nTrav*2,bitola:bitola,barraComp:barraComp};
   }
   function svgComodo(r){
     // desenho em planta: vigotas na vertical (sentido do vão), largura na horizontal
@@ -368,7 +377,7 @@ figure{margin:0}
     // vigotas
     var vw=Math.max(2.2,0.12*sx), passo=INTEREIXO*sx;
     for(var i=0;i<r.nVig;i++){
-      var cx = r.inicio==='vig' ? x0 + Math.min(w, i*passo) : x0 + (i+1)*passo;
+      var cx = (r.inicio==='vig'||r.inicio==='misto') ? x0 + Math.min(w, i*passo) : x0 + (i+1)*passo;
       if(cx>x0+w+0.5) cx=x0+w;
       s+='<rect x="'+(cx-vw/2)+'" y="'+(y0-esp*0.8)+'" width="'+vw+'" height="'+(h+esp*1.6)+'" fill="var(--vigota)"/>';
     }
@@ -377,8 +386,8 @@ figure{margin:0}
   }
   var ultimo=null;
   function calc(){
-    var o=opts(), rs=[], area=0, vol=0, pecas=0, meias=0, vigs={}, aco={}, trav=0, alertas=[];
-    st.comodos.forEach(function(c){var r=calcComodo(c,o); if(!r) return; rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; trav+=r.nTrav; if(r.barras){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.barras*r.barraComp;} vigs[r.comp]=(vigs[r.comp]||0)+r.nVig; if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
+    var o=opts(), rs=[], area=0, vol=0, pecas=0, meias=0, vigs={}, aco={}, trav=0, canal=0, alertas=[];
+    st.comodos.forEach(function(c){var r=calcComodo(c,o); if(!r) return; rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; trav+=r.nTrav; canal+=r.canaletas; if(r.barras){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.barras*r.barraComp;} vigs[r.comp]=(vigs[r.comp]||0)+r.nVig; if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
     $('area').innerHTML=fmt(area,2)+' <small>m²</small>';
     $('desenhos').innerHTML = rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m · '+r.nVig+' vigotas'+(r.nTrav?' · '+r.nTrav+' travamento'+(r.nTrav>1?'s':''):'')+'</figcaption></figure>'}).join('') : '<p class="dica">Informe pelo menos um cômodo com medidas acima de 0,5 m.</p>';
     $('leg-ench').style.background = st.ench==='lajota'?'var(--lajota)':'var(--eps)';
@@ -396,10 +405,10 @@ figure{margin:0}
       '<div class="linha"><span>Vigotas treliçadas ('+totVig+')</span><ul class="vig-list">'+comps.map(function(k){return '<li>'+vigs[k]+' × '+fmt(k,2)+' m</li>'}).join('')+'</ul></div>'+
       '<div class="linha"><span>'+nomeEnch+'</span><b>'+fmt(pecas,0)+' peças</b></div>'+
       (meias?'<div class="linha"><span>'+nomeMeia+' (junto à parede)</span><b>'+fmt(meias,0)+' peças</b></div>':'')+
-      (trav?'<div class="linha"><span>Linhas de travamento ('+trav+')</span><ul class="vig-list">'+acoTxt.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div>':'')+
+      (trav?'<div class="linha"><span>Linhas de travamento ('+trav+')</span><ul class="vig-list"><li>'+fmt(canal,0)+' canaletas H6 × 30 cm</li>'+acoTxt.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div>':'')+
       '<div class="linha"><span>Concreto (capa de '+Math.round(o.capa*100)+' cm + nervuras)</span><b>≈ '+fmt(volR,1)+' m³</b></div>'+
       '<div class="linha"><span>Treliça</span><b>'+(o.trelica?esc(o.trelica):'A definir pelo vendedor')+'</b></div>';
-    ultimo={o:o,rs:rs,area:area,comps:comps,vigs:vigs,totVig:totVig,pecas:pecas,meias:meias,nomeMeia:nomeMeia,trav:trav,acoTxt:acoTxt,nomeEnch:nomeEnch,vol:volR};
+    ultimo={o:o,rs:rs,area:area,comps:comps,vigs:vigs,totVig:totVig,pecas:pecas,meias:meias,nomeMeia:nomeMeia,trav:trav,canal:canal,acoTxt:acoTxt,nomeEnch:nomeEnch,vol:volR};
     atualizaLink();
   }
 
@@ -415,17 +424,18 @@ figure{margin:0}
       'Nome: '+nome+'\nCidade: '+cid+'\nPrevisão: '+$('prev').value+'\n\n'+
       'Uso: '+u.rs.length+' cômodo(s), '+st.uso[1]+' ('+st.uso[2]+' kgf/m²)\n'+
       'Enchimento: '+(st.ench==='lajota'?'lajota cerâmica':'EPS H'+Math.round(o.epsh*100))+'\n'+
-      'Cômodos:\n'+u.rs.map(function(r){return '• '+r.nome+': '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m'}).join('\n')+'\n\n'+
+      'Cômodos:\n'+u.rs.map(function(r){return '• '+r.nome+': '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m (vão '+fmt(r.vao,2)+' m)'}).join('\n')+'\n\n'+
       'Área total: '+fmt(u.area,2)+' m²\n'+
       'Vigotas: '+u.comps.map(function(k){return u.vigs[k]+' × '+fmt(k,2)+' m'}).join('; ')+'\n'+
       u.nomeEnch+': '+u.pecas+' peças\n'+
       (u.meias?u.nomeMeia+': '+u.meias+' peças\n':'')+
-      (u.trav?'Linhas de travamento: '+u.trav+' ('+u.acoTxt.join('; ')+')\n':'')+
+      (u.trav?'Linhas de travamento: '+u.trav+' ('+u.canal+' canaletas H6 × 30 cm; '+u.acoTxt.join('; ')+')\n':'')+
       'Concreto estimado: '+fmt(u.vol,1)+' m³'+
-      (o.av?'\n\nDetalhes técnicos: treliça '+(o.trelica||'a definir')+', apoio '+Math.round(o.apoio*100)+' cm, capa '+Math.round(o.capa*100)+' cm, '+(o.inicio==='vig'?'começa com vigota':'começa com enchimento'):'');
+      ($('parede').value.trim()?'\n\nParede sobre a laje: '+$('parede').value.trim():'')+
+      (o.av?'\n\nDetalhes técnicos: treliça '+(o.trelica||'a definir')+', apoio '+Math.round(o.apoio*100)+' cm, capa '+Math.round(o.capa*100)+' cm, '+({vig:'começa e termina com vigota',misto:'começa com vigota e termina com enchimento',ench:'começa e termina com enchimento'})[o.inicio]:'');
     $('enviar').href='https://wa.me/'+ZAP+'?text='+encodeURIComponent(t);
   }
-  ['nome','cidade','prev'].forEach(function(id){$(id).addEventListener('input',atualizaLink);$(id).addEventListener('change',atualizaLink)});
+  ['nome','cidade','prev','parede'].forEach(function(id){$(id).addEventListener('input',atualizaLink);$(id).addEventListener('change',atualizaLink)});
   $('lead').addEventListener('submit',function(e){e.preventDefault()});
   $('enviar').addEventListener('click',function(e){
     if(this.getAttribute('aria-disabled')==='true'){e.preventDefault();return;}
