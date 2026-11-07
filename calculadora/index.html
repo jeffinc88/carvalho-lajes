@@ -333,9 +333,12 @@ figure{margin:0}
     var comp = Math.ceil((vao + 2*o.apoio)*10 - 1e-6)/10;
     var pecaLen = st.ench==='lajota'?0.20:0.49;
     var porFaixa = Math.ceil(vao/pecaLen - 1e-9);
+    // Lajota: se a sobra da largura é de até meia faixa, essa última faixa leva meia lajota
+    var inteiras = Math.floor(larg/INTEREIXO + 1e-9), sobra = larg - inteiras*INTEREIXO;
+    var meiaFaixa = (st.ench==='lajota' && sobra > 0.005 && sobra <= INTEREIXO/2 + 1e-9) ? 1 : 0;
     var hEnch = st.ench==='lajota'?0.06:o.epsh;
     var vol = vao*larg*o.capa + nVig*vao*(INTEREIXO-0.33)*hEnch;
-    return {nome:c.nome||'Cômodo',a:a,b:b,vao:vao,larg:larg,area:vao*larg,nVig:nVig,nFaixas:nFaixas,comp:comp,pecas:nFaixas*porFaixa,porFaixa:porFaixa,vol:vol,inicio:o.inicio};
+    return {nome:c.nome||'Cômodo',a:a,b:b,vao:vao,larg:larg,area:vao*larg,nVig:nVig,nFaixas:nFaixas,comp:comp,pecas:(nFaixas-meiaFaixa)*porFaixa,meias:meiaFaixa*porFaixa,porFaixa:porFaixa,vol:vol,inicio:o.inicio};
   }
   function svgComodo(r){
     // desenho em planta: vigotas na vertical (sentido do vão), largura na horizontal
@@ -360,8 +363,8 @@ figure{margin:0}
   }
   var ultimo=null;
   function calc(){
-    var o=opts(), rs=[], area=0, vol=0, pecas=0, vigs={}, alertas=[];
-    st.comodos.forEach(function(c){var r=calcComodo(c,o); if(!r) return; rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; vigs[r.comp]=(vigs[r.comp]||0)+r.nVig; if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
+    var o=opts(), rs=[], area=0, vol=0, pecas=0, meias=0, vigs={}, alertas=[];
+    st.comodos.forEach(function(c){var r=calcComodo(c,o); if(!r) return; rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; vigs[r.comp]=(vigs[r.comp]||0)+r.nVig; if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
     $('area').innerHTML=fmt(area,2)+' <small>m²</small>';
     $('desenhos').innerHTML = rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m · '+r.nVig+' vigotas</figcaption></figure>'}).join('') : '<p class="dica">Informe pelo menos um cômodo com medidas acima de 0,5 m.</p>';
     $('leg-ench').style.background = st.ench==='lajota'?'var(--lajota)':'var(--eps)';
@@ -375,9 +378,10 @@ figure{margin:0}
       '<div class="linha"><span>Uso</span><b>'+esc(st.uso[1])+' · '+fmt(st.uso[2],0)+' kgf/m²</b></div>'+
       '<div class="linha"><span>Vigotas treliçadas ('+totVig+')</span><ul class="vig-list">'+comps.map(function(k){return '<li>'+vigs[k]+' × '+fmt(k,2)+' m</li>'}).join('')+'</ul></div>'+
       '<div class="linha"><span>'+nomeEnch+'</span><b>'+fmt(pecas,0)+' peças</b></div>'+
+      (meias?'<div class="linha"><span>Meias lajotas (acabamento junto à parede)</span><b>'+fmt(meias,0)+' peças</b></div>':'')+
       '<div class="linha"><span>Concreto (capa de '+Math.round(o.capa*100)+' cm + nervuras)</span><b>≈ '+fmt(volR,1)+' m³</b></div>'+
       '<div class="linha"><span>Treliça</span><b>'+(o.trelica?esc(o.trelica):'A definir pelo vendedor')+'</b></div>';
-    ultimo={o:o,rs:rs,area:area,comps:comps,vigs:vigs,totVig:totVig,pecas:pecas,nomeEnch:nomeEnch,vol:volR};
+    ultimo={o:o,rs:rs,area:area,comps:comps,vigs:vigs,totVig:totVig,pecas:pecas,meias:meias,nomeEnch:nomeEnch,vol:volR};
     atualizaLink();
   }
 
@@ -397,6 +401,7 @@ figure{margin:0}
       'Área total: '+fmt(u.area,2)+' m²\n'+
       'Vigotas: '+u.comps.map(function(k){return u.vigs[k]+' × '+fmt(k,2)+' m'}).join('; ')+'\n'+
       u.nomeEnch+': '+u.pecas+' peças\n'+
+      (u.meias?'Meias lajotas: '+u.meias+' peças\n':'')+
       'Concreto estimado: '+fmt(u.vol,1)+' m³'+
       (o.av?'\n\nDetalhes técnicos: treliça '+(o.trelica||'a definir')+', apoio '+Math.round(o.apoio*100)+' cm, capa '+Math.round(o.capa*100)+' cm, '+(o.inicio==='vig'?'começa com vigota':'começa com enchimento'):'');
     $('enviar').href='https://wa.me/'+ZAP+'?text='+encodeURIComponent(t);
