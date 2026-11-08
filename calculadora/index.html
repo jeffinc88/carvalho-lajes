@@ -105,9 +105,13 @@ input[type=number]{font-variant-numeric:tabular-nums}
 .des figcaption b{color:var(--ink)}
 figure{margin:0}
 .lista{padding:4px 20px 16px;display:grid;gap:0}
+.linha>b{white-space:nowrap}
 .linha{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
 .linha span{color:var(--muted)}
 .linha b{text-align:right}
+.meia-op{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+.meia-op button{font:inherit;font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.meia-op button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
 .vig-list{margin:0;padding:0;list-style:none;text-align:right;font-weight:700}
 .legenda{display:flex;flex-wrap:wrap;gap:6px 16px;padding:0 20px 14px;font-size:12px;color:var(--muted)}
 .legenda i{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-2px;margin-right:6px}
@@ -274,7 +278,7 @@ figure{margin:0}
 
   var st = {
     ench:'lajota', grupo:'Casa e piso', uso:USOS['Casa e piso'][0],
-    comodos:[{nome:'',a:null,b:null}]
+    comodos:[{nome:'',a:null,b:null}], meia:null
   };
   var $ = function(id){return document.getElementById(id)};
   var fmt = function(n,d){return n.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d})};
@@ -363,8 +367,13 @@ figure{margin:0}
     // Ø 6,3 mm até 5,5 m de vão e cargas até 200 kgf/m²; Ø 8,0 mm em vão maior ou carga maior
     var bitola = (vao > 5.5 || st.uso[2] > 200) ? '8,0' : '6,3';
     var barraComp = Math.ceil((larg + 2*o.apoio)*10 - 1e-6)/10;
+    var livre = vao - nTrav*LARG_TRAV;
+    var meiasLaj = meiaFaixa*Math.ceil(livre/0.20 - 1e-9), meiasEps = meiaFaixa*Math.ceil(livre/0.49 - 1e-9);
+    // Tela de distribuição: painel 2 × 3 m, transpasse de 15 cm; testa os dois sentidos e fica com o menor
+    var np=function(L,P){return Math.max(1,Math.ceil((L-0.15)/(P-0.15)-1e-9))};
+    var paineis = Math.min(np(vao,2)*np(larg,3), np(vao,3)*np(larg,2));
     var vol = vao*larg*o.capa + nVig*vao*(INTEREIXO-0.33)*hEnch + nTrav*larg*LARG_TRAV*hEnch;
-    return {nome:c.nome||'Cômodo',a:a,b:b,vao:vao,larg:larg,area:vao*larg,nVig:nVig,nFaixas:nFaixas,comp:comp,pecas:(nFaixas-meiaFaixa)*porFaixa,meias:meiaFaixa*porFaixa,porFaixa:porFaixa,vol:vol,inicio:o.inicio,
+    return {nome:c.nome||'Cômodo',a:a,b:b,vao:vao,larg:larg,area:vao*larg,nVig:nVig,nFaixas:nFaixas,comp:comp,pecas:(nFaixas-meiaFaixa)*porFaixa,meias:meiaFaixa*porFaixa,porFaixa:porFaixa,meiasLaj:meiasLaj,meiasEps:meiasEps,paineis:paineis,vol:vol,inicio:o.inicio,
       nTrav:nTrav,canaletas:nTrav*nFaixas,barras:nTrav*2,bitola:bitola,barraComp:barraComp};
   }
   function svgComodo(r){
@@ -395,8 +404,8 @@ figure{margin:0}
   }
   var ultimo=null;
   function calc(){
-    var o=opts(), rs=[], area=0, vol=0, pecas=0, meias=0, vigs={}, aco={}, trav=0, canal=0, alertas=[];
-    st.comodos.forEach(function(c,i){var r=calcComodo(c,o); if(!r) return; r.nome=(c.nome||'').trim()||'Cômodo '+(i+1); rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; trav+=r.nTrav; canal+=r.canaletas; if(r.barras){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.barras*r.barraComp;} vigs[r.comp]=(vigs[r.comp]||0)+r.nVig; if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
+    var o=opts(), rs=[], mL=0, mE=0, pain=0, area=0, vol=0, pecas=0, meias=0, vigs={}, aco={}, trav=0, canal=0, alertas=[];
+    st.comodos.forEach(function(c,i){var r=calcComodo(c,o); if(!r) return; r.nome=(c.nome||'').trim()||'Cômodo '+(i+1); rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; mL+=r.meiasLaj; mE+=r.meiasEps; pain+=r.paineis; trav+=r.nTrav; canal+=r.canaletas; if(r.barras){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.barras*r.barraComp;} vigs[r.comp]=(vigs[r.comp]||0)+r.nVig; if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
     $('area').innerHTML=fmt(area,2)+' <small>m²</small>';
     $('desenhos').innerHTML = rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m · '+r.nVig+' vigotas'+(r.nTrav?' · '+r.nTrav+' travamento'+(r.nTrav>1?'s':''):'')+'</figcaption></figure>'}).join('') : '<div class="vazio"><b>O desenho da sua laje aparece aqui</b>Preencha a largura e o comprimento de pelo menos um cômodo.</div>';
     $('leg-ench').style.background = st.ench==='lajota'?'var(--lajota)':'var(--eps)';
@@ -407,20 +416,26 @@ figure{margin:0}
     var nomeEnch = st.ench==='lajota'?'Lajotas cerâmicas 33×20':'Placas de EPS 49×33 (H'+Math.round(o.epsh*100)+')';
     var volR = Math.ceil(vol*10-1e-9)/10;
     $('leg-trav').hidden = !trav;
-    var nomeMeia = st.ench==='lajota'?'Meias lajotas':'Meias placas de EPS';
+    var meiaTipo = st.meia || st.ench;
+    var nMeia = meiaTipo==='lajota'?mL:mE;
+    var nomeMeia = meiaTipo==='lajota'?'Meias lajotas':'Meias placas de EPS';
+    var tela = st.uso[2] > 200 ? 'Q92' : 'Q61';
     var acoTxt = Object.keys(aco).sort().map(function(b){var m=aco[b];return fmt(m,1)+' m de ferro Ø '+b+' mm (≈ '+Math.ceil(m/12-1e-9)+' barra'+(Math.ceil(m/12-1e-9)>1?'s':'')+' de 12 m)'});
     $('lista').innerHTML =
       '<div class="linha"><span>Uso</span><b>'+esc(st.uso[1])+' · '+fmt(st.uso[2],0)+' kgf/m²</b></div>'+
       '<div class="linha"><span>Vigotas treliçadas ('+totVig+')</span><ul class="vig-list">'+comps.map(function(k){return '<li>'+vigs[k]+' × '+fmt(k,2)+' m</li>'}).join('')+'</ul></div>'+
       '<div class="linha"><span>'+nomeEnch+'</span><b>'+fmt(pecas,0)+' peças</b></div>'+
-      (meias?'<div class="linha"><span>'+nomeMeia+' (junto à parede)</span><b>'+fmt(meias,0)+' peças</b></div>':'')+
+      (meias?'<div class="linha"><span>Sobra junto à parede</span><div class="meia-op" role="group" aria-label="Tipo da meia peça"><button type="button" data-meia="eps" aria-pressed="'+(meiaTipo==='eps')+'">'+fmt(mE,0)+' meias placas de EPS</button><button type="button" data-meia="lajota" aria-pressed="'+(meiaTipo==='lajota')+'">'+fmt(mL,0)+' meias lajotas</button></div></div>':'')+
       (trav?'<div class="linha"><span>Linhas de travamento ('+trav+')</span><ul class="vig-list"><li>'+fmt(canal,0)+' canaletas H6 × 30 cm</li>'+acoTxt.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div>':'')+
+      '<div class="linha"><span>Tela de distribuição '+tela+' (painel 2 × 3 m)</span><b>'+fmt(pain,0)+' painé'+(pain>1?'is':'l')+'</b></div>'+
       '<div class="linha"><span>Concreto (capa de '+Math.round(o.capa*100)+' cm + nervuras)</span><b>≈ '+fmt(volR,1)+' m³</b></div>'+
       '<div class="linha"><span>Treliça</span><b>'+(o.trelica?esc(o.trelica):'A definir pelo vendedor')+'</b></div>';
     $('lista').hidden = !rs.length; $('area').hidden = !rs.length; document.querySelector('.legenda').hidden = !rs.length;
-    ultimo={o:o,rs:rs,area:area,comps:comps,vigs:vigs,totVig:totVig,pecas:pecas,meias:meias,nomeMeia:nomeMeia,trav:trav,canal:canal,acoTxt:acoTxt,nomeEnch:nomeEnch,vol:volR};
+    ultimo={o:o,rs:rs,area:area,comps:comps,vigs:vigs,totVig:totVig,pecas:pecas,meias:nMeia,nomeMeia:nomeMeia,tela:tela,pain:pain,trav:trav,canal:canal,acoTxt:acoTxt,nomeEnch:nomeEnch,vol:volR};
     atualizaLink();
   }
+
+  $('lista').addEventListener('click',function(e){var b=e.target.closest('[data-meia]');if(!b)return;st.meia=b.dataset.meia;calc();});
 
   // ---------- lead
   $('cidade').innerHTML = '<option value="">Escolha…</option>'+CIDADES.map(function(c){return '<option>'+c+'</option>'}).join('');
@@ -439,6 +454,7 @@ figure{margin:0}
       'Vigotas: '+u.comps.map(function(k){return u.vigs[k]+' × '+fmt(k,2)+' m'}).join('; ')+'\n'+
       u.nomeEnch+': '+u.pecas+' peças\n'+
       (u.meias?u.nomeMeia+': '+u.meias+' peças\n':'')+
+      'Tela de distribuição '+u.tela+' (2 × 3 m): '+u.pain+' painéis\n'+
       (u.trav?'Linhas de travamento: '+u.trav+' ('+u.canal+' canaletas H6 × 30 cm; '+u.acoTxt.join('; ')+')\n':'')+
       'Concreto estimado: '+fmt(u.vol,1)+' m³'+
       ($('parede').value.trim()?'\n\nParede sobre a laje: '+$('parede').value.trim():'')+
