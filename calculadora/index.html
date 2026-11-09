@@ -353,21 +353,25 @@ figure{margin:0}
         '<label for="ca'+i+'">Largura (m)<input id="ca'+i+'" data-k="a" type="number" inputmode="decimal" min="0.5" max="12" step="0.05" placeholder="0,00" value="'+(c.a==null?'':c.a)+'"></label>'+
         '<label for="cb'+i+'">Comprimento (m)<input id="cb'+i+'" data-k="b" type="number" inputmode="decimal" min="0.5" max="20" step="0.05" placeholder="0,00" value="'+(c.b==null?'':c.b)+'"></label>'+
         '<button type="button" class="rem" aria-label="Remover '+esc(c.nome||'cômodo')+'" data-rem="'+i+'">×</button>'+
-        '<label class="sentido" for="cs'+i+'">Sentido da vigota<select id="cs'+i+'" data-k="inv"><option value="">No lado menor (padrão)</option><option value="1"'+(c.inv?' selected':'')+'>No lado maior</option></select></label></div>';
+        '<label class="sentido" for="cs'+i+'">Sentido da vigota<select id="cs'+i+'" data-k="inv"><option value="">No lado menor (padrão)</option><option value="1"'+(c.inv?' selected':'')+'>No lado maior</option></select></label>'+
+        '<label class="sentido" for="cf'+i+'">Ferro adicional na base da vigota<select id="cf'+i+'" data-k="fb"><option value="">Sem ferro adicional</option>'+
+          ['6,3','8','10','12,5'].map(function(bt){return [1,2,3].map(function(n){var v=n+'|'+bt;return '<option value="'+v+'"'+(c.fb===v?' selected':'')+'>'+n+' barra'+(n>1?'s':'')+' Ø '+bt+' mm por vigota</option>'}).join('')}).join('')+
+        '</select></label></div>';
     }).join('');
   }
   $('comodos').addEventListener('input',function(e){
     var row=e.target.closest('.comodo'); if(!row) return;
     var c=st.comodos[+row.dataset.i], k=e.target.dataset.k;
+    if(k==='fb') return;
     c[k] = k==='nome' ? e.target.value : k==='inv' ? !!e.target.value : parseFloat(String(e.target.value).replace(',','.'))||0;
     calc();
   });
-  $('comodos').addEventListener('change',function(e){if(e.target.dataset.k==='inv'){st.comodos[+e.target.closest('.comodo').dataset.i].inv=!!e.target.value;calc();}});
+  $('comodos').addEventListener('change',function(e){var k=e.target.dataset.k;if(k!=='inv'&&k!=='fb')return;var c=st.comodos[+e.target.closest('.comodo').dataset.i];if(k==='inv')c.inv=!!e.target.value;else c.fb=e.target.value;calc();});
   $('comodos').addEventListener('click',function(e){var b=e.target.closest('[data-rem]');if(!b)return;st.comodos.splice(+b.dataset.rem,1);if(!st.comodos.length)st.comodos.push({nome:'',a:null,b:null});desenhaComodos();calc();});
   $('add').addEventListener('click',function(){st.comodos.push({nome:'',a:null,b:null});desenhaComodos();calc();var ins=$('comodos').querySelectorAll('input[data-k=nome]');ins[ins.length-1].focus();});
 
   // ---------- avançado
-  $('avanc-on').addEventListener('change',function(){$('avanc').hidden=!this.checked;$('comodos').classList.toggle('av',this.checked);if(!this.checked){st.comodos.forEach(function(c){c.inv=false});desenhaComodos();$('trelica').value='';$('apoio').value='0.10';$('capa').value='0.04';$('inicio').value='ench';$('epsh').value='0.07';}calc();});
+  $('avanc-on').addEventListener('change',function(){$('avanc').hidden=!this.checked;$('comodos').classList.toggle('av',this.checked);if(!this.checked){st.comodos.forEach(function(c){c.inv=false;c.fb=''});desenhaComodos();$('trelica').value='';$('apoio').value='0.10';$('capa').value='0.04';$('inicio').value='ench';$('epsh').value='0.07';}calc();});
   ['trelica','apoio','capa','inicio','epsh'].forEach(function(id){$(id).addEventListener('change',calc)});
 
   // ---------- conta
@@ -414,7 +418,9 @@ figure{margin:0}
     var np=function(L,P){return Math.max(1,Math.ceil((L-0.15)/(P-0.15)-1e-9))};
     var paineis = Math.min(np(vao,2)*np(larg,3), np(vao,3)*np(larg,2));
     var vol = vao*larg*o.capa + nVig*vao*(INTEREIXO-0.33)*hEnch + nTrav*larg*LARG_TRAV*hEnch;
-    return {nome:c.nome||'Cômodo',a:a,b:b,vao:vao,larg:larg,area:vao*larg,nVig:nVig,nFaixas:nFaixas,comp:comp,pecas:(nFaixas-meiaFaixa)*porFaixa,meias:meiaFaixa*porFaixa,porFaixa:porFaixa,meiasLaj:meiasLaj,meiasEps:meiasEps,paineis:paineis,vol:vol,inicio:o.inicio,
+    var fb = (o.av && typeof c.fb==='string' && c.fb) ? c.fb.split('|') : null;
+    var fbN = fb ? +fb[0] : 0, fbBit = fb ? fb[1] : null;
+    return {fbN:fbN,fbBit:fbBit,fbMetros:fbN*nVig*comp,nome:c.nome||'Cômodo',a:a,b:b,vao:vao,larg:larg,area:vao*larg,nVig:nVig,nFaixas:nFaixas,comp:comp,pecas:(nFaixas-meiaFaixa)*porFaixa,meias:meiaFaixa*porFaixa,porFaixa:porFaixa,meiasLaj:meiasLaj,meiasEps:meiasEps,paineis:paineis,vol:vol,inicio:o.inicio,
       nTrav:nTrav,canaletas:nTrav*nFaixas,barras:nTrav*2,bitola:bitola,barraComp:barraComp};
   }
   function svgComodo(r){
@@ -445,8 +451,8 @@ figure{margin:0}
   }
   var ultimo=null;
   function calc(){
-    var o=opts(), rs=[], mL=0, mE=0, pain=0, area=0, vol=0, pecas=0, meias=0, vigs={}, aco={}, trav=0, canal=0, alertas=[];
-    st.comodos.forEach(function(c,i){var r=calcComodo(c,o); if(!r) return; r.nome=(c.nome||'').trim()||'Cômodo '+(i+1); rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; mL+=r.meiasLaj; mE+=r.meiasEps; pain+=r.paineis; trav+=r.nTrav; canal+=r.canaletas; if(r.barras){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.barras*r.barraComp;} vigs[r.comp]=(vigs[r.comp]||0)+r.nVig; if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
+    var o=opts(), rs=[], acoBase={}, mL=0, mE=0, pain=0, area=0, vol=0, pecas=0, meias=0, vigs={}, aco={}, trav=0, canal=0, alertas=[];
+    st.comodos.forEach(function(c,i){var r=calcComodo(c,o); if(!r) return; r.nome=(c.nome||'').trim()||'Cômodo '+(i+1); rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; mL+=r.meiasLaj; mE+=r.meiasEps; pain+=r.paineis; trav+=r.nTrav; canal+=r.canaletas; if(r.barras){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.barras*r.barraComp;} vigs[r.comp]=(vigs[r.comp]||0)+r.nVig; if(r.fbN){acoBase[r.fbBit]=(acoBase[r.fbBit]||0)+r.fbMetros;} if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
     $('area').innerHTML=fmt(area,2)+' <small>m²</small>';
     $('desenhos').innerHTML = rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m · '+r.nVig+' vigotas'+(r.nTrav?' · '+r.nTrav+' travamento'+(r.nTrav>1?'s':''):'')+'</figcaption></figure>'}).join('') : '<div class="vazio"><b>O desenho da sua laje aparece aqui</b>Preencha a largura e o comprimento de pelo menos um cômodo.</div>';
     $('leg-ench').style.background = st.ench==='lajota'?'var(--lajota)':'var(--eps)';
@@ -458,13 +464,15 @@ figure{margin:0}
     var volR = Math.ceil(vol*10-1e-9)/10;
     $('leg-trav').hidden = !trav;
     var meiaTipo = st.meia || st.ench;
+    var baseTxt = Object.keys(acoBase).map(function(b){var m=acoBase[b],n=Math.ceil(m/12-1e-9);return fmt(m,1)+' m de ferro Ø '+b+' mm (≈ '+n+' barra'+(n>1?'s':'')+' de 12 m)'});
     var nMeia = meiaTipo==='lajota'?mL:mE;
     var nomeMeia = meiaTipo==='lajota'?'Meias lajotas':'Meias placas de EPS';
     var tela = st.uso[2] > 200 ? 'Q92' : 'Q61';
     var acoTxt = Object.keys(aco).sort().map(function(b){var m=aco[b];return fmt(m,1)+' m de ferro '+b+' (≈ '+Math.ceil(m/12-1e-9)+' barra'+(Math.ceil(m/12-1e-9)>1?'s':'')+' de 12 m)'});
     var livre =
       '<div class="linha"><span>Uso</span><b>'+esc(st.uso[1])+' · '+fmt(st.uso[2],0)+' kgf/m²</b></div>'+
-      '<div class="linha"><span>Vigotas treliçadas ('+totVig+')</span><ul class="vig-list">'+comps.map(function(k){return '<li>'+vigs[k]+' × '+fmt(k,2)+' m</li>'}).join('')+'</ul></div>';
+      '<div class="linha"><span>Vigotas treliçadas ('+totVig+')</span><ul class="vig-list">'+comps.map(function(k){return '<li>'+vigs[k]+' × '+fmt(k,2)+' m</li>'}).join('')+'</ul></div>'+
+      (baseTxt.length?'<div class="linha"><span>Ferro adicional na base das vigotas</span><ul class="vig-list">'+rs.filter(function(r){return r.fbN}).map(function(r){return '<li>'+esc(r.nome)+': '+r.fbN+' Ø '+r.fbBit+' mm por vigota</li>'}).join('')+baseTxt.map(function(t){return '<li><b>'+t+'</b></li>'}).join('')+'</ul></div>':'');
     var resto =
       '<div class="linha"><span>'+nomeEnch+'</span><b>'+fmt(pecas,0)+' peças</b></div>'+
       (meias?'<div class="linha"><span>Sobra junto à parede</span><div class="meia-op" role="group" aria-label="Tipo da meia peça"><button type="button" data-meia="eps" aria-pressed="'+(meiaTipo==='eps')+'">'+fmt(mE,0)+' meias placas de EPS</button><button type="button" data-meia="lajota" aria-pressed="'+(meiaTipo==='lajota')+'">'+fmt(mL,0)+' meias lajotas</button></div></div>':'')+
@@ -475,7 +483,7 @@ figure{margin:0}
     $('lista').innerHTML = livre + (liberado ? resto : '<div class="borrado" aria-hidden="true">'+resto+'</div>');
     $('trava').hidden = liberado || !rs.length;
     $('lista').hidden = !rs.length; $('area').hidden = !rs.length; document.querySelector('.legenda').hidden = !rs.length;
-    ultimo={o:o,rs:rs,area:area,comps:comps,vigs:vigs,totVig:totVig,pecas:pecas,meias:nMeia,nomeMeia:nomeMeia,tela:tela,pain:pain,trav:trav,canal:canal,acoTxt:acoTxt,nomeEnch:nomeEnch,vol:volR};
+    ultimo={o:o,rs:rs,area:area,comps:comps,vigs:vigs,totVig:totVig,baseTxt:baseTxt,pecas:pecas,meias:nMeia,nomeMeia:nomeMeia,tela:tela,pain:pain,trav:trav,canal:canal,acoTxt:acoTxt,nomeEnch:nomeEnch,vol:volR};
     atualizaLink();
   }
 
@@ -496,9 +504,10 @@ figure{margin:0}
     var u=ultimo, o=u.o;
     return 'Uso: '+u.rs.length+' cômodo(s), '+st.uso[1]+' ('+st.uso[2]+' kgf/m²)\n'+
       'Enchimento: '+(st.ench==='lajota'?'lajota cerâmica':'EPS H'+Math.round(o.epsh*100))+'\n'+
-      'Cômodos:\n'+u.rs.map(function(r){return '• '+r.nome+': '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m (vão '+fmt(r.vao,2)+' m)'}).join('\n')+'\n\n'+
+      'Cômodos:\n'+u.rs.map(function(r){return '• '+r.nome+': '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m (vão '+fmt(r.vao,2)+' m)'+(r.fbN?' + '+r.fbN+' Ø '+r.fbBit+' mm na base de cada vigota':'')}).join('\n')+'\n\n'+
       'Área total: '+fmt(u.area,2)+' m²\n'+
       'Vigotas: '+u.comps.map(function(k){return u.vigs[k]+' × '+fmt(k,2)+' m'}).join('; ')+'\n'+
+      (u.baseTxt.length?'Ferro adicional na base das vigotas: '+u.baseTxt.join('; ')+'\n':'')+
       u.nomeEnch+': '+u.pecas+' peças\n'+
       (u.meias?u.nomeMeia+': '+u.meias+' peças\n':'')+
       'Tela de distribuição '+u.tela+' (2 × 3 m): '+u.pain+' painéis\n'+
