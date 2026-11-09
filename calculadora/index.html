@@ -63,7 +63,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 .guia ul{margin:0;padding-left:18px;font-size:13px;display:grid;gap:4px}
 @media (max-width:480px){.guia{grid-template-columns:minmax(0,1fr)}.guia svg{width:140px;justify-self:center}}
 .vazio{display:grid;gap:8px;justify-items:center;text-align:center;padding:28px 12px;color:var(--muted);font-size:14px;border:1.5px dashed var(--line);border-radius:10px}
-.vazio b{color:var(--fg);font-size:15px}
+.vazio b{color:var(--ink);font-size:15px}
 .opcoes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .op{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:12px;text-align:left;cursor:pointer;font:inherit;display:grid;gap:2px}
 .op b{font-size:14px}.op small{color:var(--muted);font-size:12px}
@@ -110,7 +110,7 @@ figure{margin:0}
 .linha span{color:var(--muted)}
 .linha b{text-align:right}
 .meia-op{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
-.meia-op button{font:inherit;font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+.meia-op button{font:inherit;font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
 .meia-op button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
 .vig-list{margin:0;padding:0;list-style:none;text-align:right;font-weight:700}
 .legenda{display:flex;flex-wrap:wrap;gap:6px 16px;padding:0 20px 14px;font-size:12px;color:var(--muted)}
@@ -124,6 +124,17 @@ figure{margin:0}
 .enviar:hover{filter:brightness(1.06)}
 .enviar[aria-disabled="true"]{opacity:.55;pointer-events:none}
 .miud{font-size:12px;color:var(--muted);margin:0}
+.borrado{filter:blur(5px);user-select:none;pointer-events:none}
+.trava{margin:0 20px 16px;padding:16px;border:1.5px solid var(--accent);border-radius:10px;background:var(--accent-soft);display:grid;gap:10px}
+.trava h3{margin:0;font-size:16px;color:var(--ink)}
+.trava p{margin:0;font-size:13px;color:var(--muted)}
+.trava form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.trava .cheio{grid-column:1/-1}
+@media (max-width:480px){.trava form{grid-template-columns:minmax(0,1fr)}}
+.trava button{border:0;border-radius:10px;padding:13px 16px;font:inherit;font-size:15px;font-weight:800;background:var(--accent);color:#fff;cursor:pointer}
+.trava button:disabled{opacity:.6;cursor:default}
+.trava .erro{color:#c0392b;font-weight:700}
+.modo-vend{display:inline-block;margin-top:8px;font-size:12px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;background:var(--accent);color:#fff;padding:4px 10px;border-radius:999px}
 .exemplo{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:999px}
 @media (prefers-reduced-motion:no-preference){.des svg rect,.des svg line{transition:all .2s}}
 </style>
@@ -166,7 +177,7 @@ figure{margin:0}
       <div class="guia">
         <svg viewBox="0 0 140 100" aria-hidden="true"><rect x="8" y="8" width="124" height="84" fill="none" stroke="var(--muted)" stroke-width="6"/><rect x="11" y="11" width="118" height="78" fill="var(--surface)"/>
           <g stroke="var(--accent)" stroke-width="2" fill="var(--accent)"><line x1="16" y1="30" x2="124" y2="30"/><path d="M16 30l6-4v8z M124 30l-6-4v8z"/><line x1="104" y1="16" x2="104" y2="84"/><path d="M104 16l-4 6h8z M104 84l-4-6h8z"/></g>
-          <text x="58" y="25" font-size="10" font-weight="700" fill="var(--fg)" font-family="Montserrat,Arial,sans-serif">largura</text><text x="0" y="0" font-size="10" font-weight="700" fill="var(--fg)" font-family="Montserrat,Arial,sans-serif" transform="translate(99 72) rotate(-90)">compr.</text></svg>
+          <text x="58" y="25" font-size="10" font-weight="700" fill="var(--ink)" font-family="Montserrat,Arial,sans-serif">largura</text><text x="0" y="0" font-size="10" font-weight="700" fill="var(--ink)" font-family="Montserrat,Arial,sans-serif" transform="translate(99 72) rotate(-90)">compr.</text></svg>
         <ul><li>Meça <b>por dentro</b>, de parede a parede, em metros (ex.: 3,50).</li><li>Um cômodo por linha. A ordem largura/comprimento não importa.</li><li>A vigota vai no lado menor do cômodo.</li></ul>
       </div>
       <div id="comodos" style="display:grid;gap:10px"></div>
@@ -202,6 +213,17 @@ figure{margin:0}
       <div class="legenda"><span><i id="leg-ench" style="background:var(--lajota)"></i><span id="leg-ench-t">Lajota</span></span><span><i style="background:var(--vigota)"></i>Vigota</span><span><i style="background:var(--parede)"></i>Parede</span><span id="leg-trav"><i style="background:var(--trav)"></i>Linha de travamento</span></div>
       <div id="alertas"></div>
       <div class="lista" id="lista"></div>
+      <div class="trava" id="trava" hidden>
+        <h3>Veja a lista completa de materiais</h3>
+        <p>Informe seu nome e WhatsApp para liberar as quantidades de lajotas, travamento, tela e concreto.</p>
+        <form id="trava-f" novalidate>
+          <label for="t-nome">Seu nome<input id="t-nome" autocomplete="name"></label>
+          <label for="t-tel">WhatsApp com DDD<input id="t-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="(16) 99999-9999"></label>
+          <label class="cheio" for="t-cid">Cidade da obra<select id="t-cid"></select></label>
+          <button type="submit" class="cheio" id="t-btn">Ver lista completa</button>
+          <p class="cheio" id="t-msg">Usamos seu contato só para enviar o orçamento. Não enviamos propaganda.</p>
+        </form>
+      </div>
       <p class="aviso">Quantidades estimadas com os padrões de fabricação da Carvalho Pré-Moldados. O projeto final é conferido pela nossa equipe técnica antes da entrega.</p>
     </div>
 
@@ -229,6 +251,17 @@ figure{margin:0}
 <script>
 (function(){
   var ZAP = '5516992914461';
+  // Leads da calculadora vão para o CRM (Supabase). A chave é a pública (publishable/anon).
+  var SUPA_URL = 'https://aewqpdxraiibypqsirxp.supabase.co';
+  var SUPA_KEY = '';
+  // Modo vendedor: abrir uma vez com ?interno=CODIGO libera tudo neste aparelho e não grava lead
+  var COD_INTERNO = 'cv7k2m';
+  function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  (function(){var m=location.search.match(/[?&]interno=([^&]+)/); if(m&&m[1]===COD_INTERNO){lsSet('calc_interno','1');}})();
+  var INTERNO = lsGet('calc_interno')==='1';
+  var contato = null; try{contato=JSON.parse(lsGet('calc_contato')||'null')}catch(e){}
+  var liberado = INTERNO || !!contato;
   var INTEREIXO = 0.42;
   var USOS = {
     'Casa e piso': [
@@ -421,15 +454,18 @@ figure{margin:0}
     var nomeMeia = meiaTipo==='lajota'?'Meias lajotas':'Meias placas de EPS';
     var tela = st.uso[2] > 200 ? 'Q92' : 'Q61';
     var acoTxt = Object.keys(aco).sort().map(function(b){var m=aco[b];return fmt(m,1)+' m de ferro Ø '+b+' mm (≈ '+Math.ceil(m/12-1e-9)+' barra'+(Math.ceil(m/12-1e-9)>1?'s':'')+' de 12 m)'});
-    $('lista').innerHTML =
+    var livre =
       '<div class="linha"><span>Uso</span><b>'+esc(st.uso[1])+' · '+fmt(st.uso[2],0)+' kgf/m²</b></div>'+
-      '<div class="linha"><span>Vigotas treliçadas ('+totVig+')</span><ul class="vig-list">'+comps.map(function(k){return '<li>'+vigs[k]+' × '+fmt(k,2)+' m</li>'}).join('')+'</ul></div>'+
+      '<div class="linha"><span>Vigotas treliçadas ('+totVig+')</span><ul class="vig-list">'+comps.map(function(k){return '<li>'+vigs[k]+' × '+fmt(k,2)+' m</li>'}).join('')+'</ul></div>';
+    var resto =
       '<div class="linha"><span>'+nomeEnch+'</span><b>'+fmt(pecas,0)+' peças</b></div>'+
       (meias?'<div class="linha"><span>Sobra junto à parede</span><div class="meia-op" role="group" aria-label="Tipo da meia peça"><button type="button" data-meia="eps" aria-pressed="'+(meiaTipo==='eps')+'">'+fmt(mE,0)+' meias placas de EPS</button><button type="button" data-meia="lajota" aria-pressed="'+(meiaTipo==='lajota')+'">'+fmt(mL,0)+' meias lajotas</button></div></div>':'')+
       (trav?'<div class="linha"><span>Linhas de travamento ('+trav+')</span><ul class="vig-list"><li>'+fmt(canal,0)+' canaletas H6 × 30 cm</li>'+acoTxt.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div>':'')+
       '<div class="linha"><span>Tela de distribuição '+tela+' (painel 2 × 3 m)</span><b>'+fmt(pain,0)+' painé'+(pain>1?'is':'l')+'</b></div>'+
       '<div class="linha"><span>Concreto (capa de '+Math.round(o.capa*100)+' cm + nervuras)</span><b>≈ '+fmt(volR,1)+' m³</b></div>'+
       '<div class="linha"><span>Treliça</span><b>'+(o.trelica?esc(o.trelica):'A definir pelo vendedor')+'</b></div>';
+    $('lista').innerHTML = livre + (liberado ? resto : '<div class="borrado" aria-hidden="true">'+resto+'</div>');
+    $('trava').hidden = liberado || !rs.length;
     $('lista').hidden = !rs.length; $('area').hidden = !rs.length; document.querySelector('.legenda').hidden = !rs.length;
     ultimo={o:o,rs:rs,area:area,comps:comps,vigs:vigs,totVig:totVig,pecas:pecas,meias:nMeia,nomeMeia:nomeMeia,tela:tela,pain:pain,trav:trav,canal:canal,acoTxt:acoTxt,nomeEnch:nomeEnch,vol:volR};
     atualizaLink();
@@ -444,10 +480,13 @@ figure{margin:0}
     $('enviar').setAttribute('aria-disabled', ok?'false':'true');
     $('lead-msg').textContent = ok ? 'Abre o WhatsApp com a mensagem pronta. É só enviar.' : 'Preencha seu nome e a cidade para enviar.';
     if(!ok){$('enviar').href='#';return;}
-    var u=ultimo, o=u.o;
     var t='Olá! Fiz a simulação da laje no site da Carvalho e quero o orçamento.\n\n'+
-      'Nome: '+nome+'\nCidade: '+cid+'\nPrevisão: '+$('prev').value+'\n\n'+
-      'Uso: '+u.rs.length+' cômodo(s), '+st.uso[1]+' ('+st.uso[2]+' kgf/m²)\n'+
+      'Nome: '+nome+'\nCidade: '+cid+'\nPrevisão: '+$('prev').value+'\n\n'+resumo();
+    $('enviar').href='https://wa.me/'+ZAP+'?text='+encodeURIComponent(t);
+  }
+  function resumo(){
+    var u=ultimo, o=u.o;
+    return 'Uso: '+u.rs.length+' cômodo(s), '+st.uso[1]+' ('+st.uso[2]+' kgf/m²)\n'+
       'Enchimento: '+(st.ench==='lajota'?'lajota cerâmica':'EPS H'+Math.round(o.epsh*100))+'\n'+
       'Cômodos:\n'+u.rs.map(function(r){return '• '+r.nome+': '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m (vão '+fmt(r.vao,2)+' m)'}).join('\n')+'\n\n'+
       'Área total: '+fmt(u.area,2)+' m²\n'+
@@ -459,12 +498,39 @@ figure{margin:0}
       'Concreto estimado: '+fmt(u.vol,1)+' m³'+
       ($('parede').value.trim()?'\n\nParede sobre a laje: '+$('parede').value.trim():'')+
       (o.av?'\n\nDetalhes técnicos: treliça '+(o.trelica||'a definir')+', apoio '+Math.round(o.apoio*100)+' cm, capa '+Math.round(o.capa*100)+' cm, '+({vig:'começa e termina com vigota',misto:'começa com enchimento e termina com vigota',ench:'começa e termina com enchimento'})[o.inicio]:'');
-    $('enviar').href='https://wa.me/'+ZAP+'?text='+encodeURIComponent(t);
   }
+
+  // ---------- trava: libera a lista completa com nome + WhatsApp e grava o lead no CRM
+  $('t-cid').innerHTML = '<option value="">Escolha…</option>'+CIDADES.map(function(c){return '<option>'+c+'</option>'}).join('');
+  function salvarLead(extra){
+    if(INTERNO || !contato || !SUPA_KEY || !ultimo || !ultimo.rs.length) return;
+    var corpo = {p_nome:contato.nome, p_telefone:contato.tel, p_cidade:contato.cid,
+      p_previsao:(extra&&extra.prev)||null, p_resumo:resumo(), p_chamou_whatsapp:!!(extra&&extra.zap),
+      p_area:Math.round(ultimo.area*100)/100};
+    try{
+      fetch(SUPA_URL+'/rest/v1/rpc/crm_lead_calculadora',{method:'POST',keepalive:true,
+        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+        body:JSON.stringify(corpo)}).catch(function(){});
+    }catch(e){}
+  }
+  function preencheLead(){ if(!contato) return; if(!$('nome').value) $('nome').value=contato.nome; if(!$('cidade').value) $('cidade').value=contato.cid; }
+  $('trava-f').addEventListener('submit',function(e){
+    e.preventDefault();
+    var nome=$('t-nome').value.trim(), tel=$('t-tel').value.replace(/\D/g,''), cid=$('t-cid').value, msg=$('t-msg');
+    if(tel.length>11 && tel.indexOf('55')===0) tel=tel.slice(2);
+    if(nome.length<2){msg.className='cheio erro';msg.textContent='Informe seu nome.';$('t-nome').focus();return;}
+    if(tel.length<10||tel.length>11){msg.className='cheio erro';msg.textContent='Informe o WhatsApp com DDD, ex.: (16) 99999-9999.';$('t-tel').focus();return;}
+    if(!cid){msg.className='cheio erro';msg.textContent='Escolha a cidade da obra.';$('t-cid').focus();return;}
+    contato={nome:nome,tel:tel,cid:cid}; lsSet('calc_contato',JSON.stringify(contato));
+    liberado=true; calc(); salvarLead(); preencheLead(); atualizaLink();
+    if(window.gtag && window.CONV && window.CONV.lead) window.gtag('event','conversion',{send_to:window.CONV.lead});
+  });
+  if(INTERNO){ var h=document.querySelector('.topo-in'); if(h){var b=document.createElement('span');b.className='modo-vend';b.textContent='Modo vendedor';h.appendChild(b);} }
   ['nome','cidade','prev','parede'].forEach(function(id){$(id).addEventListener('input',atualizaLink);$(id).addEventListener('change',atualizaLink)});
   $('lead').addEventListener('submit',function(e){e.preventDefault()});
   $('enviar').addEventListener('click',function(e){
     if(this.getAttribute('aria-disabled')==='true'){e.preventDefault();return;}
+    salvarLead({prev:$('prev').value, zap:true});
     try{ if(window.gtag && window.CONV && window.CONV.whatsapp) window.gtag('event','conversion',{send_to:window.CONV.whatsapp,transport_type:'beacon'}); }catch(err){}
   });
 
