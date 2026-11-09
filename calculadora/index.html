@@ -134,6 +134,9 @@ figure{margin:0}
 .trava button{border:0;border-radius:10px;padding:13px 16px;font:inherit;font-size:15px;font-weight:800;background:var(--accent);color:#fff;cursor:pointer}
 .trava button:disabled{opacity:.6;cursor:default}
 .trava .erro{color:#c0392b;font-weight:700}
+.vend-bar{display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 16px}
+.vend-bar button{flex:1 1 140px;border:1.5px solid var(--brand);border-radius:10px;padding:12px 14px;font:inherit;font-size:14px;font-weight:800;background:var(--surface);color:var(--ink);cursor:pointer}
+.vend-bar button.pri{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
 .modo-vend{display:inline-block;margin-top:8px;font-size:12px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;background:var(--accent);color:#fff;padding:4px 10px;border-radius:999px}
 .exemplo{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:999px}
 @media (prefers-reduced-motion:no-preference){.des svg rect,.des svg line{transition:all .2s}}
@@ -213,6 +216,10 @@ figure{margin:0}
       <div class="legenda"><span><i id="leg-ench" style="background:var(--lajota)"></i><span id="leg-ench-t">Lajota</span></span><span><i style="background:var(--vigota)"></i>Vigota</span><span><i style="background:var(--parede)"></i>Parede</span><span id="leg-trav"><i style="background:var(--trav)"></i>Linha de travamento</span></div>
       <div id="alertas"></div>
       <div class="lista" id="lista"></div>
+      <div class="vend-bar" id="vend-bar" hidden>
+        <button type="button" class="pri" id="v-copiar">Copiar lista</button>
+        <button type="button" id="v-limpar">Novo cálculo</button>
+      </div>
       <div class="trava" id="trava" hidden>
         <h3>Veja a lista completa de materiais</h3>
         <p>Informe seu nome e WhatsApp para liberar as quantidades de lajotas, travamento, tela e concreto.</p>
@@ -525,7 +532,18 @@ figure{margin:0}
     liberado=true; calc(); salvarLead(); preencheLead(); atualizaLink();
     if(window.gtag && window.CONV && window.CONV.lead) window.gtag('event','conversion',{send_to:window.CONV.lead});
   });
-  if(INTERNO){ var h=document.querySelector('.topo-in'); if(h){var b=document.createElement('span');b.className='modo-vend';b.textContent='Modo vendedor';h.appendChild(b);} }
+  if(INTERNO){
+    var sec=$('t5').closest('section'); if(sec) sec.hidden=true;
+    $('vend-bar').hidden=false;
+    $('v-copiar').addEventListener('click',function(){
+      var btn=this; if(!ultimo||!ultimo.rs.length){btn.textContent='Preencha um cômodo';setTimeout(function(){btn.textContent='Copiar lista'},1500);return;}
+      var txt='Laje treliçada – Carvalho Pré-Moldados\n\n'+resumo();
+      var ok=function(){btn.textContent='Lista copiada ✓';setTimeout(function(){btn.textContent='Copiar lista'},1800)};
+      var alt=function(){var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(e){}document.body.removeChild(ta)};
+      try{navigator.clipboard.writeText(txt).then(ok,alt)}catch(e){alt()}
+    });
+    $('v-limpar').addEventListener('click',function(){st.comodos=[{nome:'',a:null,b:null}];st.meia=null;desenhaComodos();calc();$('parede').value='';var i=$('cn0');if(i){i.scrollIntoView({block:'center'});i.focus();}});
+    var h=document.querySelector('.topo-in'); if(h){var b=document.createElement('span');b.className='modo-vend';b.textContent='Modo vendedor';h.appendChild(b);} }
   ['nome','cidade','prev','parede'].forEach(function(id){$(id).addEventListener('input',atualizaLink);$(id).addEventListener('change',atualizaLink)});
   $('lead').addEventListener('submit',function(e){e.preventDefault()});
   $('enviar').addEventListener('click',function(e){
