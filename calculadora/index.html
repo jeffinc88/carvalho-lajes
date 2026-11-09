@@ -394,8 +394,9 @@ figure{margin:0}
     else { nFaixas = Math.max(2, faixas); nVig = nFaixas-1; }
     var comp = Math.ceil((vao + 2*o.apoio)*10 - 1e-6)/10;
     var pecaLen = st.ench==='lajota'?0.20:0.49;
-    // Linhas de travamento (perpendiculares às vigotas): vão < 4 m nenhuma; 4 a 6 m uma no meio; acima de 6 m duas, a cada 1/3
-    var nTrav = vao < 4 - 1e-9 ? 0 : (vao <= 6 + 1e-9 ? 1 : 2);
+    // Linhas de travamento (perpendiculares às vigotas), regra dos vendedores:
+    // a partir de 3,00 m de vão, uma linha a cada 1,50 m completo (3,00 → 1; 4,50 → 2; 6,00 → 3), distribuídas por igual
+    var nTrav = vao < 3 - 1e-9 ? 0 : Math.floor(vao/1.5 + 1e-9) - 1;
     var LARG_TRAV = 0.10;
     // cada linha abre um canal de 10 cm no enchimento de todas as faixas
     var porFaixa = Math.ceil((vao - nTrav*LARG_TRAV)/pecaLen - 1e-9);
@@ -404,8 +405,8 @@ figure{margin:0}
     var meiaFaixa = (sobra > 0.005 && sobra <= INTEREIXO/2 + 1e-9) ? 1 : 0;
     var hEnch = st.ench==='lajota'?0.06:o.epsh;
     // Aço do travamento: 2 barras por linha (uma embaixo, uma em cima), ancoradas nas vigas de borda;
-    // Ø 6,3 mm até 5,5 m de vão e cargas até 200 kgf/m²; Ø 8,0 mm em vão maior ou carga maior
-    var bitola = (vao > 5.5 || st.uso[2] > 200) ? '8,0' : '6,3';
+    // Ferro pela carga: 5/16" (8 mm) até 200 kgf/m²; 3/8" (10 mm) acima
+    var bitola = st.uso[2] > 200 ? '3/8" (10 mm)' : '5/16" (8 mm)';
     var barraComp = Math.ceil((larg + 2*o.apoio)*10 - 1e-6)/10;
     var livre = vao - nTrav*LARG_TRAV;
     var meiasLaj = meiaFaixa*Math.ceil(livre/0.20 - 1e-9), meiasEps = meiaFaixa*Math.ceil(livre/0.49 - 1e-9);
@@ -460,7 +461,7 @@ figure{margin:0}
     var nMeia = meiaTipo==='lajota'?mL:mE;
     var nomeMeia = meiaTipo==='lajota'?'Meias lajotas':'Meias placas de EPS';
     var tela = st.uso[2] > 200 ? 'Q92' : 'Q61';
-    var acoTxt = Object.keys(aco).sort().map(function(b){var m=aco[b];return fmt(m,1)+' m de ferro Ø '+b+' mm (≈ '+Math.ceil(m/12-1e-9)+' barra'+(Math.ceil(m/12-1e-9)>1?'s':'')+' de 12 m)'});
+    var acoTxt = Object.keys(aco).sort().map(function(b){var m=aco[b];return fmt(m,1)+' m de ferro '+b+' (≈ '+Math.ceil(m/12-1e-9)+' barra'+(Math.ceil(m/12-1e-9)>1?'s':'')+' de 12 m)'});
     var livre =
       '<div class="linha"><span>Uso</span><b>'+esc(st.uso[1])+' · '+fmt(st.uso[2],0)+' kgf/m²</b></div>'+
       '<div class="linha"><span>Vigotas treliçadas ('+totVig+')</span><ul class="vig-list">'+comps.map(function(k){return '<li>'+vigs[k]+' × '+fmt(k,2)+' m</li>'}).join('')+'</ul></div>';
