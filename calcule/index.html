@@ -403,6 +403,8 @@ figure{margin:0}
     var nTrav = vao < 3 - 1e-9 ? 0 : Math.floor(vao/1.5 + 1e-9) - 1;
     var LARG_TRAV = 0.10;
     // cada linha abre um canal de 10 cm no enchimento de todas as faixas
+    // Lajota: regra dos vendedores, 12,5 peças por m² de laje (as meias junto à parede são contadas à parte)
+    var LAJ_M2 = 12.5;
     var porFaixa = Math.ceil((vao - nTrav*LARG_TRAV)/pecaLen - 1e-9);
     // Se a sobra da largura é de até meia faixa (21 cm), essa última faixa leva meia peça (lajota ou EPS)
     var inteiras = Math.floor(larg/INTEREIXO + 1e-9), sobra = larg - inteiras*INTEREIXO;
@@ -420,7 +422,7 @@ figure{margin:0}
     var vol = vao*larg*o.capa + nVig*vao*(INTEREIXO-0.33)*hEnch + nTrav*larg*LARG_TRAV*hEnch;
     var fb = (o.av && typeof c.fb==='string' && c.fb) ? c.fb.split('|') : null;
     var fbN = fb ? +fb[0] : 0, fbBit = fb ? fb[1] : null;
-    return {fbN:fbN,fbBit:fbBit,fbMetros:fbN*nVig*comp,nome:c.nome||'Cômodo',a:a,b:b,vao:vao,larg:larg,area:vao*larg,nVig:nVig,nFaixas:nFaixas,comp:comp,pecas:(nFaixas-meiaFaixa)*porFaixa,meias:meiaFaixa*porFaixa,porFaixa:porFaixa,meiasLaj:meiasLaj,meiasEps:meiasEps,paineis:paineis,vol:vol,inicio:o.inicio,
+    return {fbN:fbN,fbBit:fbBit,fbMetros:fbN*nVig*comp,nome:c.nome||'Cômodo',a:a,b:b,vao:vao,larg:larg,area:vao*larg,nVig:nVig,nFaixas:nFaixas,comp:comp,pecas:(st.ench==='lajota' ? Math.ceil(vao*larg*LAJ_M2 - 1e-9) : (nFaixas-meiaFaixa)*porFaixa),meias:meiaFaixa*porFaixa,porFaixa:porFaixa,meiasLaj:meiasLaj,meiasEps:meiasEps,paineis:paineis,vol:vol,inicio:o.inicio,
       nTrav:nTrav,canaletas:nTrav*nFaixas,barras:nTrav*2,bitola:bitola,barraComp:barraComp};
   }
   function svgComodo(r){
