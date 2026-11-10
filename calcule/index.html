@@ -414,8 +414,8 @@ figure{margin:0}
     var barraComp = Math.ceil((larg + 2*o.apoio)*10 - 1e-6)/10;
     var livre = vao - nTrav*LARG_TRAV;
     var meiasLaj = meiaFaixa*Math.ceil(livre/0.20 - 1e-9), meiasEps = meiaFaixa*Math.ceil(livre/0.49 - 1e-9);
-    // Tela de distribuição: painel 2 × 3 m, transpasse de 15 cm; testa os dois sentidos e fica com o menor
-    var np=function(L,P){return Math.max(1,Math.ceil((L-0.15)/(P-0.15)-1e-9))};
+    // Tela de distribuição: painel 2 × 3 m, transpasse de 20 cm; testa os dois sentidos e fica com o menor
+    var np=function(L,P){return Math.max(1,Math.ceil((L-0.20)/(P-0.20)-1e-9))};
     var paineis = Math.min(np(vao,2)*np(larg,3), np(vao,3)*np(larg,2));
     var vol = vao*larg*o.capa + nVig*vao*(INTEREIXO-0.33)*hEnch + nTrav*larg*LARG_TRAV*hEnch;
     var fb = (o.av && typeof c.fb==='string' && c.fb) ? c.fb.split('|') : null;
