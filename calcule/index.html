@@ -581,7 +581,7 @@ figure{margin:0}
     var areaLaje=area; area+=beiArea;
     return {beiSegs:beiSegs, beiCurtas:beiCurtas, beiFerro:Math.round(beiFerro*10)/10, beiLados:beiLados, beiArea:beiArea, ext:ext, bei:bei, areaLaje:areaLaje,
       g:g, rot:(g===B), R:R, composto:R.length>1, sobreposto:sobre>0.01, a:Math.max(0,c.a||0), b:Math.max(0,c.b||0),
-      vao:g.maxVao, larg:g.maxX-g.minX, area:area, nVig:g.vigs.length+beiCurtas.length, compPorVig:compPorVig.concat(beiCurtas),
+      vao:g.maxVao, larg:g.maxX-g.minX, area:area, nVig:g.vigs.length, compPorVig:compPorVig,
       pecas:(st.ench==='lajota' ? Math.ceil(area*E.m2*(1+DESPERDICIO_LAJ)-1e-9) : epsInteiras+beiEps), meias:temMeia?meiaPecas:0,
       meiasLaj:meiasLaj, meiasEps:meiasEps, paineis:paineis,
       vol: area*o.capa + volVig + volTrav + beiArea*((E.ix-E.pw)/E.ix)*hEnch, inicio:o.inicio,
@@ -638,10 +638,10 @@ figure{margin:0}
   }
   var ultimo=null;
   function calc(){
-    var o=opts(), rs=[], beiF=0, beiR=[], acoBase={}, mL=0, mE=0, pain=0, area=0, vol=0, pecas=0, meias=0, vigs={}, aco={}, trav=0, canal=0, alertas=[];
-    st.comodos.forEach(function(c,i){var r=calcComodo(c,o); if(!r) return; r.nome=(c.nome||'').trim()||'Cômodo '+(i+1); rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; mL+=r.meiasLaj; mE+=r.meiasEps; pain+=r.paineis; trav+=r.nTrav; canal+=r.canaletas; if(r.metTrav){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.metTrav;} r.compPorVig.forEach(function(k){vigs[k]=(vigs[k]||0)+1}); r.medidas=medidasTxt(r,c); if(r.bei){beiF+=r.beiFerro; beiR.push(r);} if(r.sobreposto) alertas.push(r.nome+': as partes se sobrepõem. Confira o lado e o recuo.'); if(r.fbN){acoBase[r.fbBit]=(acoBase[r.fbBit]||0)+r.fbMetros;} if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
+    var o=opts(), rs=[], beiF=0, beiR=[], vigsBei={}, acoBase={}, mL=0, mE=0, pain=0, area=0, vol=0, pecas=0, meias=0, vigs={}, aco={}, trav=0, canal=0, alertas=[];
+    st.comodos.forEach(function(c,i){var r=calcComodo(c,o); if(!r) return; r.nome=(c.nome||'').trim()||'Cômodo '+(i+1); rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; mL+=r.meiasLaj; mE+=r.meiasEps; pain+=r.paineis; trav+=r.nTrav; canal+=r.canaletas; if(r.metTrav){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.metTrav;} r.compPorVig.forEach(function(k){vigs[k]=(vigs[k]||0)+1}); r.medidas=medidasTxt(r,c); if(r.bei){beiF+=r.beiFerro; beiR.push(r); r.beiCurtas.forEach(function(k){vigsBei[k]=(vigsBei[k]||0)+1});} if(r.sobreposto) alertas.push(r.nome+': as partes se sobrepõem. Confira o lado e o recuo.'); if(r.fbN){acoBase[r.fbBit]=(acoBase[r.fbBit]||0)+r.fbMetros;} if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
     $('area').innerHTML=fmt(area,2)+' <small>m²</small>';
-    $('desenhos').innerHTML = rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+(r.composto?fmt(r.area,2)+' m² ('+r.R.length+' partes)':fmt(r.a,2)+' × '+fmt(r.b,2)+' m')+' · '+r.nVig+' vigotas'+(r.nTrav?' · '+r.nTrav+' travamento'+(r.nTrav>1?'s':''):'')+'</figcaption></figure>'}).join('') : '<div class="vazio"><b>O desenho da sua laje aparece aqui</b>Preencha a largura e o comprimento de pelo menos um cômodo.</div>';
+    $('desenhos').innerHTML = rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+(r.composto?fmt(r.area,2)+' m² ('+r.R.length+' partes)':fmt(r.a,2)+' × '+fmt(r.b,2)+' m')+' · '+r.nVig+' vigotas'+(r.beiCurtas.length?' + '+r.beiCurtas.length+' do beiral':'')+(r.nTrav?' · '+r.nTrav+' travamento'+(r.nTrav>1?'s':''):'')+'</figcaption></figure>'}).join('') : '<div class="vazio"><b>O desenho da sua laje aparece aqui</b>Preencha a largura e o comprimento de pelo menos um cômodo.</div>';
     $('leg-ench').style.background = st.ench==='lajota'?'var(--lajota)':'var(--eps)';
     $('leg-ench-t').textContent = st.ench==='lajota'?'Lajota':'EPS';
     $('alertas').innerHTML = alertas.map(function(a){return '<p class="alerta">'+esc(a)+'</p>'}).join('');
@@ -650,6 +650,7 @@ figure{margin:0}
     var nomeEnch = o.ench.nome + (st.ench==='lajota'?' · com 5% de quebra':'');
     var volR = Math.ceil(vol*10-1e-9)/10;
     $('leg-trav').hidden = !trav;
+    var compsBei=Object.keys(vigsBei).map(Number).sort(function(a,b){return b-a}), totBei=compsBei.reduce(function(s,k){return s+vigsBei[k]},0);
     var meiaTipo = st.meia || st.ench;
     var baseTxt = Object.keys(acoBase).map(function(b){var m=acoBase[b],n=Math.ceil(m/12-1e-9);return fmt(m,1)+' m de ferro Ø '+b+' mm (≈ '+n+' barra'+(n>1?'s':'')+' de 12 m)'});
     var nMeia = meiaTipo==='lajota'?mL:mE;
@@ -659,6 +660,7 @@ figure{margin:0}
     var livre =
       '<div class="linha"><span>Uso</span><b>'+esc(st.uso[1])+' · '+fmt(st.uso[2],0)+' kgf/m²</b></div>'+
       '<div class="linha"><span>Vigotas treliçadas ('+totVig+')</span><ul class="vig-list">'+comps.map(function(k){return '<li>'+vigs[k]+' × '+fmt(k,2)+' m</li>'}).join('')+'</ul></div>'+
+      (totBei?'<div class="linha"><span>Vigotas curtas do beiral ('+totBei+')</span><ul class="vig-list">'+compsBei.map(function(k){return '<li>'+vigsBei[k]+' × '+fmt(k,2)+' m</li>'}).join('')+'</ul></div>':'')+
       (baseTxt.length?'<div class="linha"><span>Ferro adicional na base das vigotas</span><ul class="vig-list">'+rs.filter(function(r){return r.fbN}).map(function(r){return '<li>'+esc(r.nome)+': '+r.fbN+' Ø '+r.fbBit+' mm por vigota</li>'}).join('')+baseTxt.map(function(t){return '<li><b>'+t+'</b></li>'}).join('')+'</ul></div>':'');
     var resto =
       '<div class="linha"><span>'+nomeEnch+'</span><b>'+fmt(pecas,0)+' peças</b></div>'+
@@ -671,7 +673,7 @@ figure{margin:0}
     $('lista').innerHTML = livre + (liberado ? resto : '<div class="borrado" aria-hidden="true">'+resto+'</div>');
     $('trava').hidden = liberado || !rs.length;
     $('lista').hidden = !rs.length; $('area').hidden = !rs.length; document.querySelector('.legenda').hidden = !rs.length;
-    ultimo={beiF:beiF,beiR:beiR,o:o,rs:rs,area:area,comps:comps,vigs:vigs,totVig:totVig,baseTxt:baseTxt,pecas:pecas,meias:nMeia,nomeMeia:nomeMeia,tela:tela,pain:pain,trav:trav,canal:canal,acoTxt:acoTxt,nomeEnch:nomeEnch,vol:volR};
+    ultimo={beiF:beiF,beiR:beiR,vigsBei:vigsBei,compsBei:compsBei,totBei:totBei,o:o,rs:rs,area:area,comps:comps,vigs:vigs,totVig:totVig,baseTxt:baseTxt,pecas:pecas,meias:nMeia,nomeMeia:nomeMeia,tela:tela,pain:pain,trav:trav,canal:canal,acoTxt:acoTxt,nomeEnch:nomeEnch,vol:volR};
     atualizaLink();
   }
 
@@ -695,6 +697,7 @@ figure{margin:0}
       'Cômodos:\n'+u.rs.map(function(r){return '• '+r.nome+': '+r.medidas+' ('+(r.composto?'vão maior ':'vão ')+fmt(r.vao,2)+' m)'+(r.fbN?' + '+r.fbN+' Ø '+r.fbBit+' mm na base de cada vigota':'')}).join('\n')+'\n\n'+
       'Área total: '+fmt(u.area,2)+' m²\n'+
       'Vigotas: '+u.comps.map(function(k){return u.vigs[k]+' × '+fmt(k,2)+' m'}).join('; ')+'\n'+
+      (u.totBei?'Vigotas curtas do beiral: '+u.compsBei.map(function(k){return u.vigsBei[k]+' × '+fmt(k,2)+' m'}).join('; ')+'\n':'')+
       (u.beiR.length?'Beiral: '+u.beiR.map(function(r){return r.nome+' (parede '+Math.round((r.bei.par||0.15)*100)+' cm) – '+r.beiLados.join('; ')}).join(' | ')+'; total '+fmt(u.beiF,1)+' m de ferro 8 mm\n':'')+
       (u.baseTxt.length?'Ferro adicional na base das vigotas: '+u.baseTxt.join('; ')+'\n':'')+
       u.nomeEnch+': '+u.pecas+' peças\n'+
