@@ -80,6 +80,14 @@ body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:1
 @media (max-width:480px){.comodo{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}.comodo .nome{grid-column:1/-1}}
 .comodo .sentido{grid-column:1/-1}
 #comodos:not(.av) .sentido{display:none}
+.partes{grid-column:1/-1;display:grid;gap:8px}
+.parte{position:relative;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;align-items:end;padding:10px;border-radius:8px;background:var(--bg);border:1px solid var(--line)}
+.parte .tit{grid-column:1/-1;font-size:12px;font-weight:800;color:var(--ink);padding-right:36px}
+.parte .rem{position:absolute;top:2px;right:2px}
+@media (max-width:560px){.parte{grid-template-columns:repeat(2,minmax(0,1fr))}.parte label:last-of-type{grid-column:1/-1}}
+.juntar{justify-self:start;border:0;background:transparent;color:var(--accent);font:inherit;font-size:13px;font-weight:700;padding:6px 0;cursor:pointer}
+.juntar:hover{text-decoration:underline}
+.parte-dica{margin:0;font-size:12px;color:var(--muted)}
 textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-width:0;resize:vertical}
 label{display:grid;gap:4px;font-size:12px;font-weight:600;color:var(--muted)}
 input,select{font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-width:0}
@@ -356,18 +364,37 @@ figure{margin:0}
         '<label class="sentido" for="cs'+i+'">Sentido da vigota<select id="cs'+i+'" data-k="inv"><option value="">No lado menor (padrão)</option><option value="1"'+(c.inv?' selected':'')+'>No lado maior</option></select></label>'+
         '<label class="sentido" for="cf'+i+'">Ferro adicional na base da vigota<select id="cf'+i+'" data-k="fb"><option value="">Sem ferro adicional</option>'+
           ['6,3','8','10','12,5'].map(function(bt){return [1,2,3].map(function(n){var v=n+'|'+bt;return '<option value="'+v+'"'+(c.fb===v?' selected':'')+'>'+n+' barra'+(n>1?'s':'')+' Ø '+bt+' mm por vigota</option>'}).join('')}).join('')+
-        '</select></label></div>';
+        '</select></label>'+
+        '<div class="partes">'+(c.partes||[]).map(function(p,j){
+          var lados=[['dir','À direita'],['esq','À esquerda'],['baixo','Embaixo'],['cima','Em cima']];
+          var ref=(p.ref==null?j:p.ref);
+          return '<div class="parte" data-p="'+j+'"><div class="tit">Parte '+(j+2)+' (juntada)</div>'+
+            '<label for="pa'+i+'_'+j+'">Largura (m)<input id="pa'+i+'_'+j+'" data-pk="a" type="number" inputmode="decimal" min="0.3" step="0.05" placeholder="0,00" value="'+(p.a==null?'':p.a)+'"></label>'+
+            '<label for="pb'+i+'_'+j+'">Compr. (m)<input id="pb'+i+'_'+j+'" data-pk="b" type="number" inputmode="decimal" min="0.3" step="0.05" placeholder="0,00" value="'+(p.b==null?'':p.b)+'"></label>'+
+            '<label class="lado" for="pl'+i+'_'+j+'">Fica<select id="pl'+i+'_'+j+'" data-pk="lado">'+lados.map(function(l){return '<option value="'+l[0]+'"'+((p.lado||'dir')===l[0]?' selected':'')+'>'+l[1]+'</option>'}).join('')+'</select></label>'+
+            '<label class="ref" for="pr'+i+'_'+j+'">Da<select id="pr'+i+'_'+j+'" data-pk="ref">'+Array.apply(null,{length:j+1}).map(function(_,k){return '<option value="'+k+'"'+(ref===k?' selected':'')+'>Parte '+(k+1)+'</option>'}).join('')+'</select></label>'+
+            '<label for="pc'+i+'_'+j+'">Recuo (m)<input id="pc'+i+'_'+j+'" data-pk="recuo" type="number" inputmode="decimal" min="0" step="0.05" placeholder="0,00" value="'+(p.recuo?p.recuo:'')+'"></label>'+
+            '<button type="button" class="rem" aria-label="Remover parte '+(j+2)+'" data-remp="'+j+'">×</button></div>';
+        }).join('')+
+        ((c.partes||[]).length?'<p class="parte-dica">Recuo: quanto a parte fica afastada do canto de cima (ou da esquerda) da parte em que ela encosta. 0 = alinhada no canto.</p>':'')+
+        '<button type="button" class="juntar" data-junta="'+i+'">+ Juntar outro retângulo a este cômodo (formato em L, T…)</button></div>'+
+        '</div>';
     }).join('');
   }
   $('comodos').addEventListener('input',function(e){
     var row=e.target.closest('.comodo'); if(!row) return;
     var c=st.comodos[+row.dataset.i], k=e.target.dataset.k;
+    var pr=e.target.closest('.parte');
+    if(pr){ var p=c.partes[+pr.dataset.p], pk=e.target.dataset.pk; p[pk] = (pk==='lado') ? e.target.value : (pk==='ref' ? +e.target.value : (parseFloat(String(e.target.value).replace(',','.'))||0)); calc(); return; }
     if(k==='fb') return;
     c[k] = k==='nome' ? e.target.value : k==='inv' ? !!e.target.value : parseFloat(String(e.target.value).replace(',','.'))||0;
     calc();
   });
   $('comodos').addEventListener('change',function(e){var k=e.target.dataset.k;if(k!=='inv'&&k!=='fb')return;var c=st.comodos[+e.target.closest('.comodo').dataset.i];if(k==='inv')c.inv=!!e.target.value;else c.fb=e.target.value;calc();});
-  $('comodos').addEventListener('click',function(e){var b=e.target.closest('[data-rem]');if(!b)return;st.comodos.splice(+b.dataset.rem,1);if(!st.comodos.length)st.comodos.push({nome:'',a:null,b:null});desenhaComodos();calc();});
+  $('comodos').addEventListener('click',function(e){
+    var jb=e.target.closest('[data-junta]'); if(jb){var c=st.comodos[+jb.dataset.junta]; c.partes=c.partes||[]; c.partes.push({a:null,b:null,lado:'dir',ref:c.partes.length,recuo:0}); desenhaComodos(); calc(); var f=document.getElementById('pa'+jb.dataset.junta+'_'+(c.partes.length-1)); if(f) f.focus(); return;}
+    var rp=e.target.closest('[data-remp]'); if(rp){var cc=st.comodos[+rp.closest('.comodo').dataset.i], jj=+rp.dataset.remp; cc.partes.splice(jj,1); cc.partes.forEach(function(p,k){ if(p.ref!=null && p.ref>jj) p.ref--; if(p.ref!=null && p.ref>k) p.ref=k; }); desenhaComodos(); calc(); return;}
+    var b=e.target.closest('[data-rem]');if(!b)return;st.comodos.splice(+b.dataset.rem,1);if(!st.comodos.length)st.comodos.push({nome:'',a:null,b:null});desenhaComodos();calc();});
   $('add').addEventListener('click',function(){st.comodos.push({nome:'',a:null,b:null});desenhaComodos();calc();var ins=$('comodos').querySelectorAll('input[data-k=nome]');ins[ins.length-1].focus();});
 
   // ---------- avançado
@@ -386,77 +413,116 @@ figure{margin:0}
       av: av
     };
   }
-  function calcComodo(c,o){
+  // Monta os retângulos do cômodo (parte 1 + partes juntadas) em metros: x = largura, y = comprimento
+  function retangulos(c){
     var a=Math.max(0,c.a||0), b=Math.max(0,c.b||0);
     if(a<0.5||b<0.5) return null;
-    var inv = o.av && c.inv;
-    var vao=inv?Math.max(a,b):Math.min(a,b), larg=inv?Math.min(a,b):Math.max(a,b);
-    var faixas = Math.max(1, Math.ceil(larg/INTEREIXO - 1e-9));
-    var nVig, nFaixas;
-    if(o.inicio==='vig'){ nVig = faixas+1; nFaixas = faixas; }
-    else if(o.inicio==='misto'){ nVig = faixas; nFaixas = faixas; }
-    else { nFaixas = Math.max(2, faixas); nVig = nFaixas-1; }
-    var comp = Math.ceil((vao + 2*o.apoio)*10 - 1e-6)/10;
-    var pecaLen = st.ench==='lajota'?0.20:0.49;
-    // Linhas de travamento (perpendiculares às vigotas), regra dos vendedores:
-    // a partir de 3,00 m de vão, uma linha a cada 1,50 m completo (3,00 → 1; 4,50 → 2; 6,00 → 3), distribuídas por igual
-    var nTrav = vao < 3 - 1e-9 ? 0 : Math.floor(vao/1.5 + 1e-9) - 1;
-    var LARG_TRAV = 0.10;
-    // cada linha abre um canal de 10 cm no enchimento de todas as faixas
-    // Lajota: regra dos vendedores, 12,5 peças por m² de laje (as meias junto à parede são contadas à parte)
-    var LAJ_M2 = 12.5;
-    var porFaixa = Math.ceil((vao - nTrav*LARG_TRAV)/pecaLen - 1e-9);
-    // Se a sobra da largura é de até meia faixa (21 cm), essa última faixa leva meia peça (lajota ou EPS)
-    var inteiras = Math.floor(larg/INTEREIXO + 1e-9), sobra = larg - inteiras*INTEREIXO;
-    var meiaFaixa = (sobra > 0.005 && sobra <= INTEREIXO/2 + 1e-9) ? 1 : 0;
+    var R=[{x:0,y:0,w:a,h:b}];
+    (c.partes||[]).forEach(function(p){
+      var w=Math.max(0,p.a||0), h=Math.max(0,p.b||0); if(w<0.3||h<0.3) return;
+      var ref=R[Math.min(R.length-1, Math.max(0,(p.ref==null?R.length-1:p.ref)))], rc=+p.recuo||0, q;
+      if(p.lado==='esq') q={x:ref.x-w,y:ref.y+rc,w:w,h:h};
+      else if(p.lado==='baixo') q={x:ref.x+rc,y:ref.y+ref.h,w:w,h:h};
+      else if(p.lado==='cima') q={x:ref.x+rc,y:ref.y-h,w:w,h:h};
+      else q={x:ref.x+ref.w,y:ref.y+rc,w:w,h:h};
+      R.push(q);
+    });
+    return R;
+  }
+  // Trechos (em y) cobertos pelos retângulos numa posição x; junta trechos que se encostam
+  function trechos(R,x,incl){
+    var iv=[]; R.forEach(function(r){ var e=1e-6; if(incl ? (x>=r.x-e && x<=r.x+r.w+e) : (x>r.x+e && x<r.x+r.w-e)) iv.push([r.y,r.y+r.h]); });
+    iv.sort(function(p,q){return p[0]-q[0]}); var m=[];
+    iv.forEach(function(p){ if(m.length && p[0]<=m[m.length-1][1]+1e-6) m[m.length-1][1]=Math.max(m[m.length-1][1],p[1]); else m.push([p[0],p[1]]); });
+    return m;
+  }
+  function travPorVao(L){ return L < 3 - 1e-9 ? 0 : Math.floor(L/1.5 + 1e-9) - 1; }
+  // Conta um cômodo com as vigotas na vertical (no sentido y) — R já vem girado quando preciso
+  function contaSentido(R,o){
+    var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+    R.forEach(function(r){minX=Math.min(minX,r.x);maxX=Math.max(maxX,r.x+r.w);minY=Math.min(minY,r.y);maxY=Math.max(maxY,r.y+r.h);});
+    var larg=maxX-minX, faixas=Math.max(1,Math.ceil(larg/INTEREIXO-1e-9)), pos=[];
+    for(var k=(o.inicio==='vig'?0:1);k<faixas;k++) pos.push(minX+k*INTEREIXO);
+    if(o.inicio==='vig'||o.inicio==='misto') pos.push(maxX);
+    if(!pos.length) pos.push(minX+larg/2);
+    var vigs=[], fronteiras=[minX].concat(pos.filter(function(p){return p>minX+1e-6 && p<maxX-1e-6})).concat([maxX]);
+    pos.forEach(function(x){ trechos(R,x,true).forEach(function(t){ vigs.push({x:x,y1:t[0],y2:t[1],L:t[1]-t[0]}); }); });
+    var fx=[];
+    for(var i=0;i<fronteiras.length-1;i++){
+      var x1=fronteiras[i],x2=fronteiras[i+1],wd=x2-x1; if(wd<0.005) continue;
+      trechos(R,(x1+x2)/2,false).forEach(function(t){ var L=t[1]-t[0]; fx.push({x1:x1,x2:x2,w:wd,y1:t[0],y2:t[1],L:L,meia:wd<=INTEREIXO/2+1e-9,nT:travPorVao(L)}); });
+    }
+    var maxVao=0; vigs.forEach(function(v){maxVao=Math.max(maxVao,v.L)});
+    return {R:R,vigs:vigs,fx:fx,maxVao:maxVao,nV:vigs.length,minX:minX,maxX:maxX,minY:minY,maxY:maxY};
+  }
+  function calcComodo(c,o){
+    var R=retangulos(c); if(!R) return null;
+    var sw=function(r){return {x:r.y,y:r.x,w:r.h,h:r.w}};
+    var A=contaSentido(R,o), B=contaSentido(R.map(sw),o);
+    // padrão: o sentido com o menor vão (empate: menos vigotas); "lado maior" no avançado inverte
+    var melhorA = A.maxVao < B.maxVao-1e-6 || (Math.abs(A.maxVao-B.maxVao)<=1e-6 && A.nV<=B.nV);
+    var g = (melhorA !== !!(o.av && c.inv)) ? A : B;
+    var LARG_TRAV=0.10, LAJ_M2=12.5, area=0, sobre=0;
+    R.forEach(function(r,i){area+=r.w*r.h; for(var j=0;j<i;j++){var s=R[j],ix=Math.min(r.x+r.w,s.x+s.w)-Math.max(r.x,s.x),iy=Math.min(r.y+r.h,s.y+s.h)-Math.max(r.y,s.y); if(ix>0.01&&iy>0.01) sobre+=ix*iy;}});
+    area-=sobre;
     var hEnch = st.ench==='lajota'?0.06:o.epsh;
-    // Aço do travamento: 2 barras por linha (uma embaixo, uma em cima), ancoradas nas vigas de borda;
-    // Ferro pela carga: 5/16" (8 mm) até 200 kgf/m²; 3/8" (10 mm) acima
-    var bitola = st.uso[2] > 200 ? '3/8" (10 mm)' : '5/16" (8 mm)';
-    var barraComp = Math.ceil((larg + 2*o.apoio)*10 - 1e-6)/10;
-    var livre = vao - nTrav*LARG_TRAV;
-    var meiasLaj = meiaFaixa*Math.ceil(livre/0.20 - 1e-9), meiasEps = meiaFaixa*Math.ceil(livre/0.49 - 1e-9);
-    // Tela de distribuição: painel 2 × 3 m, transpasse de 20 cm; testa os dois sentidos e fica com o menor
+    var compPorVig = g.vigs.map(function(v){return Math.ceil((v.L+2*o.apoio)*10-1e-6)/10});
+    var epsInteiras=0, meiasLaj=0, meiasEps=0, canaletas=0, metTrav=0, volTrav=0, nTrav=0, temMeia=false;
+    g.fx.forEach(function(f){
+      var livre=f.L-f.nT*LARG_TRAV;
+      if(f.meia){ temMeia=true; meiasLaj+=Math.ceil(livre/0.20-1e-9); meiasEps+=Math.ceil(livre/0.49-1e-9); }
+      else epsInteiras+=Math.ceil(livre/0.49-1e-9);
+      canaletas+=f.nT; metTrav+=2*f.nT*f.w; volTrav+=f.nT*f.w*LARG_TRAV*hEnch; nTrav=Math.max(nTrav,f.nT);
+    });
+    if(nTrav) metTrav += 2*nTrav*2*o.apoio; // ancoragem nas bordas
+    var volVig=0; g.vigs.forEach(function(v){volVig+=v.L*(INTEREIXO-0.33)*hEnch});
     var np=function(L,P){return Math.max(1,Math.ceil((L-0.20)/(P-0.20)-1e-9))};
-    var paineis = Math.min(np(vao,2)*np(larg,3), np(vao,3)*np(larg,2));
-    var vol = vao*larg*o.capa + nVig*vao*(INTEREIXO-0.33)*hEnch + nTrav*larg*LARG_TRAV*hEnch;
+    var paineis=0; R.forEach(function(r){paineis+=Math.min(np(r.h,2)*np(r.w,3), np(r.h,3)*np(r.w,2))});
     var fb = (o.av && typeof c.fb==='string' && c.fb) ? c.fb.split('|') : null;
     var fbN = fb ? +fb[0] : 0, fbBit = fb ? fb[1] : null;
-    return {fbN:fbN,fbBit:fbBit,fbMetros:fbN*nVig*comp,nome:c.nome||'Cômodo',a:a,b:b,vao:vao,larg:larg,area:vao*larg,nVig:nVig,nFaixas:nFaixas,comp:comp,pecas:(st.ench==='lajota' ? Math.ceil(vao*larg*LAJ_M2 - 1e-9) : (nFaixas-meiaFaixa)*porFaixa),meias:meiaFaixa*porFaixa,porFaixa:porFaixa,meiasLaj:meiasLaj,meiasEps:meiasEps,paineis:paineis,vol:vol,inicio:o.inicio,
-      nTrav:nTrav,canaletas:nTrav*nFaixas,barras:nTrav*2,bitola:bitola,barraComp:barraComp};
+    var somaComp=compPorVig.reduce(function(s,x){return s+x},0);
+    var bitola = st.uso[2] > 200 ? '3/8" (10 mm)' : '5/16" (8 mm)';
+    var meiaPecas = st.ench==='lajota'?meiasLaj:meiasEps;
+    return {g:g, rot:(g===B), R:R, composto:R.length>1, sobreposto:sobre>0.01, a:Math.max(0,c.a||0), b:Math.max(0,c.b||0),
+      vao:g.maxVao, larg:g.maxX-g.minX, area:area, nVig:g.vigs.length, compPorVig:compPorVig,
+      pecas:(st.ench==='lajota' ? Math.ceil(area*LAJ_M2-1e-9) : epsInteiras), meias:temMeia?meiaPecas:0,
+      meiasLaj:meiasLaj, meiasEps:meiasEps, paineis:paineis,
+      vol: area*o.capa + volVig + volTrav, inicio:o.inicio,
+      nTrav:nTrav, canaletas:canaletas, metTrav:Math.round(metTrav*10)/10, bitola:bitola,
+      fbN:fbN, fbBit:fbBit, fbMetros:fbN*somaComp};
   }
   function svgComodo(r){
-    // desenho em planta: vigotas na vertical (sentido do vão), largura na horizontal
-    var W=200, pad=10, esp=8;
-    var sx=(W-2*pad-2*esp)/r.larg, H=Math.round(r.vao*sx+2*pad+2*esp);
-    var x0=pad+esp, y0=pad+esp, w=r.larg*sx, h=r.vao*sx;
+    // desenha na mesma posição em que o cliente digitou (largura na horizontal); as contas (g) podem estar giradas
+    var g=r.g, rot=r.rot, W=200, pad=10, esp=8;
+    var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+    r.R.forEach(function(q){minX=Math.min(minX,q.x);maxX=Math.max(maxX,q.x+q.w);minY=Math.min(minY,q.y);maxY=Math.max(maxY,q.y+q.h);});
+    var sx=(W-2*pad-2*esp)/(maxX-minX), H=Math.round((maxY-minY)*sx+2*pad+2*esp);
+    var X=function(x){return pad+esp+(x-minX)*sx}, Y=function(y){return pad+esp+(y-minY)*sx};
+    var ret=function(x,y,w,h,fill){ if(rot){var t=x;x=y;y=t;t=w;w=h;h=t;} return '<rect x="'+X(x)+'" y="'+Y(y)+'" width="'+(w*sx)+'" height="'+(h*sx)+'" fill="'+fill+'"/>'; };
     var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Planta da laje '+esc(r.nome)+'">';
-    s+='<rect x="'+pad+'" y="'+pad+'" width="'+(w+2*esp)+'" height="'+(h+2*esp)+'" fill="var(--parede)" rx="2"/>';
-    s+='<rect x="'+x0+'" y="'+y0+'" width="'+w+'" height="'+h+'" fill="'+(st.ench==='lajota'?'var(--lajota)':'var(--eps)')+'"/>';
-    // linhas de peças (juntas do enchimento)
-    var pl = (st.ench==='lajota'?0.20:0.49)*sx;
-    for(var y=y0+pl;y<y0+h-0.5;y+=pl){s+='<line x1="'+x0+'" y1="'+y+'" x2="'+(x0+w)+'" y2="'+y+'" stroke="'+(st.ench==='lajota'?'rgba(0,0,0,.18)':'var(--eps-line)')+'" stroke-width="0.6"/>';}
-    // linhas de travamento
-    for(var k=1;k<=r.nTrav;k++){
-      var ty = y0 + h*k/(r.nTrav+1), th = Math.max(3, 0.10*sx);
-      s+='<rect x="'+x0+'" y="'+(ty-th/2)+'" width="'+w+'" height="'+th+'" fill="var(--trav)"/>';
-    }
-    // vigotas
-    var vw=Math.max(2.2,0.12*sx), passo=INTEREIXO*sx;
-    for(var i=0;i<r.nVig;i++){
-      var cx = r.inicio==='vig' ? x0 + Math.min(w, i*passo) : x0 + Math.min(w, (i+1)*passo);
-      if(cx>x0+w+0.5) cx=x0+w;
-      s+='<rect x="'+(cx-vw/2)+'" y="'+(y0-esp*0.8)+'" width="'+vw+'" height="'+(h+esp*1.6)+'" fill="var(--vigota)"/>';
-    }
-    s+='</svg>';
-    return s;
+    r.R.forEach(function(q){ s+='<rect x="'+(X(q.x)-esp)+'" y="'+(Y(q.y)-esp)+'" width="'+(q.w*sx+2*esp)+'" height="'+(q.h*sx+2*esp)+'" fill="var(--parede)" rx="2"/>'; });
+    var ench = st.ench==='lajota'?'var(--lajota)':'var(--eps)', junta = st.ench==='lajota'?'rgba(0,0,0,.18)':'var(--eps-line)', pl=(st.ench==='lajota'?0.20:0.49);
+    r.R.forEach(function(q){ s+='<rect x="'+X(q.x)+'" y="'+Y(q.y)+'" width="'+(q.w*sx)+'" height="'+(q.h*sx)+'" fill="'+ench+'"/>'; });
+    // juntas das peças: atravessam a faixa, perpendiculares às vigotas
+    g.fx.forEach(function(f){ for(var y=f.y1+pl;y<f.y2-0.01;y+=pl){ if(rot) s+='<line x1="'+X(y)+'" y1="'+Y(f.x1)+'" x2="'+X(y)+'" y2="'+Y(f.x2)+'" stroke="'+junta+'" stroke-width="0.6"/>'; else s+='<line x1="'+X(f.x1)+'" y1="'+Y(y)+'" x2="'+X(f.x2)+'" y2="'+Y(y)+'" stroke="'+junta+'" stroke-width="0.6"/>'; } });
+    var th=Math.max(0.10,3/sx);
+    g.fx.forEach(function(f){ for(var k=1;k<=f.nT;k++){ var ty=f.y1+f.L*k/(f.nT+1); s+=ret(f.x1,ty-th/2,f.w+0.002,th,'var(--trav)'); } });
+    var vw=Math.max(0.12,2.2/sx), ex=esp*0.8/sx;
+    g.vigs.forEach(function(v){ s+=ret(v.x-vw/2,v.y1-ex,vw,v.L+2*ex,'var(--vigota)'); });
+    return s+'</svg>';
+  }
+  function medidasTxt(r,c){
+    var t=fmt(r.a,2)+' × '+fmt(r.b,2)+' m';
+    if(!r.composto) return t;
+    var nomesLado={dir:'à direita',esq:'à esquerda',baixo:'embaixo',cima:'em cima'};
+    return 'parte 1 '+t+(c.partes||[]).map(function(p,j){return '; parte '+(j+2)+' '+fmt(p.a||0,2)+' × '+fmt(p.b||0,2)+' m '+nomesLado[p.lado||'dir']+' da parte '+((p.ref==null?j:p.ref)+1)+(+p.recuo?' (recuo '+fmt(+p.recuo,2)+' m)':'')}).join('');
   }
   var ultimo=null;
   function calc(){
     var o=opts(), rs=[], acoBase={}, mL=0, mE=0, pain=0, area=0, vol=0, pecas=0, meias=0, vigs={}, aco={}, trav=0, canal=0, alertas=[];
-    st.comodos.forEach(function(c,i){var r=calcComodo(c,o); if(!r) return; r.nome=(c.nome||'').trim()||'Cômodo '+(i+1); rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; mL+=r.meiasLaj; mE+=r.meiasEps; pain+=r.paineis; trav+=r.nTrav; canal+=r.canaletas; if(r.barras){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.barras*r.barraComp;} vigs[r.comp]=(vigs[r.comp]||0)+r.nVig; if(r.fbN){acoBase[r.fbBit]=(acoBase[r.fbBit]||0)+r.fbMetros;} if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
+    st.comodos.forEach(function(c,i){var r=calcComodo(c,o); if(!r) return; r.nome=(c.nome||'').trim()||'Cômodo '+(i+1); rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; mL+=r.meiasLaj; mE+=r.meiasEps; pain+=r.paineis; trav+=r.nTrav; canal+=r.canaletas; if(r.metTrav){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.metTrav;} r.compPorVig.forEach(function(k){vigs[k]=(vigs[k]||0)+1}); r.medidas=medidasTxt(r,c); if(r.sobreposto) alertas.push(r.nome+': as partes se sobrepõem. Confira o lado e o recuo.'); if(r.fbN){acoBase[r.fbBit]=(acoBase[r.fbBit]||0)+r.fbMetros;} if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
     $('area').innerHTML=fmt(area,2)+' <small>m²</small>';
-    $('desenhos').innerHTML = rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m · '+r.nVig+' vigotas'+(r.nTrav?' · '+r.nTrav+' travamento'+(r.nTrav>1?'s':''):'')+'</figcaption></figure>'}).join('') : '<div class="vazio"><b>O desenho da sua laje aparece aqui</b>Preencha a largura e o comprimento de pelo menos um cômodo.</div>';
+    $('desenhos').innerHTML = rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+(r.composto?fmt(r.area,2)+' m² ('+r.R.length+' partes)':fmt(r.a,2)+' × '+fmt(r.b,2)+' m')+' · '+r.nVig+' vigotas'+(r.nTrav?' · '+r.nTrav+' travamento'+(r.nTrav>1?'s':''):'')+'</figcaption></figure>'}).join('') : '<div class="vazio"><b>O desenho da sua laje aparece aqui</b>Preencha a largura e o comprimento de pelo menos um cômodo.</div>';
     $('leg-ench').style.background = st.ench==='lajota'?'var(--lajota)':'var(--eps)';
     $('leg-ench-t').textContent = st.ench==='lajota'?'Lajota':'EPS';
     $('alertas').innerHTML = alertas.map(function(a){return '<p class="alerta">'+esc(a)+'</p>'}).join('');
@@ -506,7 +572,7 @@ figure{margin:0}
     var u=ultimo, o=u.o;
     return 'Uso: '+u.rs.length+' cômodo(s), '+st.uso[1]+' ('+st.uso[2]+' kgf/m²)\n'+
       'Enchimento: '+(st.ench==='lajota'?'lajota cerâmica':'EPS H'+Math.round(o.epsh*100))+'\n'+
-      'Cômodos:\n'+u.rs.map(function(r){return '• '+r.nome+': '+fmt(r.a,2)+' × '+fmt(r.b,2)+' m (vão '+fmt(r.vao,2)+' m)'+(r.fbN?' + '+r.fbN+' Ø '+r.fbBit+' mm na base de cada vigota':'')}).join('\n')+'\n\n'+
+      'Cômodos:\n'+u.rs.map(function(r){return '• '+r.nome+': '+r.medidas+' ('+(r.composto?'vão maior ':'vão ')+fmt(r.vao,2)+' m)'+(r.fbN?' + '+r.fbN+' Ø '+r.fbBit+' mm na base de cada vigota':'')}).join('\n')+'\n\n'+
       'Área total: '+fmt(u.area,2)+' m²\n'+
       'Vigotas: '+u.comps.map(function(k){return u.vigs[k]+' × '+fmt(k,2)+' m'}).join('; ')+'\n'+
       (u.baseTxt.length?'Ferro adicional na base das vigotas: '+u.baseTxt.join('; ')+'\n':'')+
