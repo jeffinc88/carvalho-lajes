@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script>
+  window.ADS_ID = 'AW-695034554';
+  window.CONV = { whatsapp: 'AW-695034554/aImuCJqbh7EdELrFtcsC' };
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  (function(){return;var s=document.createElement('script');s.async=true;s.src='https://www.googletagmanager.com/gtag/js?id='+window.ADS_ID;document.head.appendChild(s);gtag('js',new Date());gtag('config',window.ADS_ID);})();
+</script>
+<title>Calculadora de Laje Carvalho</title>
+<meta name="description" content="Desenhe os cômodos da sua obra e veja na hora quantas vigotas, lajotas ou EPS a sua laje treliçada precisa. Carvalho Pré-Moldados, Franca-SP.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Montserrat:wght@500;600;700;800&display=swap">
+<style>
+/* Layout: formulário em etapas à esquerda, laje desenhada e quantidades fixas à direita; uma coluna no celular */
+:root{
+  --bg:#f3f5f9; --surface:#ffffff; --ink:#15203a; --muted:#56617a; --line:#dbe1eb;
+  --brand:#193769; --brand-ink:#ffffff; --accent:#e68219; --accent-soft:#fdf0e3;
+  --zap:#1f9d55; --zap-ink:#ffffff;
+  --lajota:#d9733a; --eps:#e9edf3; --trav:#193769; --eps-line:#b7c1d1; --vigota:#5b6578; --parede:#9aa3b2;
+  --f-display:'Archivo Black','Arial Black',Arial,sans-serif;
+  --f-body:'Montserrat','Segoe UI',Arial,sans-serif;
+  --r:10px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0e1422; --surface:#161f33; --ink:#e9edf5; --muted:#a2acc2; --line:#2a3550;
+  --brand:#2a4a8c; --brand-ink:#ffffff; --accent:#f08f2a; --accent-soft:#2f2316;
+  --zap:#23a85c; --zap-ink:#ffffff;
+  --lajota:#d97a44; --eps:#dfe5ee; --trav:#6f8fd6; --eps-line:#8d99ad; --vigota:#c3cad8; --parede:#5f6a80;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1422; --surface:#161f33; --ink:#e9edf5; --muted:#a2acc2; --line:#2a3550;
+  --brand:#2a4a8c; --brand-ink:#ffffff; --accent:#f08f2a; --accent-soft:#2f2316;
+  --zap:#23a85c; --zap-ink:#ffffff;
+  --lajota:#d97a44; --eps:#dfe5ee; --trav:#6f8fd6; --eps-line:#8d99ad; --vigota:#c3cad8; --parede:#5f6a80;
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.5}
+.topo{background:var(--brand);color:var(--brand-ink)}
+.topo-in,.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.topo-in{padding-block:18px 26px;display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;justify-content:space-between}
+.marca{display:flex;align-items:center;gap:12px;color:inherit;text-decoration:none}
+.marca b{font-family:var(--f-display);font-weight:400;font-size:22px;letter-spacing:2px;line-height:1;display:block}
+.marca small{display:block;font-weight:700;font-size:10px;letter-spacing:3.4px;color:var(--accent);margin-top:4px}
+.topo h1{font-family:var(--f-display);font-weight:400;font-size:clamp(24px,4vw,36px);line-height:1.1;margin:18px 0 6px;text-wrap:balance}
+.topo p{margin:0;max-width:60ch;color:#d6deee}
+.topo-txt{flex:1 1 420px;min-width:0}
+.wrap{padding-block:24px 48px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:24px;align-items:start}
+@media (max-width:900px){.wrap{grid-template-columns:minmax(0,1fr)}}
+.etapa{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:grid;gap:14px}
+.col{display:grid;gap:16px;min-width:0}
+.etapa h2{margin:0;font-size:16px;font-weight:800;display:flex;align-items:center;gap:10px}
+.etapa h2 span{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;background:var(--accent);color:#fff;font-size:13px;flex:none}
+.dica{margin:0;color:var(--muted);font-size:13px}
+.guia{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:center;background:var(--accent-soft);border-radius:10px;padding:12px}
+.guia svg{width:120px;height:auto;display:block}
+.guia ul{margin:0;padding-left:18px;font-size:13px;display:grid;gap:4px}
+@media (max-width:480px){.guia{grid-template-columns:minmax(0,1fr)}.guia svg{width:140px;justify-self:center}}
+.vazio{display:grid;gap:8px;justify-items:center;text-align:center;padding:28px 12px;color:var(--muted);font-size:14px;border:1.5px dashed var(--line);border-radius:10px}
+.vazio b{color:var(--ink);font-size:15px}
+.opcoes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.op{border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:8px;padding:12px;text-align:left;cursor:pointer;font:inherit;display:grid;gap:2px}
+.op b{font-size:14px}.op small{color:var(--muted);font-size:12px}
+.op[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.op:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.abas{display:flex;flex-wrap:wrap;gap:6px}
+.aba{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.aba[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.usos{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;max-height:300px;overflow:auto;padding:2px}
+.usos .op{padding:10px}
+.usos .carga{font-variant-numeric:tabular-nums;font-weight:700;color:var(--accent);font-size:12px}
+.grupo-tit{grid-column:1/-1;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);font-weight:700;margin-top:4px}
+.comodo{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) auto;gap:8px;align-items:end}
+@media (max-width:480px){.comodo{grid-template-columns:minmax(0,1fr) minmax(0,1fr) auto}.comodo .nome{grid-column:1/-1}}
+.comodo .sentido{grid-column:1/-1}
+#comodos:not(.av) .sentido{display:none}
+.partes{grid-column:1/-1;display:grid;gap:8px}
+.parte{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;align-items:end;padding:10px;border-radius:8px;background:var(--bg);border:1px solid var(--line)}
+.parte .tit{grid-column:1/-1;font-size:12px;font-weight:800;color:var(--ink);padding-right:36px}
+.parte .rem{position:absolute;top:2px;right:2px}
+
+.juntar{justify-self:start;border:0;background:transparent;color:var(--accent);font:inherit;font-size:13px;font-weight:700;padding:6px 0;cursor:pointer}
+.juntar:hover{text-decoration:underline}
+.parte-dica{margin:0;font-size:12px;color:var(--muted)}
+.beiral{grid-column:1/-1;display:grid;gap:8px}
+.chk{display:inline-flex;flex-direction:row;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--ink);cursor:pointer}
+.chk input{width:18px;height:18px;accent-color:var(--accent);padding:0}
+.bei-op{display:grid;gap:10px;padding:10px;border-radius:8px;background:var(--bg);border:1px solid var(--line)}
+.bei-lados{display:flex;flex-wrap:wrap;gap:8px 16px}
+.bei-lados .chk{font-weight:600}
+.bei-med{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.bei-tit{font-size:12px;font-weight:800;color:var(--ink);margin-bottom:-4px}
+textarea{font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-width:0;resize:vertical}
+label{display:grid;gap:4px;font-size:12px;font-weight:600;color:var(--muted)}
+input,select{font:inherit;font-size:15px;color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:9px 10px;width:100%;min-width:0}
+input[type=number]{font-variant-numeric:tabular-nums}
+.rem{border:0;background:transparent;color:var(--muted);font-size:20px;line-height:1;padding:10px 8px;cursor:pointer;border-radius:6px}
+.rem:hover{color:var(--ink);background:var(--bg)}
+.add{border:1.5px dashed var(--line);background:transparent;color:var(--accent);font:inherit;font-weight:700;padding:10px;border-radius:8px;cursor:pointer}
+.avanc-tog{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--ink);cursor:pointer}
+.avanc-tog input{width:18px;height:18px;accent-color:var(--accent)}
+.avanc{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:480px){.avanc{grid-template-columns:minmax(0,1fr)}}
+.res{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px)}
+@media (max-width:900px){.res{position:static}}
+.painel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+.painel-cab{background:var(--brand);color:var(--brand-ink);padding:16px 20px;display:flex;flex-wrap:wrap;gap:6px 24px;align-items:baseline;justify-content:space-between}
+.painel-cab h2{margin:0;font-family:var(--f-display);font-weight:400;font-size:20px;letter-spacing:.5px}
+.area{font-variant-numeric:tabular-nums;font-weight:800;font-size:28px}
+.area small{font-size:14px;font-weight:600;color:#d6deee}
+.desenhos{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;padding:16px 20px}
+.des{display:grid;gap:4px;min-width:0}
+.vista{display:flex;gap:6px;padding:14px 20px 0}
+.vista button{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.vista button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.desenhos.em-planta{display:grid;grid-template-columns:minmax(0,1fr)}
+#planta{width:100%;height:auto;display:block;touch-action:none;user-select:none}
+#planta .mover{cursor:grab}
+#planta .arrastando{cursor:grabbing;opacity:.85}
+#planta .rot{font:800 14px var(--f-body,Montserrat,Arial,sans-serif);fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.55);stroke-width:3px;pointer-events:none}
+.dica-planta{margin:0;font-size:12px;color:var(--muted)}
+.sv-comodo{touch-action:pan-y}
+.sv-comodo .parte-hit{cursor:grab;touch-action:none}
+.des svg{width:100%;height:auto;display:block}
+.des figcaption{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.des figcaption b{color:var(--ink)}
+figure{margin:0}
+.lista{padding:4px 20px 16px;display:grid;gap:0}
+.linha>b{white-space:nowrap}
+.linha{display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.linha span{color:var(--muted)}
+.linha b{text-align:right}
+.meia-op{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+.meia-op button{font:inherit;font-size:13px;font-weight:700;padding:6px 10px;border-radius:999px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.meia-op button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.vig-list{margin:0;padding:0;list-style:none;text-align:right;font-weight:700}
+.legenda{display:flex;flex-wrap:wrap;gap:6px 16px;padding:0 20px 14px;font-size:12px;color:var(--muted)}
+.legenda i{display:inline-block;width:12px;height:12px;border-radius:2px;vertical-align:-2px;margin-right:6px}
+.aviso{margin:0;padding:12px 20px;background:var(--accent-soft);font-size:12.5px;color:var(--ink);border-top:1px solid var(--line)}
+.alerta{margin:0 20px 14px;padding:10px 12px;border-radius:8px;background:var(--accent-soft);font-size:13px;font-weight:600}
+.lead{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.lead .cheio{grid-column:1/-1}
+@media (max-width:480px){.lead{grid-template-columns:minmax(0,1fr)}}
+.enviar{display:flex;align-items:center;justify-content:center;gap:10px;background:var(--zap);color:var(--zap-ink);border:0;border-radius:10px;padding:15px 18px;font:inherit;font-size:16px;font-weight:800;text-decoration:none;cursor:pointer}
+.enviar:hover{filter:brightness(1.06)}
+.enviar[aria-disabled="true"]{opacity:.55;pointer-events:none}
+.miud{font-size:12px;color:var(--muted);margin:0}
+.borrado{filter:blur(5px);user-select:none;pointer-events:none}
+.trava{margin:0 20px 16px;padding:16px;border:1.5px solid var(--accent);border-radius:10px;background:var(--accent-soft);display:grid;gap:10px}
+.trava h3{margin:0;font-size:16px;color:var(--ink)}
+.trava p{margin:0;font-size:13px;color:var(--muted)}
+.trava form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.trava .cheio{grid-column:1/-1}
+@media (max-width:480px){.trava form{grid-template-columns:minmax(0,1fr)}}
+.trava button{border:0;border-radius:10px;padding:13px 16px;font:inherit;font-size:15px;font-weight:800;background:var(--accent);color:#fff;cursor:pointer}
+.trava button:disabled{opacity:.6;cursor:default}
+.trava .erro{color:#c0392b;font-weight:700}
+.vend-bar{display:flex;flex-wrap:wrap;gap:8px;padding:0 20px 16px}
+.vend-bar button{flex:1 1 140px;border:1.5px solid var(--brand);border-radius:10px;padding:12px 14px;font:inherit;font-size:14px;font-weight:800;background:var(--surface);color:var(--ink);cursor:pointer}
+.vend-bar button.pri{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.modo-vend{display:inline-block;margin-top:8px;font-size:12px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;background:var(--accent);color:#fff;padding:4px 10px;border-radius:999px}
+.exemplo{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--accent);background:var(--accent-soft);padding:3px 8px;border-radius:999px}
+@media (prefers-reduced-motion:no-preference){.des svg rect,.des svg line{transition:all .2s}}
+</style>
+
+<meta name="robots" content="noindex,nofollow">
+</head>
+<body>
+<header class="topo">
+  <div class="topo-in">
+    <div class="topo-txt">
+      <a class="marca" href="https://carvalholajes.com.br/">
+        <svg width="64" height="19" viewBox="90 126 296 86" aria-hidden="true"><path d="M100 137 H371 M100 137 V201 M371 137 V201 M100 137 L168 201 L236 137 L303 201 L371 137" fill="none" stroke="#E68219" stroke-width="10" stroke-linejoin="round"/><rect x="96" y="196" width="280" height="10" fill="#ffffff"/><circle cx="100" cy="137" r="10" fill="#ffffff"/><circle cx="236" cy="137" r="10" fill="#ffffff"/><circle cx="371" cy="137" r="10" fill="#ffffff"/><circle cx="168" cy="201" r="9" fill="#E68219"/><circle cx="303" cy="201" r="9" fill="#E68219"/></svg>
+        <span><b>CARVALHO</b><small>PRÉ-MOLDADOS</small></span>
+      </a>
+      <h1>Calcule a sua laje treliçada</h1><p style="margin:6px 0 0;display:inline-block;background:#E68219;color:#fff;font-weight:800;font-size:12px;letter-spacing:.5px;padding:4px 10px;border-radius:999px">VERSÃO EM TESTE · beiral, partes juntadas e planta completa</p>
+      <p>Informe os cômodos da obra e veja na hora o desenho da laje e quantas vigotas e lajotas (ou EPS) ela leva. Depois é só pedir o orçamento no WhatsApp.</p>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="col">
+    <section class="etapa" aria-labelledby="t1">
+      <h2 id="t1"><span>1</span>Tipo de enchimento</h2>
+      <div class="opcoes" id="ench">
+        <button type="button" class="op" id="ench-lajota" data-v="lajota" aria-pressed="true"><b>Lajota cerâmica</b><small>Tradicional, H6 ou H8</small></button>
+        <button type="button" class="op" id="ench-eps" data-v="eps" aria-pressed="false"><b>EPS (isopor)</b><small>Leve e isolante, 49 × 33 cm</small></button>
+      </div>
+      <div id="lajh-box" style="display:grid;gap:6px">
+        <span style="font-size:12px;font-weight:600;color:var(--muted)">Altura da lajota</span>
+        <div class="opcoes" role="group" aria-label="Altura da lajota">
+          <button type="button" class="op" id="lajh-h6" data-h="h6" aria-pressed="true"><b>H6</b><small>6 × 30 × 20 cm · intereixo 42 cm</small></button>
+          <button type="button" class="op" id="lajh-h8" data-h="h8" aria-pressed="false"><b>H8</b><small>8 × 25 × 20 cm · intereixo 38 cm</small></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="etapa" aria-labelledby="t2">
+      <h2 id="t2"><span>2</span>Para que a laje vai servir?</h2>
+      <p class="dica">O uso define o peso que a laje precisa aguentar.</p>
+      <div class="abas" id="abas" role="group" aria-label="Grupo de uso"></div>
+      <div class="usos" id="usos"></div>
+    </section>
+
+    <section class="etapa" aria-labelledby="t3">
+      <h2 id="t3"><span>3</span>Medidas dos cômodos</h2>
+      <div class="guia">
+        <svg viewBox="0 0 140 100" aria-hidden="true"><rect x="8" y="8" width="124" height="84" fill="none" stroke="var(--muted)" stroke-width="6"/><rect x="11" y="11" width="118" height="78" fill="var(--surface)"/>
+          <g stroke="var(--accent)" stroke-width="2" fill="var(--accent)"><line x1="16" y1="30" x2="124" y2="30"/><path d="M16 30l6-4v8z M124 30l-6-4v8z"/><line x1="104" y1="16" x2="104" y2="84"/><path d="M104 16l-4 6h8z M104 84l-4-6h8z"/></g>
+          <text x="58" y="25" font-size="10" font-weight="700" fill="var(--ink)" font-family="Montserrat,Arial,sans-serif">largura</text><text x="0" y="0" font-size="10" font-weight="700" fill="var(--ink)" font-family="Montserrat,Arial,sans-serif" transform="translate(99 72) rotate(-90)">compr.</text></svg>
+        <ul><li>Meça <b>por dentro</b>, de parede a parede, em metros (ex.: 3,50).</li><li>Um cômodo por linha. A ordem largura/comprimento não importa.</li><li>A vigota vai no lado menor do cômodo.</li></ul>
+      </div>
+      <div id="comodos" style="display:grid;gap:10px"></div>
+      <button type="button" class="add" id="add">+ Adicionar cômodo</button>
+    </section>
+
+    <section class="etapa" aria-labelledby="t4">
+      <label class="avanc-tog" for="avanc-on"><input type="checkbox" id="avanc-on"> Sou pedreiro ou engenheiro: ajustar detalhes técnicos</label>
+      <div class="avanc" id="avanc" hidden>
+        <label for="trelica">Treliça
+          <select id="trelica">
+            <option value="">A definir pelo vendedor</option>
+            <option>TR08 6/3/4</option><option>TR08 6/4/4</option><option>TR08 6/4/5</option>
+            <option>TR12 6/3/4</option><option>TR12 6/4/5</option><option>TR12 6/4/6</option>
+            <option>TR16 7/4/5</option><option>TR20 7/4/5</option><option>TR25 8/5/7</option>
+          </select></label>
+        <label for="apoio">Apoio da vigota em cada parede
+          <select id="apoio"><option value="0.10">10 cm</option><option value="0.05">5 cm</option></select></label>
+        <label for="capa">Capa de concreto
+          <select id="capa"><option value="0.04">4 cm</option><option value="0.05">5 cm</option><option value="0.06">6 cm</option></select></label>
+        <label for="inicio">Junto às paredes
+          <select id="inicio"><option value="ench">Começa e termina com enchimento</option><option value="vig">Começa e termina com vigota</option><option value="misto">Começa com enchimento e termina com vigota</option></select></label>
+        <label for="epsh" id="epsh-l" hidden>Altura do EPS
+          <select id="epsh"><option value="0.07">7 cm</option><option value="0.11">11 cm</option><option value="0.15">15 cm</option><option value="0.19">19 cm</option></select></label>
+      </div>
+    </section>
+  </div>
+
+  <aside class="col res" aria-labelledby="tr">
+    <div class="painel">
+      <div class="painel-cab"><h2 id="tr">Sua laje</h2><div class="area" id="area">0 <small>m²</small></div></div>
+      <div class="vista" id="vista" role="group" aria-label="Como ver o desenho" hidden><button type="button" data-vista="cada" aria-pressed="true">Cada cômodo</button><button type="button" data-vista="planta" aria-pressed="false">Planta completa</button></div>
+      <div class="desenhos" id="desenhos"></div>
+      <div class="legenda"><span><i id="leg-ench" style="background:var(--lajota)"></i><span id="leg-ench-t">Lajota</span></span><span><i style="background:var(--vigota)"></i>Vigota</span><span><i style="background:var(--parede)"></i>Parede</span><span id="leg-trav"><i style="background:var(--trav)"></i>Linha de travamento</span></div>
+      <div id="alertas"></div>
+      <div class="lista" id="lista"></div>
+      <div class="vend-bar" id="vend-bar" hidden>
+        <button type="button" class="pri" id="v-copiar">Copiar lista</button>
+        <button type="button" id="v-limpar">Novo cálculo</button>
+      </div>
+      <div class="trava" id="trava" hidden>
+        <h3>Veja a lista completa de materiais</h3>
+        <p>Informe seu nome e WhatsApp para liberar as quantidades de lajotas, travamento, tela e concreto.</p>
+        <form id="trava-f" novalidate>
+          <label for="t-nome">Seu nome<input id="t-nome" autocomplete="name"></label>
+          <label for="t-tel">WhatsApp com DDD<input id="t-tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="(16) 99999-9999"></label>
+          <label class="cheio" for="t-cid">Cidade da obra<select id="t-cid"></select></label>
+          <button type="submit" class="cheio" id="t-btn">Ver lista completa</button>
+          <p class="cheio" id="t-msg">Usamos seu contato só para enviar o orçamento. Não enviamos propaganda.</p>
+        </form>
+      </div>
+      <p class="aviso">Quantidades estimadas com os padrões de fabricação da Carvalho Pré-Moldados. O projeto final é conferido pela nossa equipe técnica antes da entrega.</p>
+    </div>
+
+    <section class="etapa" aria-labelledby="t5">
+      <h2 id="t5"><span>4</span>Receba o orçamento</h2>
+      <p class="dica">Enviamos tudo pronto para o nosso WhatsApp. O vendedor responde com o preço e o prazo de entrega.</p>
+      <form class="lead" id="lead" novalidate>
+        <label for="nome">Seu nome<input id="nome" autocomplete="name" required></label>
+        <label for="cidade">Cidade da obra
+          <select id="cidade" required></select></label>
+        <label class="cheio" for="parede">Tem parede apoiada em cima da laje? Onde? <span style="font-weight:500">(opcional)</span>
+          <textarea id="parede" rows="2" placeholder="Ex.: parede do banheiro do andar de cima, no meio da sala"></textarea></label>
+        <label class="cheio" for="prev">Quando pretende fazer a laje?
+          <select id="prev"><option>Este mês</option><option>Em 1 a 3 meses</option><option>Só pesquisando por enquanto</option></select></label>
+        <a class="enviar cheio" id="enviar" href="#" target="_blank" rel="noopener" aria-disabled="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2c-1.5 0-3-.4-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.9c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7a2.8 2.8 0 0 0 1.8-1.3 2.3 2.3 0 0 0 .2-1.3c-.1-.1-.3-.2-.5-.3Z"/></svg>
+          Receber o orçamento no WhatsApp</a>
+        <p class="miud cheio" id="lead-msg">Preencha seu nome e a cidade para enviar.</p>
+        <p class="miud cheio">Se o WhatsApp não abrir, chame no <b>(16) 99291-4461</b>.</p>
+      </form>
+    </section>
+  </aside>
+</main>
+
+<script>
+(function(){
+  var ZAP = '5516992914461';
+  // Leads da calculadora vão para o CRM (Supabase). A chave é a pública (publishable/anon).
+  var SUPA_URL = 'https://aewqpdxraiibypqsirxp.supabase.co';
+  var SUPA_KEY = 'sb_publishable_-7J0Iyk_WDIfqOhNxrWfZw_nlrCwapl';
+  // Modo vendedor: abrir uma vez com ?interno=CODIGO libera tudo neste aparelho e não grava lead
+  var COD_INTERNO = 'cv7k2m';
+  function lsGet(k){try{return localStorage.getItem(k)}catch(e){return null}}
+  function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
+  (function(){var m=location.search.match(/[?&]interno=([^&]+)/); if(m&&m[1]===COD_INTERNO){lsSet('calc_interno','1');}})();
+  var INTERNO = true; // versão de testes: sempre em modo vendedor, não grava lead nem conta conversão
+  var contato = null; try{contato=JSON.parse(lsGet('calc_contato')||'null')}catch(e){}
+  var liberado = INTERNO || !!contato;
+  var INTEREIXO = 0.42;
+  var USOS = {
+    'Casa e piso': [
+      ['Casa','Quarto, sala e cozinha',150,'Banheiro e corredor também'],
+      ['Casa','Área de serviço',200,'Lavanderia e despensa'],
+      ['Comércio','Quarto de hotel',150,'Pousada também'],
+      ['Comércio','Escritório',250,'Sala comercial'],
+      ['Comércio','Restaurante',300,'Salão de lanchonete'],
+      ['Comércio','Cozinha de restaurante',300,'Cozinha que não é de casa'],
+      ['Comércio','Galeria de arte',300,'Exposições e mostras'],
+      ['Comércio','Loja',400,'Roupas, calçados, eletrônicos'],
+      ['Áreas comuns','Corredor e hall',300,'Circulação de prédio'],
+      ['Áreas comuns','Salão de festas',300,'Salão de jogos também'],
+      ['Áreas comuns','Academia de condomínio',300,'Aparelhos de ginástica'],
+      ['Áreas comuns','Academia de clube',500,'Academia comercial e dança'],
+      ['Áreas comuns','Quadra esportiva',500,'Jogos com corrida e pulos'],
+      ['Escola, igreja e saúde','Quarto de hospital',200,'Enfermaria'],
+      ['Escola, igreja e saúde','Sala de aula',300,'Escolas e cursos'],
+      ['Escola, igreja e saúde','Biblioteca',300,'Sala de leitura'],
+      ['Escola, igreja e saúde','Igreja ou auditório',400,'Cadeiras fixas no chão'],
+      ['Escola, igreja e saúde','Igreja ou auditório',500,'Cadeiras soltas'],
+      ['Depósito e área técnica','Barrilete',150,'Canos e registros da caixa d’água'],
+      ['Depósito e área técnica','Área técnica',300,'Máquinas e equipamentos'],
+      ['Depósito e área técnica','Depósito de mercadorias',750,'Pilhas até 2,5 m de altura'],
+      ['Depósito e área técnica','Casa de máquinas',3000,'Elevador até 1 m/s'],
+      ['Depósito e área técnica','Casa de máquinas',5000,'Elevador acima de 1 m/s']
+    ],
+    'Forro e cobertura': [
+      ['Forro e cobertura','Forro sob telhado',100,'Só manutenção'],
+      ['Forro e cobertura','Cobertura sem telhado',100,'Ou tampa de caixa d’água'],
+      ['Forro e cobertura','Laje jardim',100,'Sem acesso de pessoas'],
+      ['Forro e cobertura','Placas solares',150,'Cobertura com placas solares'],
+      ['Forro e cobertura','Sótão',200,'Forro usado para guardar coisas']
+    ],
+    'Terraço e varanda': [
+      ['Terraço','Casa ou apartamento',250,'Varanda, sacada e terraço'],
+      ['Terraço','Comércio ou escritório',300,'Terraço de loja ou empresa'],
+      ['Terraço','Terraço jardim',300,'Com acesso de pessoas'],
+      ['Terraço','Acesso público',400,'Hotel, escola, hospital']
+    ],
+    'Garagem': [
+      ['Garagem','Carros de passeio',300,'Veículos até 3 t'],
+      ['Garagem','Vans e utilitários',500,'Veículos até 9 t']
+    ]
+  };
+  var CIDADES = ['Franca','Batatais','Brodowski','Buritizal','Capetinga','Cássia','Claraval','Cristais Paulista','Delfinópolis','Guará','Ibiraci','Itirapuã','Ituverava','Nuporanga','Orlândia','Patrocínio Paulista','Pedregulho','Restinga','Ribeirão Corrente','Rifaina','Sales Oliveira','São José da Bela Vista','São Sebastião do Paraíso','São Tomás de Aquino','Outra cidade'];
+
+  var st = {
+    ench:'lajota', grupo:'Casa e piso', uso:USOS['Casa e piso'][0],
+    comodos:[{nome:'',a:null,b:null}], meia:null, lajh:'h6', vista:'cada'
+  };
+  var $ = function(id){return document.getElementById(id)};
+  var fmt = function(n,d){return n.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d})};
+  var esc = function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})};
+
+  // ---------- etapa 1
+  [$('ench-lajota'),$('ench-eps')].forEach(function(b){
+    b.addEventListener('click',function(){st.ench=b.dataset.v;
+      $('ench-lajota').setAttribute('aria-pressed',st.ench==='lajota');$('ench-eps').setAttribute('aria-pressed',st.ench==='eps');
+      $('epsh-l').hidden = st.ench!=='eps'; $('lajh-box').hidden = st.ench!=='lajota'; calc();});
+  });
+  [$('lajh-h6'),$('lajh-h8')].forEach(function(b){
+    b.addEventListener('click',function(){st.lajh=b.dataset.h;
+      $('lajh-h6').setAttribute('aria-pressed',st.lajh==='h6');$('lajh-h8').setAttribute('aria-pressed',st.lajh==='h8'); calc();});
+  });
+  // Medidas de cada enchimento: ix = intereixo, pw = largura da peça, pl = comprimento (no sentido do vão), h = altura
+  function cfgEnch(o){
+    if(st.ench==='eps') return {ix:0.42,pw:0.33,pl:0.49,h:o.epsh,nome:'Placas de EPS 49×33 (H'+Math.round(o.epsh*100)+')',curto:'EPS H'+Math.round(o.epsh*100),can:'H6 × 30 cm'};
+    if(st.lajh==='h8') return {ix:0.38,pw:0.25,pl:0.20,h:0.08,m2:1/(0.38*0.20),nome:'Lajotas cerâmicas H8 (25×20)',curto:'lajota cerâmica H8 (8 × 25 × 20 cm)',can:'H8 × 25 cm'};
+    return {ix:0.42,pw:0.30,pl:0.20,h:0.06,m2:12.5,nome:'Lajotas cerâmicas H6 (30×20)',curto:'lajota cerâmica H6 (6 × 30 × 20 cm)',can:'H6 × 30 cm'};
+  }
+  var DESPERDICIO_LAJ = 0.05; // 5% a mais nas lajotas (quebra)
+
+  // ---------- etapa 2
+  function desenhaUsos(){
+    $('abas').innerHTML = Object.keys(USOS).map(function(g){return '<button type="button" class="aba" aria-pressed="'+(g===st.grupo)+'" data-g="'+esc(g)+'">'+esc(g)+'</button>'}).join('');
+    var html='', ult='';
+    USOS[st.grupo].forEach(function(u,i){
+      if(u[0]!==ult && st.grupo==='Casa e piso'){html+='<div class="grupo-tit">'+esc(u[0])+'</div>';ult=u[0];}
+      var on = st.uso===u;
+      html+='<button type="button" class="op" aria-pressed="'+on+'" data-i="'+i+'"><b>'+esc(u[1])+'</b><small>'+esc(u[3])+'</small><span class="carga">'+fmt(u[2],0)+' kgf/m²</span></button>';
+    });
+    $('usos').innerHTML=html;
+  }
+  $('abas').addEventListener('click',function(e){var b=e.target.closest('.aba');if(!b)return;st.grupo=b.dataset.g;desenhaUsos();});
+  $('usos').addEventListener('click',function(e){var b=e.target.closest('.op');if(!b)return;st.uso=USOS[st.grupo][+b.dataset.i];desenhaUsos();calc();});
+
+  // ---------- etapa 3
+  function desenhaComodos(){
+    $('comodos').innerHTML = st.comodos.map(function(c,i){
+      return '<div class="comodo" data-i="'+i+'">'+
+        '<label class="nome" for="cn'+i+'">Cômodo<input id="cn'+i+'" data-k="nome" placeholder="'+(['Ex.: Sala','Ex.: Quarto','Ex.: Cozinha'][i]||'Ex.: Banheiro')+'" value="'+esc(c.nome)+'"></label>'+
+        '<label for="ca'+i+'">Largura (m)<input id="ca'+i+'" data-k="a" type="number" inputmode="decimal" min="0.5" max="12" step="0.05" placeholder="0,00" value="'+(c.a==null?'':c.a)+'"></label>'+
+        '<label for="cb'+i+'">Comprimento (m)<input id="cb'+i+'" data-k="b" type="number" inputmode="decimal" min="0.5" max="20" step="0.05" placeholder="0,00" value="'+(c.b==null?'':c.b)+'"></label>'+
+        '<button type="button" class="rem" aria-label="Remover '+esc(c.nome||'cômodo')+'" data-rem="'+i+'">×</button>'+
+        '<label class="sentido" for="cs'+i+'">Sentido da vigota<select id="cs'+i+'" data-k="inv"><option value="">No lado menor (padrão)</option><option value="1"'+(c.inv?' selected':'')+'>No lado maior</option></select></label>'+
+        '<label class="sentido" for="cf'+i+'">Ferro adicional na base da vigota<select id="cf'+i+'" data-k="fb"><option value="">Sem ferro adicional</option>'+
+          ['6,3','8','10','12,5'].map(function(bt){return [1,2,3].map(function(n){var v=n+'|'+bt;return '<option value="'+v+'"'+(c.fb===v?' selected':'')+'>'+n+' barra'+(n>1?'s':'')+' Ø '+bt+' mm por vigota</option>'}).join('')}).join('')+
+        '</select></label>'+
+        '<div class="partes">'+(c.partes||[]).map(function(p,j){
+          return '<div class="parte" data-p="'+j+'"><div class="tit">Parte '+(j+2)+' (juntada)</div>'+
+            '<label for="pa'+i+'_'+j+'">Largura (m)<input id="pa'+i+'_'+j+'" data-pk="a" type="number" inputmode="decimal" min="0.3" step="0.05" placeholder="0,00" value="'+(p.a==null?'':p.a)+'"></label>'+
+            '<label for="pb'+i+'_'+j+'">Compr. (m)<input id="pb'+i+'_'+j+'" data-pk="b" type="number" inputmode="decimal" min="0.3" step="0.05" placeholder="0,00" value="'+(p.b==null?'':p.b)+'"></label>'+
+            '<button type="button" class="rem" aria-label="Remover parte '+(j+2)+'" data-remp="'+j+'">×</button></div>';
+        }).join('')+
+        ((c.partes||[]).length?'<p class="parte-dica">No desenho da laje (em “Sua laje”), arraste a parte tracejada até onde ela fica. Ela se encaixa sozinha na parte vizinha.</p>':'')+
+        '<button type="button" class="juntar" data-junta="'+i+'">+ Juntar outro retângulo a este cômodo (formato em L, T…)</button></div>'+
+        htmlBeiral(c,i)+
+        '</div>';
+    }).join('');
+  }
+  // largura do beiral em cada lado (m); 0 = sem beiral
+  function larguraBeiral(b,lado){ var v=b&&b[lado]; if(v===true) return +b.b||0.6; return +v||0; }
+  function htmlBeiral(c,i){
+    var b=c.bei||{};
+    var h='<div class="beiral"><label class="chk" for="be'+i+'"><input type="checkbox" id="be'+i+'" data-bk="on"'+(b.on?' checked':'')+'> Tem beiral</label>';
+    if(b.on){
+      var lados=[['cima','Em cima'],['baixo','Embaixo'],['esq','À esquerda'],['dir','À direita']];
+      var tams=[['0','Sem beiral'],['0.3','30 cm'],['0.6','60 cm'],['0.7','70 cm']];
+      var partes=[{nome:'Parte 1',bei:b,k:0}].concat((c.partes||[]).map(function(p,j){return {nome:'Parte '+(j+2),bei:p.bei||{},k:j+1}}));
+      var comp=partes.length>1;
+      h+='<div class="bei-op">'+partes.map(function(P){
+          return (comp?'<div class="bei-tit">'+P.nome+'</div>':'')+'<div class="bei-med">'+lados.map(function(l){var v=String(larguraBeiral(P.bei,l[0])), id='bl'+i+'_'+P.k+l[0]; return '<label for="'+id+'">'+l[1]+'<select id="'+id+'" data-bk="'+l[0]+'" data-bp="'+P.k+'">'+tams.map(function(o){return '<option value="'+o[0]+'"'+(v===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label>'}).join('')+'</div>';
+        }).join('')+
+        '<div class="bei-med"><label for="bp'+i+'">Espessura da parede<select id="bp'+i+'" data-bk="par">'+[['0.15','15 cm'],['0.2','20 cm']].map(function(o){return '<option value="'+o[0]+'"'+(String(b.par||0.15)===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label></div>'+
+        '<p class="parte-dica">Os lados são os do desenho.'+(comp?' Onde um lado encosta em outra parte, ali não entra beiral: só conta o trecho que fica para fora.':'')+' Onde a vigota chega no beiral, ela passa direto; onde o beiral corre ao lado da vigota, entram vigotas curtas com ferro de ligação.</p></div>';
+    }
+    return h+'</div>';
+  }
+  $('comodos').addEventListener('change',function(e){
+    var bk=e.target.dataset.bk; if(!bk) return;
+    var c=st.comodos[+e.target.closest('.comodo').dataset.i]; c.bei=c.bei||{par:0.15};
+    if(bk==='on'){ c.bei.on=e.target.checked; if(c.bei.on && !c.bei.cima && !c.bei.baixo && !c.bei.esq && !c.bei.dir) c.bei.cima=0.6; desenhaComodos(); var f=document.getElementById('be'+e.target.closest('.comodo').dataset.i); if(f) f.focus(); }
+    else if(bk==='par') c.bei.par=parseFloat(e.target.value)||0.15;
+    else { var k=+(e.target.dataset.bp||0), alvo; if(k===0) alvo=c.bei; else { var pp=c.partes[k-1]; pp.bei=pp.bei||{}; alvo=pp.bei; } alvo[bk]=parseFloat(e.target.value)||0; }
+    calc();
+  });
+  $('comodos').addEventListener('input',function(e){
+    if(e.target.dataset.bk) return;
+    var row=e.target.closest('.comodo'); if(!row) return;
+    var c=st.comodos[+row.dataset.i], k=e.target.dataset.k;
+    var pr=e.target.closest('.parte');
+    if(pr){ var p=c.partes[+pr.dataset.p], pk=e.target.dataset.pk; p[pk] = (pk==='lado') ? e.target.value : (pk==='ref' ? +e.target.value : (parseFloat(String(e.target.value).replace(',','.'))||0)); calc(); return; }
+    if(k==='fb') return;
+    c[k] = k==='nome' ? e.target.value : k==='inv' ? !!e.target.value : parseFloat(String(e.target.value).replace(',','.'))||0;
+    calc();
+  });
+  $('comodos').addEventListener('change',function(e){var k=e.target.dataset.k;if(k!=='inv'&&k!=='fb')return;var c=st.comodos[+e.target.closest('.comodo').dataset.i];if(k==='inv')c.inv=!!e.target.value;else c.fb=e.target.value;calc();});
+  $('comodos').addEventListener('click',function(e){
+    var jb=e.target.closest('[data-junta]'); if(jb){var c=st.comodos[+jb.dataset.junta]; c.partes=c.partes||[]; var R0=retangulos(c)||[{x:0,y:0,w:Math.max(0,c.a||0),h:0}], dx=0, ty=Infinity; R0.forEach(function(q){dx=Math.max(dx,q.x+q.w); ty=Math.min(ty,q.y);}); c.partes.push({a:null,b:null,x:dx,y:ty===Infinity?0:ty}); desenhaComodos(); calc(); var f=document.getElementById('pa'+jb.dataset.junta+'_'+(c.partes.length-1)); if(f) f.focus(); return;}
+    var rp=e.target.closest('[data-remp]'); if(rp){var cc=st.comodos[+rp.closest('.comodo').dataset.i], jj=+rp.dataset.remp; cc.partes.splice(jj,1); desenhaComodos(); calc(); return;}
+    var b=e.target.closest('[data-rem]');if(!b)return;st.comodos.splice(+b.dataset.rem,1);if(!st.comodos.length)st.comodos.push({nome:'',a:null,b:null});desenhaComodos();calc();});
+  $('add').addEventListener('click',function(){st.comodos.push({nome:'',a:null,b:null});desenhaComodos();calc();var ins=$('comodos').querySelectorAll('input[data-k=nome]');ins[ins.length-1].focus();});
+
+  // ---------- avançado
+  $('avanc-on').addEventListener('change',function(){$('avanc').hidden=!this.checked;$('comodos').classList.toggle('av',this.checked);if(!this.checked){st.comodos.forEach(function(c){c.inv=false;c.fb=''});desenhaComodos();$('trelica').value='';$('apoio').value='0.10';$('capa').value='0.04';$('inicio').value='ench';$('epsh').value='0.07';}calc();});
+  ['trelica','apoio','capa','inicio','epsh'].forEach(function(id){$(id).addEventListener('change',calc)});
+
+  // ---------- conta
+  function opts(){
+    var av=$('avanc-on').checked;
+    var o = {
+      apoio: av?parseFloat($('apoio').value):0.10,
+      capa: av?parseFloat($('capa').value):0.04,
+      inicio: av?$('inicio').value:'ench',
+      trelica: av?$('trelica').value:'',
+      epsh: parseFloat($('epsh').value),
+      ench: null,
+      av: av
+    };
+    o.ench = cfgEnch(o);
+    return o;
+  }
+  // Monta os retângulos do cômodo (parte 1 + partes juntadas) em metros: x = largura, y = comprimento
+  function retangulos(c){
+    var a=Math.max(0,c.a||0), b=Math.max(0,c.b||0);
+    if(a<0.5||b<0.5) return null;
+    var R=[{x:0,y:0,w:a,h:b,bei:c.bei||{}}];
+    (c.partes||[]).forEach(function(p,j){
+      var w=Math.max(0,p.a||0), h=Math.max(0,p.b||0); if(w<0.3||h<0.3) return;
+      if(p.x==null||p.y==null){ // posição antiga (lado + recuo) vira posição fixa; depois a pessoa arrasta no desenho
+        var ref=R[Math.min(R.length-1, Math.max(0,(p.ref==null?R.length-1:p.ref)))], rc=+p.recuo||0;
+        if(p.lado==='esq'){p.x=ref.x-w;p.y=ref.y+rc;} else if(p.lado==='baixo'){p.x=ref.x+rc;p.y=ref.y+ref.h;} else if(p.lado==='cima'){p.x=ref.x+rc;p.y=ref.y-h;} else {p.x=ref.x+ref.w;p.y=ref.y+rc;}
+      }
+      R.push({x:p.x,y:p.y,w:w,h:h,bei:p.bei||{},pj:j});
+    });
+    return R;
+  }
+  // Trechos (em y) cobertos pelos retângulos numa posição x; junta trechos que se encostam
+  function trechos(R,x,incl){
+    var iv=[]; R.forEach(function(r){ var e=1e-6; if(incl ? (x>=r.x-e && x<=r.x+r.w+e) : (x>r.x+e && x<r.x+r.w-e)) iv.push([r.y,r.y+r.h]); });
+    iv.sort(function(p,q){return p[0]-q[0]}); var m=[];
+    iv.forEach(function(p){ if(m.length && p[0]<=m[m.length-1][1]+1e-6) m[m.length-1][1]=Math.max(m[m.length-1][1],p[1]); else m.push([p[0],p[1]]); });
+    return m;
+  }
+  function travPorVao(L){ return L < 3 - 1e-9 ? 0 : Math.floor(L/1.5 + 1e-9) - 1; }
+  // Conta um cômodo com as vigotas na vertical (no sentido y) — R já vem girado quando preciso
+  function contaSentido(R,o){
+    var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+    R.forEach(function(r){minX=Math.min(minX,r.x);maxX=Math.max(maxX,r.x+r.w);minY=Math.min(minY,r.y);maxY=Math.max(maxY,r.y+r.h);});
+    var IX=o.ench.ix, larg=maxX-minX, faixas=Math.max(1,Math.ceil(larg/IX-1e-9)), pos=[];
+    for(var k=(o.inicio==='vig'?0:1);k<faixas;k++) pos.push(minX+k*IX);
+    if(o.inicio==='vig'||o.inicio==='misto') pos.push(maxX);
+    if(!pos.length) pos.push(minX+larg/2);
+    var vigs=[], fronteiras=[minX].concat(pos.filter(function(p){return p>minX+1e-6 && p<maxX-1e-6})).concat([maxX]);
+    pos.forEach(function(x){ trechos(R,x,true).forEach(function(t){ vigs.push({x:x,y1:t[0],y2:t[1],L:t[1]-t[0]}); }); });
+    var fx=[];
+    for(var i=0;i<fronteiras.length-1;i++){
+      var x1=fronteiras[i],x2=fronteiras[i+1],wd=x2-x1; if(wd<0.005) continue;
+      trechos(R,(x1+x2)/2,false).forEach(function(t){ var L=t[1]-t[0]; fx.push({x1:x1,x2:x2,w:wd,y1:t[0],y2:t[1],L:L,meia:wd<=IX/2+1e-9,nT:travPorVao(L)}); });
+    }
+    var maxVao=0; vigs.forEach(function(v){maxVao=Math.max(maxVao,v.L)});
+    return {R:R,vigs:vigs,fx:fx,maxVao:maxVao,nV:vigs.length,minX:minX,maxX:maxX,minY:minY,maxY:maxY};
+  }
+  function np0(L,P){return Math.max(1,Math.ceil((L-0.20)/(P-0.20)-1e-9))}
+  function calcComodo(c,o){
+    var R=retangulos(c); if(!R) return null;
+    var sw=function(r){return {x:r.y,y:r.x,w:r.h,h:r.w}};
+    var A=contaSentido(R,o), B=contaSentido(R.map(sw),o);
+    // padrão: o sentido com o menor vão (empate: menos vigotas); "lado maior" no avançado inverte
+    var melhorA = A.maxVao < B.maxVao-1e-6 || (Math.abs(A.maxVao-B.maxVao)<=1e-6 && A.nV<=B.nV);
+    var g = (melhorA !== !!(o.av && c.inv)) ? A : B;
+    var LARG_TRAV=0.10, LAJ_M2=12.5, area=0, sobre=0;
+    R.forEach(function(r,i){area+=r.w*r.h; for(var j=0;j<i;j++){var s=R[j],ix=Math.min(r.x+r.w,s.x+s.w)-Math.max(r.x,s.x),iy=Math.min(r.y+r.h,s.y+s.h)-Math.max(r.y,s.y); if(ix>0.01&&iy>0.01) sobre+=ix*iy;}});
+    area-=sobre;
+    var E=o.ench, hEnch = E.h;
+    // ---- Beiral: por parte e por lado, só no trecho do lado que fica para fora.
+    // Na ponta da vigota ela passa direto; ao lado da vigota entram vigotas curtas com ferro de ligação (8 mm)
+    var rotG=(g===B), extra=g.vigs.map(function(){return 0}), ext=g.vigs.map(function(){return {ini:0,fim:0}});
+    var bei=(c.bei&&c.bei.on)?c.bei:null, beiCurtas=[], beiNeg=0, beiFerro=0, beiArea=0, beiPain=0, beiEps=0, beiLados=[], beiSegs=[];
+    if(bei){
+      var PAR=+bei.par||0.15, e=1e-6;
+      var nomesL={cima:'em cima',baixo:'embaixo',esq:'à esquerda',dir:'à direita'};
+      var expostos=function(q,lado){
+        var a,b,blk=[];
+        if(lado==='cima'||lado==='baixo'){ a=q.x; b=q.x+q.w; R.forEach(function(t){ if(t===q) return; var toca = lado==='cima'?Math.abs(t.y+t.h-q.y)<e:Math.abs(t.y-(q.y+q.h))<e; if(toca) blk.push([t.x,t.x+t.w]); }); }
+        else { a=q.y; b=q.y+q.h; R.forEach(function(t){ if(t===q) return; var toca = lado==='esq'?Math.abs(t.x+t.w-q.x)<e:Math.abs(t.x-(q.x+q.w))<e; if(toca) blk.push([t.y,t.y+t.h]); }); }
+        var sg=[[a,b]];
+        blk.forEach(function(k){ var nv=[]; sg.forEach(function(z){ if(k[1]<=z[0]+e||k[0]>=z[1]-e){nv.push(z);return;} if(k[0]>z[0]+e) nv.push([z[0],k[0]]); if(k[1]<z[1]-e) nv.push([k[1],z[1]]); }); sg=nv; });
+        return sg.filter(function(z){return z[1]-z[0]>0.05});
+      };
+      R.forEach(function(q,qi){ ['cima','baixo','esq','dir'].forEach(function(lado){
+        var BB=larguraBeiral(q.bei,lado); if(!BB) return;
+        var kF=BB<=0.3+1e-9?2:3;
+        var coord = lado==='cima'?q.y : lado==='baixo'?q.y+q.h : lado==='esq'?q.x : q.x+q.w;
+        var ponta = rotG ? (lado==='esq'||lado==='dir') : (lado==='cima'||lado==='baixo');
+        expostos(q,lado).forEach(function(sg){
+          var Ls=sg[1]-sg[0], txt;
+          if(ponta){
+            var m=(lado==='cima'||lado==='esq')?'ini':'fim', nn=0;
+            g.vigs.forEach(function(v,i){ var yEnd=m==='ini'?v.y1:v.y2; if(Math.abs(yEnd-coord)<e && v.x>=sg[0]-e && v.x<=sg[1]+e && !ext[i][m]){ extra[i]+=PAR+BB-o.apoio; ext[i][m]=BB; nn++; beiFerro+=kF*(BB+PAR); } });
+            beiNeg+=nn; txt=nn+' vigotas passam direto (+1 ferro 8 mm de '+fmt(Math.ceil(kF*(BB+PAR)*10-1e-6)/10,1)+' m em cada)';
+          } else {
+            var n=Math.max(1,Math.ceil(Ls/E.ix-1e-9)), cc=Math.ceil((BB+PAR)*10-1e-6)/10;
+            for(var k=0;k<n;k++) beiCurtas.push(cc);
+            beiFerro+=n*kF*cc; txt=n+' vigotas curtas de '+fmt(cc,2)+' m (+1 ferro 8 mm de '+fmt(kF*cc,1)+' m em cada)';
+          }
+          beiSegs.push({lado:lado,coord:coord,a:sg[0],b:sg[1],BB:BB,ponta:ponta});
+          beiLados.push((R.length>1?'parte '+(qi+1)+', ':'')+nomesL[lado]+' ('+Math.round(BB*100)+' cm, '+fmt(Ls,2)+' m): '+txt);
+          beiArea+=Ls*BB; beiPain+=Math.min(np0(Ls,2)*np0(BB,3), np0(Ls,3)*np0(BB,2)); beiEps+=Math.ceil(Ls*BB/(E.ix*0.49)-1e-9);
+        });
+      }); });
+    }
+    var compPorVig = g.vigs.map(function(v,i){return Math.ceil((v.L+2*o.apoio+extra[i])*10-1e-6)/10});
+    var epsInteiras=0, meiasLaj=0, meiasEps=0, canaletas=0, metTrav=0, volTrav=0, nTrav=0, temMeia=false;
+    g.fx.forEach(function(f){
+      var livre=f.L-f.nT*LARG_TRAV;
+      if(f.meia){ temMeia=true; meiasLaj+=Math.ceil(livre/0.20-1e-9); meiasEps+=Math.ceil(livre/0.49-1e-9); }
+      else epsInteiras+=Math.ceil(livre/0.49-1e-9);
+      canaletas+=f.nT; metTrav+=2*f.nT*f.w; volTrav+=f.nT*f.w*LARG_TRAV*hEnch; nTrav=Math.max(nTrav,f.nT);
+    });
+    if(nTrav) metTrav += 2*nTrav*2*o.apoio; // ancoragem nas bordas
+    var volVig=0; g.vigs.forEach(function(v){volVig+=v.L*(E.ix-E.pw)*hEnch});
+    var np=np0;
+    var paineis=beiPain; R.forEach(function(r){paineis+=Math.min(np(r.h,2)*np(r.w,3), np(r.h,3)*np(r.w,2))});
+    var fb = (o.av && typeof c.fb==='string' && c.fb) ? c.fb.split('|') : null;
+    var fbN = fb ? +fb[0] : 0, fbBit = fb ? fb[1] : null;
+    var somaComp=compPorVig.reduce(function(s,x){return s+x},0);
+    var bitola = st.uso[2] > 200 ? '3/8" (10 mm)' : '5/16" (8 mm)';
+    meiasLaj=Math.ceil(meiasLaj*(1+DESPERDICIO_LAJ)-1e-9); var meiaPecas = st.ench==='lajota'?meiasLaj:meiasEps;
+    var areaLaje=area; area+=beiArea;
+    return {beiSegs:beiSegs, beiCurtas:beiCurtas, beiFerro:Math.round(beiFerro*10)/10, beiLados:beiLados, beiArea:beiArea, ext:ext, bei:bei, areaLaje:areaLaje,
+      g:g, rot:(g===B), R:R, composto:R.length>1, sobreposto:sobre>0.01, a:Math.max(0,c.a||0), b:Math.max(0,c.b||0),
+      vao:g.maxVao, larg:g.maxX-g.minX, area:area, nVig:g.vigs.length, compPorVig:compPorVig,
+      pecas:(st.ench==='lajota' ? Math.ceil(area*E.m2*(1+DESPERDICIO_LAJ)-1e-9) : epsInteiras+beiEps), meias:temMeia?meiaPecas:0,
+      meiasLaj:meiasLaj, meiasEps:meiasEps, paineis:paineis,
+      vol: area*o.capa + volVig + volTrav + beiArea*((E.ix-E.pw)/E.ix)*hEnch, inicio:o.inicio,
+      nTrav:nTrav, canaletas:canaletas, metTrav:Math.round(metTrav*10)/10, bitola:bitola,
+      fbN:fbN, fbBit:fbBit, fbMetros:fbN*somaComp};
+  }
+  // limites do cômodo nas coordenadas dele (m), com as sobras do beiral em cada lado
+  function limites(r){
+    var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+    r.R.forEach(function(q){minX=Math.min(minX,q.x);maxX=Math.max(maxX,q.x+q.w);minY=Math.min(minY,q.y);maxY=Math.max(maxY,q.y+q.h);});
+    var mE=0, mD=0, mC=0, mB=0;
+    (r.beiSegs||[]).forEach(function(z){ if(z.lado==='esq') mE=Math.max(mE,z.BB-(z.coord-minX)); if(z.lado==='dir') mD=Math.max(mD,z.BB-(maxX-z.coord)); if(z.lado==='cima') mC=Math.max(mC,z.BB-(z.coord-minY)); if(z.lado==='baixo') mB=Math.max(mB,z.BB-(maxY-z.coord)); });
+    return {minX:minX,maxX:maxX,minY:minY,maxY:maxY,mE:mE,mD:mD,mC:mC,mB:mB};
+  }
+  function svgComodo(r,P){
+    // desenha na mesma posição em que o cliente digitou (largura na horizontal); as contas (g) podem estar giradas.
+    // Com P, desenha dentro da planta completa (escala e posição do mundo) e devolve um grupo arrastável.
+    var g=r.g, rot=r.rot, W=200, pad=10, esp=8;
+    var lim=limites(r), minX=lim.minX, maxX=lim.maxX, minY=lim.minY, maxY=lim.maxY, mE=lim.mE, mD=lim.mD, mC=lim.mC, mB=lim.mB;
+    var segs=r.beiSegs||[], sx, H, X, Y;
+    if(P){ sx=P.sx; esp=P.esp; X=function(x){return P.X(x+r.pos.x)}; Y=function(y){return P.Y(y+r.pos.y)}; }
+    else { sx=(W-2*pad-2*esp)/(maxX-minX+mE+mD); H=Math.round((maxY-minY+mC+mB)*sx+2*pad+2*esp);
+      X=function(x){return pad+esp+(x-minX+mE)*sx}; Y=function(y){return pad+esp+(y-minY+mC)*sx}; }
+    var ret=function(x,y,w,h,fill){ if(rot){var t=x;x=y;y=t;t=w;w=h;h=t;} return '<rect x="'+X(x)+'" y="'+Y(y)+'" width="'+(w*sx)+'" height="'+(h*sx)+'" fill="'+fill+'"/>'; };
+    var s= P ? '<g class="mover" data-mover="'+r.idx+'">' : '<svg class="sv-comodo" viewBox="0 0 '+W+' '+H+'" data-i="'+r.idx+'" data-sx="'+sx+'" data-ox="'+X(0)+'" data-oy="'+Y(0)+'" role="img" aria-label="Planta da laje '+esc(r.nome)+'">';
+    // beiral: faixa para fora da parede, só nos trechos marcados
+    var e=1e-6, fb=st.ench==='lajota'?'var(--lajota)':'var(--eps)';
+    segs.forEach(function(z){
+      var L=(z.b-z.a)*sx+2*esp, W2=z.BB*sx;
+      if(z.lado==='cima') s+='<rect x="'+(X(z.a)-esp)+'" y="'+(Y(z.coord)-esp-W2)+'" width="'+L+'" height="'+W2+'" fill="'+fb+'" opacity=".75"/>';
+      if(z.lado==='baixo') s+='<rect x="'+(X(z.a)-esp)+'" y="'+(Y(z.coord)+esp)+'" width="'+L+'" height="'+W2+'" fill="'+fb+'" opacity=".75"/>';
+      if(z.lado==='esq') s+='<rect x="'+(X(z.coord)-esp-W2)+'" y="'+(Y(z.a)-esp)+'" width="'+W2+'" height="'+L+'" fill="'+fb+'" opacity=".75"/>';
+      if(z.lado==='dir') s+='<rect x="'+(X(z.coord)+esp)+'" y="'+(Y(z.a)-esp)+'" width="'+W2+'" height="'+L+'" fill="'+fb+'" opacity=".75"/>';
+    });
+    r.R.forEach(function(q){ s+='<rect x="'+(X(q.x)-esp)+'" y="'+(Y(q.y)-esp)+'" width="'+(q.w*sx+2*esp)+'" height="'+(q.h*sx+2*esp)+'" fill="var(--parede)" rx="2"/>'; });
+    var ench = st.ench==='lajota'?'var(--lajota)':'var(--eps)', junta = st.ench==='lajota'?'rgba(0,0,0,.18)':'var(--eps-line)', pl=(st.ench==='lajota'?0.20:0.49);
+    r.R.forEach(function(q){ s+='<rect x="'+X(q.x)+'" y="'+Y(q.y)+'" width="'+(q.w*sx)+'" height="'+(q.h*sx)+'" fill="'+ench+'"/>'; });
+    // juntas das peças: atravessam a faixa, perpendiculares às vigotas
+    g.fx.forEach(function(f){ for(var y=f.y1+pl;y<f.y2-0.01;y+=pl){ if(rot) s+='<line x1="'+X(y)+'" y1="'+Y(f.x1)+'" x2="'+X(y)+'" y2="'+Y(f.x2)+'" stroke="'+junta+'" stroke-width="0.6"/>'; else s+='<line x1="'+X(f.x1)+'" y1="'+Y(y)+'" x2="'+X(f.x2)+'" y2="'+Y(y)+'" stroke="'+junta+'" stroke-width="0.6"/>'; } });
+    var th=Math.max(0.10,3/sx);
+    g.fx.forEach(function(f){ for(var k=1;k<=f.nT;k++){ var ty=f.y1+f.L*k/(f.nT+1); s+=ret(f.x1,ty-th/2,f.w+0.002,th,'var(--trav)'); } });
+    var vw=Math.max(0.12,2.2/sx), ex=esp*0.8/sx;
+    // parede + beiral, em metros, nas pontas das vigotas que passam direto
+    g.vigs.forEach(function(v,i){ var x1=r.ext[i].ini?(esp/sx)+r.ext[i].ini:ex, x2=r.ext[i].fim?(esp/sx)+r.ext[i].fim:ex; s+=ret(v.x-vw/2,v.y1-x1,vw,v.L+x1+x2,'var(--vigota)'); });
+    // vigotas curtas do beiral (lado paralelo às vigotas): atravessam a parede, a cada intereixo
+    var IX=(st.ench==='eps'||st.lajh!=='h8')?0.42:0.38, cw=vw*sx;
+    segs.forEach(function(z){ if(z.ponta) return; var W2=z.BB*sx;
+      for(var t=z.a+IX/2;t<z.b;t+=IX){
+        if(z.lado==='cima') s+='<rect x="'+(X(t)-cw/2)+'" y="'+(Y(z.coord)-esp-W2)+'" width="'+cw+'" height="'+(W2+esp+3)+'" fill="var(--vigota)"/>';
+        if(z.lado==='baixo') s+='<rect x="'+(X(t)-cw/2)+'" y="'+(Y(z.coord)-3)+'" width="'+cw+'" height="'+(W2+esp+3)+'" fill="var(--vigota)"/>';
+        if(z.lado==='esq') s+='<rect x="'+(X(z.coord)-esp-W2)+'" y="'+(Y(t)-cw/2)+'" width="'+(W2+esp+3)+'" height="'+cw+'" fill="var(--vigota)"/>';
+        if(z.lado==='dir') s+='<rect x="'+(X(z.coord)-3)+'" y="'+(Y(t)-cw/2)+'" width="'+(W2+esp+3)+'" height="'+cw+'" fill="var(--vigota)"/>';
+      }
+    });
+    if(!P) r.R.forEach(function(q){ if(q.pj==null) return; s+='<rect class="parte-hit" data-parte="'+q.pj+'" x="'+X(q.x)+'" y="'+Y(q.y)+'" width="'+(q.w*sx)+'" height="'+(q.h*sx)+'" fill="rgba(255,255,255,0.01)" stroke="var(--brand)" stroke-width="1.6" stroke-dasharray="5 3"><title>Arraste para encaixar a parte '+(q.pj+2)+'</title></rect>'; });
+    if(P){ s+='<text x="'+X((minX+maxX)/2)+'" y="'+Y((minY+maxY)/2)+'" text-anchor="middle" dominant-baseline="middle" class="rot">'+esc(r.nome)+'</text>'; return s+'</g>'; }
+    return s+'</svg>';
+  }
+  // ---------- planta completa: todos os cômodos juntos, arrastáveis
+  var PAR_PLANTA=0.15;
+  function caixa(r){ var l=limites(r); return {x0:r.pos.x+l.minX, x1:r.pos.x+l.maxX, y0:r.pos.y+l.minY, y1:r.pos.y+l.maxY}; }
+  function posicionaNovos(rs){
+    var dir=-Infinity; rs.forEach(function(r){ var c=st.comodos[r.idx]; if(c.pos){ r.pos=c.pos; dir=Math.max(dir,caixa(r).x1); } });
+    rs.forEach(function(r){ var c=st.comodos[r.idx]; if(!c.pos){ var l=limites(r); c.pos={x:(dir===-Infinity?0:dir+1.2)-l.minX, y:-l.minY}; r.pos=c.pos; dir=caixa(r).x1; } });
+  }
+  function svgPlanta(rs){
+    posicionaNovos(rs);
+    var x0=Infinity,x1=-Infinity,y0=Infinity,y1=-Infinity;
+    rs.forEach(function(r){ var b=caixa(r), l=limites(r); x0=Math.min(x0,b.x0-l.mE-PAR_PLANTA); x1=Math.max(x1,b.x1+l.mD+PAR_PLANTA); y0=Math.min(y0,b.y0-l.mC-PAR_PLANTA); y1=Math.max(y1,b.y1+l.mB+PAR_PLANTA); });
+    var Wp=640, pad=14, sx=(Wp-2*pad)/(x1-x0), Hp=Math.round((y1-y0)*sx+2*pad);
+    var P={sx:sx, esp:PAR_PLANTA*sx, X:function(x){return pad+(x-x0)*sx}, Y:function(y){return pad+(y-y0)*sx}};
+    return '<svg id="planta" viewBox="0 0 '+Wp+' '+Hp+'" data-sx="'+sx+'" role="img" aria-label="Planta completa da laje">'+rs.map(function(r){return svgComodo(r,P)}).join('')+'</svg>';
+  }
+  // encaixe: ao soltar perto de outro cômodo, cola nele (deixando a parede entre os dois) ou alinha as bordas
+  function encaixa(i){
+    var rs=ultimo.rs, me=null; rs.forEach(function(r){ if(r.idx===i) me=r; }); if(!me) return;
+    var b=caixa(me), bx=null, by=null, lim=0.4;
+    rs.forEach(function(o){ if(o===me) return; var ob=caixa(o);
+      [ob.x1+PAR_PLANTA-b.x0, ob.x0-PAR_PLANTA-b.x1, ob.x0-b.x0, ob.x1-b.x1].forEach(function(d){ if(Math.abs(d)<lim && (bx===null||Math.abs(d)<Math.abs(bx))) bx=d; });
+      [ob.y1+PAR_PLANTA-b.y0, ob.y0-PAR_PLANTA-b.y1, ob.y0-b.y0, ob.y1-b.y1].forEach(function(d){ if(Math.abs(d)<lim && (by===null||Math.abs(d)<Math.abs(by))) by=d; });
+    });
+    var c=st.comodos[i]; if(bx!==null) c.pos.x+=bx; if(by!==null) c.pos.y+=by;
+    c.pos.x=Math.round(c.pos.x*100)/100; c.pos.y=Math.round(c.pos.y*100)/100;
+  }
+  var arrasto=null;
+  function ptSvg(svg,e){ var m=svg.getScreenCTM(); if(!m) return {x:0,y:0}; var p=new DOMPoint(e.clientX,e.clientY).matrixTransform(m.inverse()); return {x:p.x,y:p.y}; }
+  // arrastar uma parte juntada (desenho de cada cômodo): encaixa encostada nas outras partes, sem parede no meio
+  function encaixaParte(c,j){
+    var R=retangulos(c); if(!R) return; var me=null; R.forEach(function(q){ if(q.pj===j) me=q; }); if(!me) return;
+    var bx=null, by=null, lim=0.5;
+    R.forEach(function(o){ if(o===me) return;
+      [o.x+o.w-me.x, o.x-(me.x+me.w), o.x-me.x, (o.x+o.w)-(me.x+me.w)].forEach(function(d){ if(Math.abs(d)<lim && (bx===null||Math.abs(d)<Math.abs(bx))) bx=d; });
+      [o.y+o.h-me.y, o.y-(me.y+me.h), o.y-me.y, (o.y+o.h)-(me.y+me.h)].forEach(function(d){ if(Math.abs(d)<lim && (by===null||Math.abs(d)<Math.abs(by))) by=d; });
+    });
+    var p=c.partes[j]; if(bx!==null) p.x+=bx; if(by!==null) p.y+=by;
+    p.x=Math.round(p.x*100)/100; p.y=Math.round(p.y*100)/100;
+  }
+  $('desenhos').addEventListener('pointerdown',function(e){
+    var hit=e.target.closest('[data-parte]');
+    if(hit){ var sv=hit.ownerSVGElement, p0=ptSvg(sv,e);
+      arrasto={parte:true, g:hit, svg:sv, i:+sv.dataset.i, j:+hit.dataset.parte, x0:p0.x, y0:p0.y, dx:0, dy:0, sx:+sv.dataset.sx};
+      try{ sv.setPointerCapture(e.pointerId); }catch(_){}
+      hit.setAttribute('fill','rgba(25,55,105,0.25)'); e.preventDefault(); return; }
+    var gEl=e.target.closest('[data-mover]'); if(!gEl) return;
+    var svg=gEl.ownerSVGElement, p=ptSvg(svg,e);
+    arrasto={g:gEl, svg:svg, i:+gEl.dataset.mover, x0:p.x, y0:p.y, dx:0, dy:0, sx:+svg.dataset.sx};
+    try{ svg.setPointerCapture(e.pointerId); }catch(_){}
+    svg.appendChild(gEl); gEl.classList.add('arrastando'); e.preventDefault();
+  });
+  $('desenhos').addEventListener('pointermove',function(e){
+    if(!arrasto) return; var p=ptSvg(arrasto.svg,e);
+    arrasto.dx=p.x-arrasto.x0; arrasto.dy=p.y-arrasto.y0;
+    arrasto.g.setAttribute('transform','translate('+arrasto.dx+' '+arrasto.dy+')');
+  });
+  function soltar(){
+    if(!arrasto) return; var a=arrasto; arrasto=null;
+    var c=st.comodos[a.i];
+    if(a.parte){ if(c && c.partes[a.j] && (Math.abs(a.dx)>1||Math.abs(a.dy)>1)){ c.partes[a.j].x+=a.dx/a.sx; c.partes[a.j].y+=a.dy/a.sx; encaixaParte(c,a.j); } calc(); return; }
+    if(c && c.pos && (Math.abs(a.dx)>1||Math.abs(a.dy)>1)){ c.pos.x+=a.dx/a.sx; c.pos.y+=a.dy/a.sx; encaixa(a.i); }
+    calc();
+  }
+  $('desenhos').addEventListener('pointerup',soltar);
+  $('desenhos').addEventListener('pointercancel',soltar);
+  $('vista').addEventListener('click',function(e){ var b=e.target.closest('[data-vista]'); if(!b) return; st.vista=b.dataset.vista; calc(); });
+  function medidasTxt(r,c){
+    var t=fmt(r.a,2)+' × '+fmt(r.b,2)+' m';
+    if(!r.composto) return t;
+    return 'parte 1 '+t+(c.partes||[]).map(function(p,j){return '; parte '+(j+2)+' '+fmt(p.a||0,2)+' × '+fmt(p.b||0,2)+' m'}).join('')+' (formato montado no desenho)';
+  }
+  var ultimo=null;
+  function calc(){
+    var o=opts(), rs=[], beiF=0, beiR=[], vigsBei={}, acoBase={}, mL=0, mE=0, pain=0, area=0, vol=0, pecas=0, meias=0, vigs={}, aco={}, trav=0, canal=0, alertas=[];
+    st.comodos.forEach(function(c,i){var r=calcComodo(c,o); if(!r) return; r.idx=i; r.nome=(c.nome||'').trim()||'Cômodo '+(i+1); rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; mL+=r.meiasLaj; mE+=r.meiasEps; pain+=r.paineis; trav+=r.nTrav; canal+=r.canaletas; if(r.metTrav){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.metTrav;} r.compPorVig.forEach(function(k){vigs[k]=(vigs[k]||0)+1}); r.medidas=medidasTxt(r,c); if(r.bei){beiF+=r.beiFerro; beiR.push(r); r.beiCurtas.forEach(function(k){vigsBei[k]=(vigsBei[k]||0)+1});} if(r.sobreposto) alertas.push(r.nome+': as partes se sobrepõem. Confira o lado e o recuo.'); if(r.fbN){acoBase[r.fbBit]=(acoBase[r.fbBit]||0)+r.fbMetros;} if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
+    $('area').innerHTML=fmt(area,2)+' <small>m²</small>';
+    var vPlanta = st.vista==='planta' && rs.length>1;
+    $('vista').hidden = rs.length<2;
+    $('vista').querySelectorAll('[data-vista]').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.vista===(vPlanta?'planta':'cada'))); });
+    $('desenhos').classList.toggle('em-planta', vPlanta);
+    if(vPlanta){ $('desenhos').innerHTML = svgPlanta(rs)+'<p class="dica-planta">Arraste os cômodos para montar a planta. Quando chegam perto de outro, eles se encaixam com a parede no meio.</p>'; }
+    else $('desenhos').innerHTML = rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+(r.composto?fmt(r.area,2)+' m² ('+r.R.length+' partes)':fmt(r.a,2)+' × '+fmt(r.b,2)+' m')+' · '+r.nVig+' vigotas'+(r.beiCurtas.length?' + '+r.beiCurtas.length+' do beiral':'')+(r.nTrav?' · '+r.nTrav+' travamento'+(r.nTrav>1?'s':''):'')+'</figcaption></figure>'}).join('') : '<div class="vazio"><b>O desenho da sua laje aparece aqui</b>Preencha a largura e o comprimento de pelo menos um cômodo.</div>';
+    $('leg-ench').style.background = st.ench==='lajota'?'var(--lajota)':'var(--eps)';
+    $('leg-ench-t').textContent = st.ench==='lajota'?'Lajota':'EPS';
+    $('alertas').innerHTML = alertas.map(function(a){return '<p class="alerta">'+esc(a)+'</p>'}).join('');
+    var comps = Object.keys(vigs).map(Number).sort(function(a,b){return b-a});
+    var totVig = comps.reduce(function(s,k){return s+vigs[k]},0);
+    var nomeEnch = o.ench.nome + (st.ench==='lajota'?' · com 5% de quebra':'');
+    var volR = Math.ceil(vol*10-1e-9)/10;
+    $('leg-trav').hidden = !trav;
+    var compsBei=Object.keys(vigsBei).map(Number).sort(function(a,b){return b-a}), totBei=compsBei.reduce(function(s,k){return s+vigsBei[k]},0);
+    var meiaTipo = st.meia || st.ench;
+    var baseTxt = Object.keys(acoBase).map(function(b){var m=acoBase[b],n=Math.ceil(m/12-1e-9);return fmt(m,1)+' m de ferro Ø '+b+' mm (≈ '+n+' barra'+(n>1?'s':'')+' de 12 m)'});
+    var nMeia = meiaTipo==='lajota'?mL:mE;
+    var nomeMeia = meiaTipo==='lajota'?'Meias lajotas':'Meias placas de EPS';
+    var tela = st.uso[2] > 200 ? 'Q92' : 'Q61';
+    var acoTxt = Object.keys(aco).sort().map(function(b){var m=aco[b];return fmt(m,1)+' m de ferro '+b+' (≈ '+Math.ceil(m/12-1e-9)+' barra'+(Math.ceil(m/12-1e-9)>1?'s':'')+' de 12 m)'});
+    var livre =
+      '<div class="linha"><span>Uso</span><b>'+esc(st.uso[1])+' · '+fmt(st.uso[2],0)+' kgf/m²</b></div>'+
+      '<div class="linha"><span>Vigotas treliçadas ('+totVig+')</span><ul class="vig-list">'+comps.map(function(k){return '<li>'+vigs[k]+' × '+fmt(k,2)+' m</li>'}).join('')+'</ul></div>'+
+      (totBei?'<div class="linha"><span>Vigotas curtas do beiral ('+totBei+')</span><ul class="vig-list">'+compsBei.map(function(k){return '<li>'+vigsBei[k]+' × '+fmt(k,2)+' m</li>'}).join('')+'</ul></div>':'')+
+      (baseTxt.length?'<div class="linha"><span>Ferro adicional na base das vigotas</span><ul class="vig-list">'+rs.filter(function(r){return r.fbN}).map(function(r){return '<li>'+esc(r.nome)+': '+r.fbN+' Ø '+r.fbBit+' mm por vigota</li>'}).join('')+baseTxt.map(function(t){return '<li><b>'+t+'</b></li>'}).join('')+'</ul></div>':'');
+    var resto =
+      '<div class="linha"><span>'+nomeEnch+'</span><b>'+fmt(pecas,0)+' peças</b></div>'+
+      (meias?'<div class="linha"><span>Sobra junto à parede</span><div class="meia-op" role="group" aria-label="Tipo da meia peça"><button type="button" data-meia="eps" aria-pressed="'+(meiaTipo==='eps')+'">'+fmt(mE,0)+' meias placas de EPS</button><button type="button" data-meia="lajota" aria-pressed="'+(meiaTipo==='lajota')+'">'+fmt(mL,0)+' meias lajotas</button></div></div>':'')+
+      (beiR.length?'<div class="linha"><span>Beiral</span><ul class="vig-list">'+beiR.map(function(r){return r.beiLados.map(function(t){return '<li>'+esc(r.nome)+', '+esc(t)+'</li>'}).join('')}).join('')+'<li><b>'+fmt(beiF,1)+' m de ferro 8 mm (≈ '+Math.ceil(beiF/12-1e-9)+' barra'+(Math.ceil(beiF/12-1e-9)>1?'s':'')+' de 12 m)</b></li></ul></div>':'')+
+      (trav?'<div class="linha"><span>Linhas de travamento ('+trav+')</span><ul class="vig-list"><li>'+fmt(canal,0)+' canaletas '+o.ench.can+'</li>'+acoTxt.map(function(x){return '<li>'+x+'</li>'}).join('')+'</ul></div>':'')+
+      '<div class="linha"><span>Tela de distribuição '+tela+' (painel 2 × 3 m)</span><b>'+fmt(pain,0)+' painé'+(pain>1?'is':'l')+'</b></div>'+
+      '<div class="linha"><span>Concreto (capa de '+Math.round(o.capa*100)+' cm + nervuras)</span><b>≈ '+fmt(volR,1)+' m³</b></div>'+
+      '<div class="linha"><span>Treliça</span><b>'+(o.trelica?esc(o.trelica):'A definir pelo vendedor')+'</b></div>';
+    $('lista').innerHTML = livre + (liberado ? resto : '<div class="borrado" aria-hidden="true">'+resto+'</div>');
+    $('trava').hidden = liberado || !rs.length;
+    $('lista').hidden = !rs.length; $('area').hidden = !rs.length; document.querySelector('.legenda').hidden = !rs.length;
+    ultimo={beiF:beiF,beiR:beiR,vigsBei:vigsBei,compsBei:compsBei,totBei:totBei,o:o,rs:rs,area:area,comps:comps,vigs:vigs,totVig:totVig,baseTxt:baseTxt,pecas:pecas,meias:nMeia,nomeMeia:nomeMeia,tela:tela,pain:pain,trav:trav,canal:canal,acoTxt:acoTxt,nomeEnch:nomeEnch,vol:volR};
+    atualizaLink();
+  }
+
+  $('lista').addEventListener('click',function(e){var b=e.target.closest('[data-meia]');if(!b)return;st.meia=b.dataset.meia;calc();});
+
+  // ---------- lead
+  $('cidade').innerHTML = '<option value="">Escolha…</option>'+CIDADES.map(function(c){return '<option>'+c+'</option>'}).join('');
+  function atualizaLink(){
+    var nome=$('nome').value.trim(), cid=$('cidade').value, ok = nome.length>=2 && cid && ultimo && ultimo.rs.length;
+    $('enviar').setAttribute('aria-disabled', ok?'false':'true');
+    $('lead-msg').textContent = ok ? 'Abre o WhatsApp com a mensagem pronta. É só enviar.' : 'Preencha seu nome e a cidade para enviar.';
+    if(!ok){$('enviar').href='#';return;}
+    var t='Olá! Fiz a simulação da laje no site da Carvalho e quero o orçamento.\n\n'+
+      'Nome: '+nome+'\nCidade: '+cid+'\nPrevisão: '+$('prev').value+'\n\n'+resumo();
+    $('enviar').href='https://wa.me/'+ZAP+'?text='+encodeURIComponent(t);
+  }
+  function resumo(){
+    var u=ultimo, o=u.o;
+    return 'Uso: '+u.rs.length+' cômodo(s), '+st.uso[1]+' ('+st.uso[2]+' kgf/m²)\n'+
+      'Enchimento: '+o.ench.curto+'\n'+
+      'Cômodos:\n'+u.rs.map(function(r){return '• '+r.nome+': '+r.medidas+' ('+(r.composto?'vão maior ':'vão ')+fmt(r.vao,2)+' m)'+(r.fbN?' + '+r.fbN+' Ø '+r.fbBit+' mm na base de cada vigota':'')}).join('\n')+'\n\n'+
+      'Área total: '+fmt(u.area,2)+' m²\n'+
+      'Vigotas: '+u.comps.map(function(k){return u.vigs[k]+' × '+fmt(k,2)+' m'}).join('; ')+'\n'+
+      (u.totBei?'Vigotas curtas do beiral: '+u.compsBei.map(function(k){return u.vigsBei[k]+' × '+fmt(k,2)+' m'}).join('; ')+'\n':'')+
+      (u.beiR.length?'Beiral: '+u.beiR.map(function(r){return r.nome+' (parede '+Math.round((r.bei.par||0.15)*100)+' cm) – '+r.beiLados.join('; ')}).join(' | ')+'; total '+fmt(u.beiF,1)+' m de ferro 8 mm\n':'')+
+      (u.baseTxt.length?'Ferro adicional na base das vigotas: '+u.baseTxt.join('; ')+'\n':'')+
+      u.nomeEnch+': '+u.pecas+' peças\n'+
+      (u.meias?u.nomeMeia+': '+u.meias+' peças\n':'')+
+      'Tela de distribuição '+u.tela+' (2 × 3 m): '+u.pain+' painéis\n'+
+      (u.trav?'Linhas de travamento: '+u.trav+' ('+u.canal+' canaletas '+o.ench.can+'; '+u.acoTxt.join('; ')+')\n':'')+
+      'Concreto estimado: '+fmt(u.vol,1)+' m³'+
+      ($('parede').value.trim()?'\n\nParede sobre a laje: '+$('parede').value.trim():'')+
+      (o.av?'\n\nDetalhes técnicos: treliça '+(o.trelica||'a definir')+', apoio '+Math.round(o.apoio*100)+' cm, capa '+Math.round(o.capa*100)+' cm, '+({vig:'começa e termina com vigota',misto:'começa com enchimento e termina com vigota',ench:'começa e termina com enchimento'})[o.inicio]:'');
+  }
+
+  // ---------- trava: libera a lista completa com nome + WhatsApp e grava o lead no CRM
+  $('t-cid').innerHTML = '<option value="">Escolha…</option>'+CIDADES.map(function(c){return '<option>'+c+'</option>'}).join('');
+  function salvarLead(extra){
+    if(INTERNO || !contato || !SUPA_KEY || !ultimo || !ultimo.rs.length) return;
+    var corpo = {p_nome:contato.nome, p_telefone:contato.tel, p_cidade:contato.cid,
+      p_previsao:(extra&&extra.prev)||null, p_resumo:resumo(), p_chamou_whatsapp:!!(extra&&extra.zap),
+      p_area:Math.round(ultimo.area*100)/100};
+    try{
+      fetch(SUPA_URL+'/rest/v1/rpc/crm_lead_calculadora',{method:'POST',keepalive:true,
+        headers:{'apikey':SUPA_KEY,'Authorization':'Bearer '+SUPA_KEY,'Content-Type':'application/json'},
+        body:JSON.stringify(corpo)}).catch(function(){});
+    }catch(e){}
+  }
+  function preencheLead(){ if(!contato) return; if(!$('nome').value) $('nome').value=contato.nome; if(!$('cidade').value) $('cidade').value=contato.cid; }
+  $('trava-f').addEventListener('submit',function(e){
+    e.preventDefault();
+    var nome=$('t-nome').value.trim(), tel=$('t-tel').value.replace(/\D/g,''), cid=$('t-cid').value, msg=$('t-msg');
+    if(tel.length>11 && tel.indexOf('55')===0) tel=tel.slice(2);
+    if(nome.length<2){msg.className='cheio erro';msg.textContent='Informe seu nome.';$('t-nome').focus();return;}
+    if(tel.length<10||tel.length>11){msg.className='cheio erro';msg.textContent='Informe o WhatsApp com DDD, ex.: (16) 99999-9999.';$('t-tel').focus();return;}
+    if(!cid){msg.className='cheio erro';msg.textContent='Escolha a cidade da obra.';$('t-cid').focus();return;}
+    contato={nome:nome,tel:tel,cid:cid}; lsSet('calc_contato',JSON.stringify(contato));
+    liberado=true; calc(); salvarLead(); preencheLead(); atualizaLink();
+    if(window.gtag && window.CONV && window.CONV.lead) window.gtag('event','conversion',{send_to:window.CONV.lead});
+  });
+  if(INTERNO){
+    var sec=$('t5').closest('section'); if(sec) sec.hidden=true;
+    $('vend-bar').hidden=false;
+    $('v-copiar').addEventListener('click',function(){
+      var btn=this; if(!ultimo||!ultimo.rs.length){btn.textContent='Preencha um cômodo';setTimeout(function(){btn.textContent='Copiar lista'},1500);return;}
+      var txt='Laje treliçada – Carvalho Pré-Moldados\n\n'+resumo();
+      var ok=function(){btn.textContent='Lista copiada ✓';setTimeout(function(){btn.textContent='Copiar lista'},1800)};
+      var alt=function(){var ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');ok()}catch(e){}document.body.removeChild(ta)};
+      try{navigator.clipboard.writeText(txt).then(ok,alt)}catch(e){alt()}
+    });
+    $('v-limpar').addEventListener('click',function(){st.comodos=[{nome:'',a:null,b:null}];st.meia=null;desenhaComodos();calc();$('parede').value='';var i=$('cn0');if(i){i.scrollIntoView({block:'center'});i.focus();}});
+    var h=document.querySelector('.topo-in'); if(h){var b=document.createElement('span');b.className='modo-vend';b.textContent='Modo vendedor';h.appendChild(b);} }
+  ['nome','cidade','prev','parede'].forEach(function(id){$(id).addEventListener('input',atualizaLink);$(id).addEventListener('change',atualizaLink)});
+  $('lead').addEventListener('submit',function(e){e.preventDefault()});
+  $('enviar').addEventListener('click',function(e){
+    if(this.getAttribute('aria-disabled')==='true'){e.preventDefault();return;}
+    salvarLead({prev:$('prev').value, zap:true});
+    try{ if(window.gtag && window.CONV && window.CONV.whatsapp) window.gtag('event','conversion',{send_to:window.CONV.whatsapp,transport_type:'beacon'}); }catch(err){}
+  });
+
+  desenhaUsos(); desenhaComodos(); calc();
+})();
+</script>
+
+</body>
+</html>
