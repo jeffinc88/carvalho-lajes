@@ -116,6 +116,15 @@ input[type=number]{font-variant-numeric:tabular-nums}
 .area small{font-size:14px;font-weight:600;color:#d6deee}
 .desenhos{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;padding:16px 20px}
 .des{display:grid;gap:4px;min-width:0}
+.vista{display:flex;gap:6px;padding:14px 20px 0}
+.vista button{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.vista button[aria-pressed="true"]{background:var(--brand);border-color:var(--brand);color:var(--brand-ink)}
+.desenhos.em-planta{display:grid;grid-template-columns:minmax(0,1fr)}
+#planta{width:100%;height:auto;display:block;touch-action:none;user-select:none}
+#planta .mover{cursor:grab}
+#planta .arrastando{cursor:grabbing;opacity:.85}
+#planta .rot{font:800 14px var(--f-body,Montserrat,Arial,sans-serif);fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.55);stroke-width:3px;pointer-events:none}
+.dica-planta{margin:0;font-size:12px;color:var(--muted)}
 .des svg{width:100%;height:auto;display:block}
 .des figcaption{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
 .des figcaption b{color:var(--ink)}
@@ -235,6 +244,7 @@ figure{margin:0}
   <aside class="col res" aria-labelledby="tr">
     <div class="painel">
       <div class="painel-cab"><h2 id="tr">Sua laje</h2><div class="area" id="area">0 <small>m²</small></div></div>
+      <div class="vista" id="vista" role="group" aria-label="Como ver o desenho" hidden><button type="button" data-vista="cada" aria-pressed="true">Cada cômodo</button><button type="button" data-vista="planta" aria-pressed="false">Planta completa</button></div>
       <div class="desenhos" id="desenhos"></div>
       <div class="legenda"><span><i id="leg-ench" style="background:var(--lajota)"></i><span id="leg-ench-t">Lajota</span></span><span><i style="background:var(--vigota)"></i>Vigota</span><span><i style="background:var(--parede)"></i>Parede</span><span id="leg-trav"><i style="background:var(--trav)"></i>Linha de travamento</span></div>
       <div id="alertas"></div>
@@ -341,7 +351,7 @@ figure{margin:0}
 
   var st = {
     ench:'lajota', grupo:'Casa e piso', uso:USOS['Casa e piso'][0],
-    comodos:[{nome:'',a:null,b:null}], meia:null, lajh:'h6'
+    comodos:[{nome:'',a:null,b:null}], meia:null, lajh:'h6', vista:'cada'
   };
   var $ = function(id){return document.getElementById(id)};
   var fmt = function(n,d){return n.toLocaleString('pt-BR',{minimumFractionDigits:d,maximumFractionDigits:d})};
@@ -588,17 +598,25 @@ figure{margin:0}
       nTrav:nTrav, canaletas:canaletas, metTrav:Math.round(metTrav*10)/10, bitola:bitola,
       fbN:fbN, fbBit:fbBit, fbMetros:fbN*somaComp};
   }
-  function svgComodo(r){
-    // desenha na mesma posição em que o cliente digitou (largura na horizontal); as contas (g) podem estar giradas
-    var g=r.g, rot=r.rot, W=200, pad=10, esp=8;
+  // limites do cômodo nas coordenadas dele (m), com as sobras do beiral em cada lado
+  function limites(r){
     var minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
     r.R.forEach(function(q){minX=Math.min(minX,q.x);maxX=Math.max(maxX,q.x+q.w);minY=Math.min(minY,q.y);maxY=Math.max(maxY,q.y+q.h);});
-    var segs=r.beiSegs||[], mE=0, mD=0, mC=0, mB=0;
-    segs.forEach(function(z){ if(z.lado==='esq') mE=Math.max(mE,z.BB-(z.coord-minX)); if(z.lado==='dir') mD=Math.max(mD,z.BB-(maxX-z.coord)); if(z.lado==='cima') mC=Math.max(mC,z.BB-(z.coord-minY)); if(z.lado==='baixo') mB=Math.max(mB,z.BB-(maxY-z.coord)); });
-    var sx=(W-2*pad-2*esp)/(maxX-minX+mE+mD), H=Math.round((maxY-minY+mC+mB)*sx+2*pad+2*esp);
-    var X=function(x){return pad+esp+(x-minX+mE)*sx}, Y=function(y){return pad+esp+(y-minY+mC)*sx};
+    var mE=0, mD=0, mC=0, mB=0;
+    (r.beiSegs||[]).forEach(function(z){ if(z.lado==='esq') mE=Math.max(mE,z.BB-(z.coord-minX)); if(z.lado==='dir') mD=Math.max(mD,z.BB-(maxX-z.coord)); if(z.lado==='cima') mC=Math.max(mC,z.BB-(z.coord-minY)); if(z.lado==='baixo') mB=Math.max(mB,z.BB-(maxY-z.coord)); });
+    return {minX:minX,maxX:maxX,minY:minY,maxY:maxY,mE:mE,mD:mD,mC:mC,mB:mB};
+  }
+  function svgComodo(r,P){
+    // desenha na mesma posição em que o cliente digitou (largura na horizontal); as contas (g) podem estar giradas.
+    // Com P, desenha dentro da planta completa (escala e posição do mundo) e devolve um grupo arrastável.
+    var g=r.g, rot=r.rot, W=200, pad=10, esp=8;
+    var lim=limites(r), minX=lim.minX, maxX=lim.maxX, minY=lim.minY, maxY=lim.maxY, mE=lim.mE, mD=lim.mD, mC=lim.mC, mB=lim.mB;
+    var segs=r.beiSegs||[], sx, H, X, Y;
+    if(P){ sx=P.sx; esp=P.esp; X=function(x){return P.X(x+r.pos.x)}; Y=function(y){return P.Y(y+r.pos.y)}; }
+    else { sx=(W-2*pad-2*esp)/(maxX-minX+mE+mD); H=Math.round((maxY-minY+mC+mB)*sx+2*pad+2*esp);
+      X=function(x){return pad+esp+(x-minX+mE)*sx}; Y=function(y){return pad+esp+(y-minY+mC)*sx}; }
     var ret=function(x,y,w,h,fill){ if(rot){var t=x;x=y;y=t;t=w;w=h;h=t;} return '<rect x="'+X(x)+'" y="'+Y(y)+'" width="'+(w*sx)+'" height="'+(h*sx)+'" fill="'+fill+'"/>'; };
-    var s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Planta da laje '+esc(r.nome)+'">';
+    var s= P ? '<g class="mover" data-mover="'+r.idx+'">' : '<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Planta da laje '+esc(r.nome)+'">';
     // beiral: faixa para fora da parede, só nos trechos marcados
     var e=1e-6, fb=st.ench==='lajota'?'var(--lajota)':'var(--eps)';
     segs.forEach(function(z){
@@ -628,8 +646,57 @@ figure{margin:0}
         if(z.lado==='dir') s+='<rect x="'+(X(z.coord)-3)+'" y="'+(Y(t)-cw/2)+'" width="'+(W2+esp+3)+'" height="'+cw+'" fill="var(--vigota)"/>';
       }
     });
+    if(P){ s+='<text x="'+X((minX+maxX)/2)+'" y="'+Y((minY+maxY)/2)+'" text-anchor="middle" dominant-baseline="middle" class="rot">'+esc(r.nome)+'</text>'; return s+'</g>'; }
     return s+'</svg>';
   }
+  // ---------- planta completa: todos os cômodos juntos, arrastáveis
+  var PAR_PLANTA=0.15;
+  function caixa(r){ var l=limites(r); return {x0:r.pos.x+l.minX, x1:r.pos.x+l.maxX, y0:r.pos.y+l.minY, y1:r.pos.y+l.maxY}; }
+  function posicionaNovos(rs){
+    var dir=-Infinity; rs.forEach(function(r){ var c=st.comodos[r.idx]; if(c.pos){ r.pos=c.pos; dir=Math.max(dir,caixa(r).x1); } });
+    rs.forEach(function(r){ var c=st.comodos[r.idx]; if(!c.pos){ var l=limites(r); c.pos={x:(dir===-Infinity?0:dir+1.2)-l.minX, y:-l.minY}; r.pos=c.pos; dir=caixa(r).x1; } });
+  }
+  function svgPlanta(rs){
+    posicionaNovos(rs);
+    var x0=Infinity,x1=-Infinity,y0=Infinity,y1=-Infinity;
+    rs.forEach(function(r){ var b=caixa(r), l=limites(r); x0=Math.min(x0,b.x0-l.mE-PAR_PLANTA); x1=Math.max(x1,b.x1+l.mD+PAR_PLANTA); y0=Math.min(y0,b.y0-l.mC-PAR_PLANTA); y1=Math.max(y1,b.y1+l.mB+PAR_PLANTA); });
+    var Wp=640, pad=14, sx=(Wp-2*pad)/(x1-x0), Hp=Math.round((y1-y0)*sx+2*pad);
+    var P={sx:sx, esp:PAR_PLANTA*sx, X:function(x){return pad+(x-x0)*sx}, Y:function(y){return pad+(y-y0)*sx}};
+    return '<svg id="planta" viewBox="0 0 '+Wp+' '+Hp+'" data-sx="'+sx+'" role="img" aria-label="Planta completa da laje">'+rs.map(function(r){return svgComodo(r,P)}).join('')+'</svg>';
+  }
+  // encaixe: ao soltar perto de outro cômodo, cola nele (deixando a parede entre os dois) ou alinha as bordas
+  function encaixa(i){
+    var rs=ultimo.rs, me=null; rs.forEach(function(r){ if(r.idx===i) me=r; }); if(!me) return;
+    var b=caixa(me), bx=null, by=null, lim=0.4;
+    rs.forEach(function(o){ if(o===me) return; var ob=caixa(o);
+      [ob.x1+PAR_PLANTA-b.x0, ob.x0-PAR_PLANTA-b.x1, ob.x0-b.x0, ob.x1-b.x1].forEach(function(d){ if(Math.abs(d)<lim && (bx===null||Math.abs(d)<Math.abs(bx))) bx=d; });
+      [ob.y1+PAR_PLANTA-b.y0, ob.y0-PAR_PLANTA-b.y1, ob.y0-b.y0, ob.y1-b.y1].forEach(function(d){ if(Math.abs(d)<lim && (by===null||Math.abs(d)<Math.abs(by))) by=d; });
+    });
+    var c=st.comodos[i]; if(bx!==null) c.pos.x+=bx; if(by!==null) c.pos.y+=by;
+    c.pos.x=Math.round(c.pos.x*100)/100; c.pos.y=Math.round(c.pos.y*100)/100;
+  }
+  var arrasto=null;
+  function ptSvg(svg,e){ var m=svg.getScreenCTM(); if(!m) return {x:0,y:0}; var p=new DOMPoint(e.clientX,e.clientY).matrixTransform(m.inverse()); return {x:p.x,y:p.y}; }
+  $('desenhos').addEventListener('pointerdown',function(e){
+    var gEl=e.target.closest('[data-mover]'); if(!gEl) return;
+    var svg=gEl.ownerSVGElement, p=ptSvg(svg,e);
+    arrasto={g:gEl, svg:svg, i:+gEl.dataset.mover, x0:p.x, y0:p.y, dx:0, dy:0, sx:+svg.dataset.sx};
+    try{ svg.setPointerCapture(e.pointerId); }catch(_){}
+    svg.appendChild(gEl); gEl.classList.add('arrastando'); e.preventDefault();
+  });
+  $('desenhos').addEventListener('pointermove',function(e){
+    if(!arrasto) return; var p=ptSvg(arrasto.svg,e);
+    arrasto.dx=p.x-arrasto.x0; arrasto.dy=p.y-arrasto.y0;
+    arrasto.g.setAttribute('transform','translate('+arrasto.dx+' '+arrasto.dy+')');
+  });
+  function soltar(){
+    if(!arrasto) return; var a=arrasto; arrasto=null;
+    var c=st.comodos[a.i]; if(c && c.pos && (Math.abs(a.dx)>1||Math.abs(a.dy)>1)){ c.pos.x+=a.dx/a.sx; c.pos.y+=a.dy/a.sx; encaixa(a.i); }
+    calc();
+  }
+  $('desenhos').addEventListener('pointerup',soltar);
+  $('desenhos').addEventListener('pointercancel',soltar);
+  $('vista').addEventListener('click',function(e){ var b=e.target.closest('[data-vista]'); if(!b) return; st.vista=b.dataset.vista; calc(); });
   function medidasTxt(r,c){
     var t=fmt(r.a,2)+' × '+fmt(r.b,2)+' m';
     if(!r.composto) return t;
@@ -639,9 +706,14 @@ figure{margin:0}
   var ultimo=null;
   function calc(){
     var o=opts(), rs=[], beiF=0, beiR=[], vigsBei={}, acoBase={}, mL=0, mE=0, pain=0, area=0, vol=0, pecas=0, meias=0, vigs={}, aco={}, trav=0, canal=0, alertas=[];
-    st.comodos.forEach(function(c,i){var r=calcComodo(c,o); if(!r) return; r.nome=(c.nome||'').trim()||'Cômodo '+(i+1); rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; mL+=r.meiasLaj; mE+=r.meiasEps; pain+=r.paineis; trav+=r.nTrav; canal+=r.canaletas; if(r.metTrav){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.metTrav;} r.compPorVig.forEach(function(k){vigs[k]=(vigs[k]||0)+1}); r.medidas=medidasTxt(r,c); if(r.bei){beiF+=r.beiFerro; beiR.push(r); r.beiCurtas.forEach(function(k){vigsBei[k]=(vigsBei[k]||0)+1});} if(r.sobreposto) alertas.push(r.nome+': as partes se sobrepõem. Confira o lado e o recuo.'); if(r.fbN){acoBase[r.fbBit]=(acoBase[r.fbBit]||0)+r.fbMetros;} if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
+    st.comodos.forEach(function(c,i){var r=calcComodo(c,o); if(!r) return; r.idx=i; r.nome=(c.nome||'').trim()||'Cômodo '+(i+1); rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; mL+=r.meiasLaj; mE+=r.meiasEps; pain+=r.paineis; trav+=r.nTrav; canal+=r.canaletas; if(r.metTrav){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.metTrav;} r.compPorVig.forEach(function(k){vigs[k]=(vigs[k]||0)+1}); r.medidas=medidasTxt(r,c); if(r.bei){beiF+=r.beiFerro; beiR.push(r); r.beiCurtas.forEach(function(k){vigsBei[k]=(vigsBei[k]||0)+1});} if(r.sobreposto) alertas.push(r.nome+': as partes se sobrepõem. Confira o lado e o recuo.'); if(r.fbN){acoBase[r.fbBit]=(acoBase[r.fbBit]||0)+r.fbMetros;} if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
     $('area').innerHTML=fmt(area,2)+' <small>m²</small>';
-    $('desenhos').innerHTML = rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+(r.composto?fmt(r.area,2)+' m² ('+r.R.length+' partes)':fmt(r.a,2)+' × '+fmt(r.b,2)+' m')+' · '+r.nVig+' vigotas'+(r.beiCurtas.length?' + '+r.beiCurtas.length+' do beiral':'')+(r.nTrav?' · '+r.nTrav+' travamento'+(r.nTrav>1?'s':''):'')+'</figcaption></figure>'}).join('') : '<div class="vazio"><b>O desenho da sua laje aparece aqui</b>Preencha a largura e o comprimento de pelo menos um cômodo.</div>';
+    var vPlanta = st.vista==='planta' && rs.length>1;
+    $('vista').hidden = rs.length<2;
+    $('vista').querySelectorAll('[data-vista]').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.vista===(vPlanta?'planta':'cada'))); });
+    $('desenhos').classList.toggle('em-planta', vPlanta);
+    if(vPlanta){ $('desenhos').innerHTML = svgPlanta(rs)+'<p class="dica-planta">Arraste os cômodos para montar a planta. Quando chegam perto de outro, eles se encaixam com a parede no meio.</p>'; }
+    else $('desenhos').innerHTML = rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+(r.composto?fmt(r.area,2)+' m² ('+r.R.length+' partes)':fmt(r.a,2)+' × '+fmt(r.b,2)+' m')+' · '+r.nVig+' vigotas'+(r.beiCurtas.length?' + '+r.beiCurtas.length+' do beiral':'')+(r.nTrav?' · '+r.nTrav+' travamento'+(r.nTrav>1?'s':''):'')+'</figcaption></figure>'}).join('') : '<div class="vazio"><b>O desenho da sua laje aparece aqui</b>Preencha a largura e o comprimento de pelo menos um cômodo.</div>';
     $('leg-ench').style.background = st.ench==='lajota'?'var(--lajota)':'var(--eps)';
     $('leg-ench-t').textContent = st.ench==='lajota'?'Lajota':'EPS';
     $('alertas').innerHTML = alertas.map(function(a){return '<p class="alerta">'+esc(a)+'</p>'}).join('');
