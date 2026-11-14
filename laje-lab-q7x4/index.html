@@ -515,8 +515,13 @@ figure{margin:0}
       var x1=fronteiras[i],x2=fronteiras[i+1],wd=x2-x1; if(wd<0.005) continue;
       trechos(R,(x1+x2)/2,false).forEach(function(t){ var L=t[1]-t[0]; fx.push({x1:x1,x2:x2,w:wd,y1:t[0],y2:t[1],L:L,meia:wd<=IX/2+1e-9,nT:travPorVao(L)}); });
     }
-    var maxVao=0; vigs.forEach(function(v){maxVao=Math.max(maxVao,v.L)});
-    return {R:R,vigs:vigs,fx:fx,maxVao:maxVao,nV:vigs.length,minX:minX,maxX:maxX,minY:minY,maxY:maxY};
+    var maxVao=0, maior=null; vigs.forEach(function(v){ if(v.L>maxVao){maxVao=v.L; maior=v;} });
+    // Travamento do cômodo inteiro (mesmo com partes juntadas): o número de linhas sai do maior vão,
+    // as linhas ficam distribuídas por igual nessa vigota e atravessam todas as faixas por onde passam
+    var nLin=travPorVao(maxVao), linhas=[];
+    for(var k=1;k<=nLin;k++) linhas.push(maior.y1+maior.L*k/(nLin+1));
+    fx.forEach(function(f){ f.linhas=linhas.filter(function(y){return y>f.y1+0.05 && y<f.y2-0.05}); f.nT=f.linhas.length; });
+    return {nLin:nLin,linhas:linhas,R:R,vigs:vigs,fx:fx,maxVao:maxVao,nV:vigs.length,minX:minX,maxX:maxX,minY:minY,maxY:maxY};
   }
   function np0(L,P){return Math.max(1,Math.ceil((L-0.20)/(P-0.20)-1e-9))}
   function calcComodo(c,o){
@@ -628,7 +633,7 @@ figure{margin:0}
     // juntas das peças: atravessam a faixa, perpendiculares às vigotas
     g.fx.forEach(function(f){ for(var y=f.y1+pl;y<f.y2-0.01;y+=pl){ if(rot) s+='<line x1="'+X(y)+'" y1="'+Y(f.x1)+'" x2="'+X(y)+'" y2="'+Y(f.x2)+'" stroke="'+junta+'" stroke-width="0.6"/>'; else s+='<line x1="'+X(f.x1)+'" y1="'+Y(y)+'" x2="'+X(f.x2)+'" y2="'+Y(y)+'" stroke="'+junta+'" stroke-width="0.6"/>'; } });
     var th=Math.max(0.10,3/sx);
-    g.fx.forEach(function(f){ for(var k=1;k<=f.nT;k++){ var ty=f.y1+f.L*k/(f.nT+1); s+=ret(f.x1,ty-th/2,f.w+0.002,th,'var(--trav)'); } });
+    g.fx.forEach(function(f){ (f.linhas||[]).forEach(function(ty){ s+=ret(f.x1,ty-th/2,f.w+0.002,th,'var(--trav)'); }); });
     var vw=Math.max(0.12,2.2/sx), ex=esp*0.8/sx;
     // parede + beiral, em metros, nas pontas das vigotas que passam direto
     g.vigs.forEach(function(v,i){ var x1=r.ext[i].ini?(esp/sx)+r.ext[i].ini:ex, x2=r.ext[i].fim?(esp/sx)+r.ext[i].fim:ex; s+=ret(v.x-vw/2,v.y1-x1,vw,v.L+x1+x2,'var(--vigota)'); });
