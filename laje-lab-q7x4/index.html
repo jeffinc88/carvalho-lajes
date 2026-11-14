@@ -126,6 +126,12 @@ input[type=number]{font-variant-numeric:tabular-nums}
 .dica-planta{grid-column:1/-1;display:flex;gap:10px;align-items:center;margin:0;padding:10px 12px;border-radius:10px;background:var(--accent-soft);color:var(--ink);font-size:13px;line-height:1.4}
 .dica-planta svg{flex:none;color:var(--accent)}
 .parede-hit{cursor:pointer}
+.bei-menu{position:fixed;z-index:50;width:220px;max-width:calc(100vw - 16px);background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:10px;display:grid;gap:8px}
+.bei-menu .bm-tit{font-weight:800;font-size:14px;display:grid;gap:2px}
+.bei-menu .bm-tit small{font-weight:600;font-size:12px;color:var(--muted)}
+.bei-menu .bm-ops{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.bei-menu button{min-height:44px;border:1.5px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.bei-menu button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
 .parede-hit:hover{fill:rgba(230,130,25,.35)}
 .sv-comodo{touch-action:pan-y}
 .sv-comodo .parte-hit{cursor:grab;touch-action:none}
@@ -250,6 +256,7 @@ figure{margin:0}
       <div class="painel-cab"><h2 id="tr">Sua laje</h2><div class="area" id="area">0 <small>m²</small></div></div>
       <div class="vista" id="vista" role="group" aria-label="Como ver o desenho" hidden><button type="button" data-vista="cada" aria-pressed="true">Cada cômodo</button><button type="button" data-vista="planta" aria-pressed="false">Planta completa (arrastar)</button></div>
       <div class="desenhos" id="desenhos"></div>
+      <div class="bei-menu" id="bei-menu" role="dialog" aria-label="Tamanho do beiral" hidden></div>
       <div class="legenda"><span><i id="leg-ench" style="background:var(--lajota)"></i><span id="leg-ench-t">Lajota</span></span><span><i style="background:var(--vigota)"></i>Vigota</span><span><i style="background:var(--parede)"></i>Parede</span><span id="leg-trav"><i style="background:var(--trav)"></i>Linha de travamento</span></div>
       <div id="alertas"></div>
       <div class="lista" id="lista"></div>
@@ -422,9 +429,8 @@ figure{margin:0}
   function htmlBeiral(c,i){
     var b=c.bei||{};
     return '<div class="beiral"><div class="bei-med">'+
-      '<label for="bw'+i+'">Tamanho do beiral<select id="bw'+i+'" data-bk="w">'+[['0.3','30 cm'],['0.6','60 cm'],['0.7','70 cm']].map(function(o){return '<option value="'+o[0]+'"'+(String(b.w||0.6)===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label>'+
       '<label for="bp'+i+'">Espessura da parede<select id="bp'+i+'" data-bk="par">'+[['0.15','15 cm'],['0.2','20 cm']].map(function(o){return '<option value="'+o[0]+'"'+(String(b.par||0.15)===o[0]?' selected':'')+'>'+o[1]+'</option>'}).join('')+'</select></label></div>'+
-      '<p class="parte-dica"><b>Beiral:</b> toque numa parede do desenho para pôr beiral do tamanho escolhido. Toque de novo para tirar.</p></div>';
+      '<p class="parte-dica"><b>Beiral:</b> toque numa parede do desenho e escolha o tamanho (30, 60 ou 70 cm) ou "Sem beiral". Cada trecho pode ter um tamanho.</p></div>';
   }
   $('comodos').addEventListener('change',function(e){
     var bk=e.target.dataset.bk; if(!bk) return;
@@ -433,6 +439,28 @@ figure{margin:0}
     calc();
   });
   // liga/desliga beiral num lado de uma parte (k = 0 parte 1; k >= 1 partes juntadas)
+  var nomeLado={cima:'em cima',baixo:'embaixo',esq:'à esquerda',dir:'à direita'};
+  function alvoBeiral(i,k){ var c=st.comodos[i]; c.bei=c.bei||{par:0.15}; return k===0 ? c.bei : (c.partes[k-1].bei = c.partes[k-1].bei||{}); }
+  function abreMenuBeiral(i,k,lado,cx,cy){
+    var c=st.comodos[i]; if(!c) return;
+    var cur=larguraBeiral(alvoBeiral(i,k),lado), m=$('bei-menu');
+    var nome=(c.nome||'').trim()||'Cômodo '+(i+1);
+    m.innerHTML='<div class="bm-tit">Beiral '+nomeLado[lado]+(c.partes&&c.partes.length?' · parte '+(k+1):'')+'<small>'+esc(nome)+'</small></div><div class="bm-ops">'+
+      [[0,'Sem beiral'],[0.3,'30 cm'],[0.6,'60 cm'],[0.7,'70 cm']].map(function(o){return '<button type="button" data-w="'+o[0]+'" aria-pressed="'+(Math.abs(cur-o[0])<1e-6)+'">'+o[1]+'</button>'}).join('')+'</div>';
+    m.dataset.alvo=i+','+k+','+lado; m.hidden=false;
+    var w=m.offsetWidth, h=m.offsetHeight, x=Math.min(Math.max(8,cx-w/2), window.innerWidth-w-8), y=cy+14;
+    if(y+h>window.innerHeight-8) y=Math.max(8,cy-h-14);
+    m.style.left=x+'px'; m.style.top=y+'px';
+    var b=m.querySelector('[aria-pressed="true"]')||m.querySelector('button'); if(b) b.focus();
+  }
+  function fechaMenuBeiral(){ $('bei-menu').hidden=true; }
+  $('bei-menu').addEventListener('click',function(e){
+    var b=e.target.closest('[data-w]'); if(!b) return; var a=this.dataset.alvo.split(',');
+    alvoBeiral(+a[0],+a[1])[a[2]]=parseFloat(b.dataset.w)||0; fechaMenuBeiral(); calc();
+  });
+  document.addEventListener('pointerdown',function(e){ if(!$('bei-menu').hidden && !e.target.closest('#bei-menu') && !e.target.closest('[data-bt]')) fechaMenuBeiral(); });
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') fechaMenuBeiral(); });
+  window.addEventListener('scroll',fechaMenuBeiral,{passive:true});
   function alternaBeiral(i,k,lado){
     var c=st.comodos[i]; if(!c) return; c.bei=c.bei||{w:0.6,par:0.15};
     var alvo = k===0 ? c.bei : (c.partes[k-1].bei = c.partes[k-1].bei||{});
@@ -709,7 +737,7 @@ figure{margin:0}
   $('desenhos').addEventListener('pointerdown',function(e){
     var bt=e.target.closest('[data-bt]');
     if(bt && !e.target.closest('[data-mover]')){ var sv0=bt.ownerSVGElement, q0=ptSvg(sv0,e);
-      arrasto={toque:true, bt:bt.dataset.bt, svg:sv0, i:+sv0.dataset.i, x0:q0.x, y0:q0.y, dx:0, dy:0, g:null}; e.preventDefault(); return; }
+      arrasto={toque:true, bt:bt.dataset.bt, svg:sv0, i:+sv0.dataset.i, x0:q0.x, y0:q0.y, dx:0, dy:0, g:null, cx:e.clientX, cy:e.clientY}; e.preventDefault(); return; }
     var hit=e.target.closest('[data-parte]');
     if(hit){ var sv=hit.ownerSVGElement, p0=ptSvg(sv,e);
       arrasto={parte:true, g:hit, svg:sv, i:+sv.dataset.i, j:+hit.dataset.parte, x0:p0.x, y0:p0.y, dx:0, dy:0, sx:+sv.dataset.sx};
@@ -717,7 +745,7 @@ figure{margin:0}
       hit.setAttribute('fill','rgba(25,55,105,0.25)'); e.preventDefault(); return; }
     var gEl=e.target.closest('[data-mover]'); if(!gEl) return;
     var svg=gEl.ownerSVGElement, p=ptSvg(svg,e);
-    arrasto={g:gEl, svg:svg, i:+gEl.dataset.mover, x0:p.x, y0:p.y, dx:0, dy:0, sx:+svg.dataset.sx, bt:(bt?bt.dataset.bt:null)};
+    arrasto={g:gEl, svg:svg, i:+gEl.dataset.mover, x0:p.x, y0:p.y, dx:0, dy:0, sx:+svg.dataset.sx, bt:(bt?bt.dataset.bt:null), cx:e.clientX, cy:e.clientY};
     try{ svg.setPointerCapture(e.pointerId); }catch(_){}
     svg.appendChild(gEl); gEl.classList.add('arrastando'); e.preventDefault();
   });
@@ -729,7 +757,7 @@ figure{margin:0}
   function soltar(){
     if(!arrasto) return; var a=arrasto; arrasto=null;
     var c=st.comodos[a.i], parado=Math.abs(a.dx)<=4&&Math.abs(a.dy)<=4;
-    if(a.bt && parado){ var bb=a.bt.split(','); alternaBeiral(a.i,+bb[0],bb[1]); return; }
+    if(a.bt && parado){ var bb=a.bt.split(','); if(a.g){ a.g.removeAttribute('transform'); a.g.classList.remove('arrastando'); } abreMenuBeiral(a.i,+bb[0],bb[1],a.cx,a.cy); return; }
     if(a.toque) return;
     if(a.parte){ if(c && c.partes[a.j] && (Math.abs(a.dx)>1||Math.abs(a.dy)>1)){ c.partes[a.j].x+=a.dx/a.sx; c.partes[a.j].y+=a.dy/a.sx; encaixaParte(c,a.j); } calc(); return; }
     if(c && c.pos && (Math.abs(a.dx)>1||Math.abs(a.dy)>1)){ c.pos.x+=a.dx/a.sx; c.pos.y+=a.dy/a.sx; encaixa(a.i); }
@@ -753,8 +781,8 @@ figure{margin:0}
     $('vista').querySelectorAll('[data-vista]').forEach(function(b){ b.setAttribute('aria-pressed', String(b.dataset.vista===(vPlanta?'planta':'cada'))); });
     $('desenhos').classList.toggle('em-planta', vPlanta);
     var ICO_MAO='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>';
-    if(vPlanta){ $('desenhos').innerHTML = '<div class="dica-planta">'+ICO_MAO+'<div><b>Arraste os cômodos para montar a planta.</b> Eles se encaixam sozinhos, com a parede no meio. Toque numa parede para pôr ou tirar beiral.</div></div>'+svgPlanta(rs); }
-    else $('desenhos').innerHTML = (rs.length?'<div class="dica-planta">'+ICO_MAO+'<div>Toque numa parede para pôr ou tirar beiral.'+(rs.some(function(r){return r.composto})?' Arraste a parte tracejada para encaixar.':'')+'</div></div>':'')+(rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+(r.composto?fmt(r.area,2)+' m² ('+r.R.length+' partes)':fmt(r.a,2)+' × '+fmt(r.b,2)+' m')+' · '+r.nVig+' vigotas'+(r.beiCurtas.length?' + '+r.beiCurtas.length+' do beiral':'')+(r.nTrav?' · '+r.nTrav+' travamento'+(r.nTrav>1?'s':''):'')+'</figcaption></figure>'}).join('') : '<div class="vazio"><b>O desenho da sua laje aparece aqui</b>Preencha a largura e o comprimento de pelo menos um cômodo.</div>');
+    if(vPlanta){ $('desenhos').innerHTML = '<div class="dica-planta">'+ICO_MAO+'<div><b>Arraste os cômodos para montar a planta.</b> Eles se encaixam sozinhos, com a parede no meio. Toque numa parede para escolher o beiral.</div></div>'+svgPlanta(rs); }
+    else $('desenhos').innerHTML = (rs.length?'<div class="dica-planta">'+ICO_MAO+'<div>Toque numa parede para escolher o beiral daquele trecho.'+(rs.some(function(r){return r.composto})?' Arraste a parte tracejada para encaixar.':'')+'</div></div>':'')+(rs.length? rs.map(function(r){return '<figure class="des">'+svgComodo(r)+'<figcaption><b>'+esc(r.nome)+'</b> · '+(r.composto?fmt(r.area,2)+' m² ('+r.R.length+' partes)':fmt(r.a,2)+' × '+fmt(r.b,2)+' m')+' · '+r.nVig+' vigotas'+(r.beiCurtas.length?' + '+r.beiCurtas.length+' do beiral':'')+(r.nTrav?' · '+r.nTrav+' travamento'+(r.nTrav>1?'s':''):'')+'</figcaption></figure>'}).join('') : '<div class="vazio"><b>O desenho da sua laje aparece aqui</b>Preencha a largura e o comprimento de pelo menos um cômodo.</div>');
     $('leg-ench').style.background = st.ench==='lajota'?'var(--lajota)':'var(--eps)';
     $('leg-ench-t').textContent = st.ench==='lajota'?'Lajota':'EPS';
     $('alertas').innerHTML = alertas.map(function(a){return '<p class="alerta">'+esc(a)+'</p>'}).join('');
