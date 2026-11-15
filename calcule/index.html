@@ -12,6 +12,7 @@
 </script>
 <title>Calculadora de Laje Carvalho</title>
 <meta name="description" content="Desenhe os cômodos da sua obra e veja na hora quantas vigotas, lajotas ou EPS a sua laje treliçada precisa. Carvalho Pré-Moldados, Franca-SP.">
+<link rel="icon" type="image/svg+xml" href="/img/favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Montserrat:wght@500;600;700;800&display=swap">
 <style>
@@ -246,7 +247,8 @@ figure{margin:0}
       <p class="dica">Enviamos tudo pronto para o nosso WhatsApp. O vendedor responde com o preço e o prazo de entrega.</p>
       <form class="lead" id="lead" novalidate>
         <label for="nome">Seu nome<input id="nome" autocomplete="name" required></label>
-        <label for="cidade">Cidade da obra
+        <label for="tel">WhatsApp com DDD<input id="tel" type="tel" inputmode="tel" autocomplete="tel" placeholder="(16) 99999-9999"></label>
+        <label class="cheio" for="cidade">Cidade da obra
           <select id="cidade" required></select></label>
         <label class="cheio" for="parede">Tem parede apoiada em cima da laje? Onde? <span style="font-weight:500">(opcional)</span>
           <textarea id="parede" rows="2" placeholder="Ex.: parede do banheiro do andar de cima, no meio da sala"></textarea></label>
@@ -554,11 +556,23 @@ figure{margin:0}
         body:JSON.stringify(corpo)}).catch(function(){});
     }catch(e){}
   }
-  function preencheLead(){ if(!contato) return; if(!$('nome').value) $('nome').value=contato.nome; if(!$('cidade').value) $('cidade').value=contato.cid; }
+  function fmtTel(t){ t=String(t||'').replace(/\D/g,''); if(t.length<10) return t; return '('+t.slice(0,2)+') '+t.slice(2,t.length-4)+'-'+t.slice(-4); }
+  function limpaTel(v){ var t=String(v||'').replace(/\D/g,''); if(t.length>11 && t.indexOf('55')===0) t=t.slice(2); return t; }
+  // Preenche o passo 4 com o que o visitante já informou na trava (só campos vazios, continuam editáveis)
+  function preencheLead(){ if(!contato) return;
+    if(!$('nome').value) $('nome').value=contato.nome||'';
+    if(!$('tel').value) $('tel').value=fmtTel(contato.tel);
+    if(!$('cidade').value && contato.cid) $('cidade').value=contato.cid; }
+  // Se o visitante corrigiu os dados no passo 4, o lead do CRM usa a versão corrigida
+  function atualizaContato(){
+    var nome=$('nome').value.trim(), tel=limpaTel($('tel').value), cid=$('cidade').value;
+    if(!contato && !(nome.length>=2 && tel.length>=10 && tel.length<=11)) return;
+    var c=contato?{nome:contato.nome,tel:contato.tel,cid:contato.cid}:{};
+    if(nome.length>=2) c.nome=nome; if(tel.length>=10 && tel.length<=11) c.tel=tel; if(cid) c.cid=cid;
+    contato=c; lsSet('calc_contato',JSON.stringify(contato)); }
   $('trava-f').addEventListener('submit',function(e){
     e.preventDefault();
-    var nome=$('t-nome').value.trim(), tel=$('t-tel').value.replace(/\D/g,''), cid=$('t-cid').value, msg=$('t-msg');
-    if(tel.length>11 && tel.indexOf('55')===0) tel=tel.slice(2);
+    var nome=$('t-nome').value.trim(), tel=limpaTel($('t-tel').value), cid=$('t-cid').value, msg=$('t-msg');
     if(nome.length<2){msg.className='cheio erro';msg.textContent='Informe seu nome.';$('t-nome').focus();return;}
     if(tel.length<10||tel.length>11){msg.className='cheio erro';msg.textContent='Informe o WhatsApp com DDD, ex.: (16) 99999-9999.';$('t-tel').focus();return;}
     if(!cid){msg.className='cheio erro';msg.textContent='Escolha a cidade da obra.';$('t-cid').focus();return;}
@@ -582,11 +596,11 @@ figure{margin:0}
   $('lead').addEventListener('submit',function(e){e.preventDefault()});
   $('enviar').addEventListener('click',function(e){
     if(this.getAttribute('aria-disabled')==='true'){e.preventDefault();return;}
-    salvarLead({prev:$('prev').value, zap:true});
+    atualizaContato(); salvarLead({prev:$('prev').value, zap:true});
     try{ if(window.gtag && window.CONV && window.CONV.whatsapp) window.gtag('event','conversion',{send_to:window.CONV.whatsapp,transport_type:'beacon'}); }catch(err){}
   });
 
-  desenhaUsos(); desenhaComodos(); calc();
+  desenhaUsos(); desenhaComodos(); calc(); preencheLead(); atualizaLink();
 })();
 </script>
 
