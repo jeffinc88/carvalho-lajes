@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "montserrat",
+        "createdAt": "2026-11-15T03:45:34.779Z",
+        "reason": "user confirmed 2026-11-15: Montserrat é a fonte da calculadora e deve ser mantida"
+      }
+    ]
+  }
+}
