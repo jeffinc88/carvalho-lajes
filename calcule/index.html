@@ -475,6 +475,8 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     o.ench = cfgEnch(o);
     return o;
   }
+  // Nº de vigotas pela regra dos vendedores: largura ÷ intereixo; fração até ,45 arredonda para baixo, acima disso para cima
+  function arred45(x){ var f=Math.floor(x+1e-9); return (x-f)>0.45+1e-9 ? f+1 : f; }
   function calcComodo(c,o){
     if(!medOk(c.a,MIN_COM)||!medOk(c.b,MIN_COM)) return null;
     var a=c.a, b=c.b;
@@ -483,9 +485,10 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     var E=o.ench, IX=E.ix;
     var faixas = Math.max(1, Math.ceil(larg/IX - 1e-9));
     var nVig, nFaixas;
-    if(o.inicio==='vig'){ nVig = faixas+1; nFaixas = faixas; }
-    else if(o.inicio==='misto'){ nVig = faixas; nFaixas = faixas; }
-    else { nFaixas = Math.max(2, faixas); nVig = nFaixas-1; }
+    var nRegra = Math.max(1, arred45(larg/IX));
+    if(o.inicio==='vig'){ nVig = nRegra+1; nFaixas = faixas; }
+    else if(o.inicio==='misto'){ nVig = nRegra; nFaixas = faixas; }
+    else { nFaixas = Math.max(2, faixas); nVig = nRegra; }
     var comp = Math.ceil((vao + 2*o.apoio)*10 - 1e-6)/10;
     var pecaLen = E.pl;
     // Linhas de travamento (perpendiculares às vigotas), regra dos vendedores:
@@ -534,7 +537,10 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     // vigotas
     var vw=Math.max(2.2,0.12*sx), passo=r.ix*sx;
     for(var i=0;i<r.nVig;i++){
-      var cx = r.inicio==='vig' ? x0 + Math.min(w, i*passo) : x0 + Math.min(w, (i+1)*passo);
+      // posições: no intereixo quando cabem; se não couberem, distribuídas por igual na largura
+      var nV=r.nVig, cabe = (r.inicio==='vig' ? (nV-1) : r.inicio==='misto' ? nV : nV+1)*passo <= w+0.5;
+      var cx = cabe ? (r.inicio==='vig' ? x0 + Math.min(w, i*passo) : x0 + Math.min(w, (i+1)*passo))
+                    : (r.inicio==='vig' ? x0 + (nV>1? i*w/(nV-1) : w/2) : r.inicio==='misto' ? x0 + (i+1)*w/nV : x0 + (i+1)*w/(nV+1));
       if(cx>x0+w+0.5) cx=x0+w;
       s+='<rect x="'+(cx-vw/2)+'" y="'+(y0-esp*0.8)+'" width="'+vw+'" height="'+(h+esp*1.6)+'" fill="var(--vigota)"/>';
     }
