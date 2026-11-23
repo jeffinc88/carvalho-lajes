@@ -417,7 +417,8 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     if(st.lajh==='h8') return {ix:0.38,pw:0.25,pl:0.20,h:0.08,m2:1/(0.38*0.20),nome:'Lajotas cerâmicas H8 (25×20)',curto:'lajota cerâmica H8 (8 × 25 × 20 cm)',can:'H8 × 25 cm'};
     return {ix:0.42,pw:0.30,pl:0.20,h:0.06,m2:12.5,nome:'Lajotas cerâmicas H6 (30×20)',curto:'lajota cerâmica H6 (6 × 30 × 20 cm)',can:'H6 × 30 cm'};
   }
-  var DESPERDICIO_LAJ = 0.05; // 5% a mais nas lajotas (quebra)
+  var DESPERDICIO_LAJ = 0.05; // 5% a mais nas lajotas cerâmicas (quebra)
+  var DESPERDICIO_EPS = 0.03; // 3% a mais no EPS
 
   // ---------- etapa 2
   function desenhaUsos(){
@@ -704,11 +705,11 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       }); });
     }
     var compPorVig = g.vigs.map(function(v,i){return Math.ceil((v.L+2*o.apoio+extra[i])*10-1e-6)/10});
-    var epsInteiras=0, meiasLaj=0, meiasEps=0, canaletas=0, metTrav=0, volTrav=0, nTrav=0, temMeia=false;
+    var areaEnch=0, epsInteiras=0, meiasLaj=0, meiasEps=0, canaletas=0, metTrav=0, volTrav=0, nTrav=0, temMeia=false;
     g.fx.forEach(function(f){
       var livre=f.L-f.nT*LARG_TRAV;
       if(f.meia){ temMeia=true; meiasLaj+=Math.ceil(livre/0.20-1e-9); meiasEps+=Math.ceil(livre/0.49-1e-9); }
-      else epsInteiras+=Math.ceil(livre/0.49-1e-9);
+      else { epsInteiras+=Math.ceil(livre/0.49-1e-9); areaEnch+=livre*f.w*(E.pw/E.ix); }
       canaletas+=f.nT; metTrav+=2*f.nT*f.w; volTrav+=f.nT*f.w*LARG_TRAV*hEnch; nTrav=Math.max(nTrav,f.nT);
     });
     if(nTrav) metTrav += 2*nTrav*2*o.apoio; // ancoragem nas bordas
@@ -719,12 +720,16 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     var fbN = fb ? +fb[0] : 0, fbBit = fb ? fb[1] : null;
     var somaComp=compPorVig.reduce(function(s,x){return s+x},0);
     var bitola = st.uso[2] > 200 ? '3/8" (10 mm)' : '5/16" (8 mm)';
-    meiasLaj=Math.ceil(meiasLaj*(1+DESPERDICIO_LAJ)-1e-9); var meiaPecas = st.ench==='lajota'?meiasLaj:meiasEps;
+    meiasLaj=Math.ceil(meiasLaj*(1+DESPERDICIO_LAJ)-1e-9); meiasEps=Math.ceil(meiasEps*(1+DESPERDICIO_EPS)-1e-9);
+    // enchimento pelo espaço ocupado (faixas inteiras + beiral), com a quebra de cada material
+    areaEnch += beiArea*(E.pw/E.ix);
+    var inteirasEnch=Math.ceil(areaEnch/(E.pw*E.pl)*(1+(st.ench==='lajota'?DESPERDICIO_LAJ:DESPERDICIO_EPS))-1e-9);
+    var meiaPecas = st.ench==='lajota'?meiasLaj:meiasEps;
     var areaLaje=area; area+=beiArea;
     return {temBei:beiSegs.length>0, beiSegs:beiSegs, beiCurtas:beiCurtas, beiFerro:Math.round(beiFerro*10)/10, beiLados:beiLados, beiArea:beiArea, ext:ext, bei:bei, areaLaje:areaLaje,
       g:g, rot:(g===B), R:R, composto:R.length>1, sobreposto:sobre>0.01, a:Math.max(0,c.a||0), b:Math.max(0,c.b||0),
       vao:g.maxVao, larg:g.maxX-g.minX, area:area, nVig:g.vigs.length, compPorVig:compPorVig,
-      pecas:(st.ench==='lajota' ? Math.ceil(area*E.m2*(1+DESPERDICIO_LAJ)-1e-9) : epsInteiras+beiEps), meias:temMeia?meiaPecas:0,
+      pecas:inteirasEnch, meias:temMeia?meiaPecas:0,
       meiasLaj:meiasLaj, meiasEps:meiasEps, paineis:paineis,
       vol: area*o.capa + volVig + volTrav + beiArea*((E.ix-E.pw)/E.ix)*hEnch, inicio:o.inicio,
       nTrav:nTrav, canaletas:canaletas, metTrav:Math.round(metTrav*10)/10, bitola:bitola,
@@ -897,7 +902,7 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     $('alertas').innerHTML = alertas.map(function(a){return '<p class="alerta">'+esc(a)+'</p>'}).join('');
     var comps = Object.keys(vigs).map(Number).sort(function(a,b){return b-a});
     var totVig = comps.reduce(function(s,k){return s+vigs[k]},0);
-    var nomeEnch = o.ench.nome + (st.ench==='lajota'?' · com 5% de quebra':'');
+    var nomeEnch = o.ench.nome + (st.ench==='lajota'?' · com 5% de quebra':' · com 3% de quebra');
     var volR = Math.ceil(vol*10-1e-9)/10;
     $('leg-trav').hidden = !trav;
     var compsBei=Object.keys(vigsBei).map(Number).sort(function(a,b){return b-a}), totBei=compsBei.reduce(function(s,k){return s+vigsBei[k]},0);

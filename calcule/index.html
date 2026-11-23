@@ -370,7 +370,8 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     if(st.lajh==='h8') return {ix:0.38,pw:0.25,pl:0.20,h:0.08,m2:1/(0.38*0.20),nome:'Lajotas cerâmicas H8 (25×20)',curto:'lajota cerâmica H8 (8 × 25 × 20 cm)',can:'H8 × 25 cm'};
     return {ix:0.42,pw:0.30,pl:0.20,h:0.06,m2:12.5,nome:'Lajotas cerâmicas H6 (30×20)',curto:'lajota cerâmica H6 (6 × 30 × 20 cm)',can:'H6 × 30 cm'};
   }
-  var DESPERDICIO_LAJ = 0.05; // 5% a mais nas lajotas (quebra)
+  var DESPERDICIO_LAJ = 0.05; // 5% a mais nas lajotas cerâmicas (quebra)
+  var DESPERDICIO_EPS = 0.03; // 3% a mais no EPS
 
   // ---------- etapa 2
   function desenhaUsos(){
@@ -508,14 +509,19 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     var bitola = st.uso[2] > 200 ? '3/8" (10 mm)' : '5/16" (8 mm)';
     var barraComp = Math.ceil((larg + 2*o.apoio)*10 - 1e-6)/10;
     var livre = vao - nTrav*LARG_TRAV;
-    var meiasLaj = Math.ceil(meiaFaixa*Math.ceil(livre/0.20 - 1e-9)*(1+DESPERDICIO_LAJ) - 1e-9), meiasEps = meiaFaixa*Math.ceil(livre/0.49 - 1e-9);
+    var meiasLaj = Math.ceil(meiaFaixa*Math.ceil(livre/0.20 - 1e-9)*(1+DESPERDICIO_LAJ) - 1e-9), meiasEps = Math.ceil(meiaFaixa*Math.ceil(livre/0.49 - 1e-9)*(1+DESPERDICIO_EPS) - 1e-9);
+    // Enchimento pelo espaço que ele ocupa: a fração da largura entre as vigotas (peça ÷ intereixo),
+    // ao longo do vão livre (sem os canais do travamento); desconta a faixa de meia peça; soma a quebra
+    var largCheia = inteiras*IX + (meiaFaixa ? 0 : sobra); // largura das faixas de peça inteira
+    var areaEnch = (largCheia*E.pw/IX) * livre, areaPeca = E.pw*E.pl;
+    var inteirasEnch = Math.ceil(areaEnch/areaPeca*(1+(st.ench==='lajota'?DESPERDICIO_LAJ:DESPERDICIO_EPS)) - 1e-9);
     // Tela de distribuição: painel 2 × 3 m, transpasse de 20 cm; testa os dois sentidos e fica com o menor
     var np=function(L,P){return Math.max(1,Math.ceil((L-0.20)/(P-0.20)-1e-9))};
     var paineis = Math.min(np(vao,2)*np(larg,3), np(vao,3)*np(larg,2));
     var vol = vao*larg*o.capa + nVig*vao*(IX-E.pw)*hEnch + nTrav*larg*LARG_TRAV*hEnch;
     var fb = (o.av && typeof c.fb==='string' && c.fb) ? c.fb.split('|') : null;
     var fbN = fb ? +fb[0] : 0, fbBit = fb ? fb[1] : null;
-    return {fbN:fbN,fbBit:fbBit,fbMetros:fbN*nVig*comp,nome:c.nome||'Cômodo',a:a,b:b,vao:vao,larg:larg,area:vao*larg,nVig:nVig,nFaixas:nFaixas,comp:comp,ix:IX,pecas:(st.ench==='lajota' ? Math.ceil(vao*larg*E.m2*(1+DESPERDICIO_LAJ) - 1e-9) : (nFaixas-meiaFaixa)*porFaixa),meias:(st.ench==='lajota'?meiasLaj:meiaFaixa*porFaixa),porFaixa:porFaixa,meiasLaj:meiasLaj,meiasEps:meiasEps,paineis:paineis,vol:vol,inicio:o.inicio,
+    return {fbN:fbN,fbBit:fbBit,fbMetros:fbN*nVig*comp,nome:c.nome||'Cômodo',a:a,b:b,vao:vao,larg:larg,area:vao*larg,nVig:nVig,nFaixas:nFaixas,comp:comp,ix:IX,pecas:inteirasEnch,meias:(st.ench==='lajota'?meiasLaj:meiasEps),porFaixa:porFaixa,meiasLaj:meiasLaj,meiasEps:meiasEps,paineis:paineis,vol:vol,inicio:o.inicio,
       nTrav:nTrav,canaletas:nTrav*nFaixas,barras:nTrav*2,bitola:bitola,barraComp:barraComp};
   }
   function svgComodo(r){
@@ -565,7 +571,7 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     $('alertas').innerHTML = alertas.map(function(a){return '<p class="alerta">'+esc(a)+'</p>'}).join('');
     var comps = Object.keys(vigs).map(Number).sort(function(a,b){return b-a});
     var totVig = comps.reduce(function(s,k){return s+vigs[k]},0);
-    var nomeEnch = o.ench.nome + (st.ench==='lajota'?' · com 5% de quebra':'');
+    var nomeEnch = o.ench.nome + (st.ench==='lajota'?' · com 5% de quebra':' · com 3% de quebra');
     var volR = Math.ceil(vol*10-1e-9)/10;
     $('leg-trav').hidden = !trav;
     var meiaTipo = st.meia || st.ench;
