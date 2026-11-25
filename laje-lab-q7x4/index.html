@@ -23,7 +23,7 @@
   --brand:#193769; --brand-ink:#ffffff; --accent:#f08f2a; --accent-soft:#2a1e12;
   --accent-ink:#f7a650; --accent-btn:#b35f00; --erro:#ff8f86; --erro-soft:#3a1a1c; --campo:#5d6c8f;
   --zap:#16804a; --zap-ink:#ffffff;
-  --lajota:#d97a44; --eps:#dfe5ee; --trav:#7d9be0; --eps-line:#8d99ad; --vigota:#c3cad8; --parede:#5f6a80;
+  --lajota:#d97a44; --eps:#dfe5ee; --trav:#7d9be0; --eps-line:#8d99ad; --vigota:#c3cad8; --parede:#5f6a80; --concreto:#a0a3a8;
   --f-display:'Archivo Black','Arial Black',Arial,sans-serif;
   --f-body:'Montserrat','Segoe UI',Arial,sans-serif;
   --r:12px;
@@ -275,7 +275,7 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       <div class="vista" id="vista" role="group" aria-label="Como ver o desenho" hidden><button type="button" data-vista="cada" aria-pressed="true">Cada cômodo</button><button type="button" data-vista="planta" aria-pressed="false">Planta completa (arrastar)</button></div>
       <div class="desenhos" id="desenhos" aria-live="polite"></div>
       <div class="bei-menu" id="bei-menu" role="dialog" aria-label="Tamanho do beiral" hidden></div>
-      <div class="legenda"><span><i id="leg-ench" style="background:var(--lajota)"></i><span id="leg-ench-t">Lajota</span></span><span><i style="background:var(--vigota)"></i>Vigota</span><span><i style="background:var(--parede)"></i>Parede</span><span id="leg-trav"><i style="background:var(--trav)"></i>Linha de travamento</span></div>
+      <div class="legenda"><span><i id="leg-ench" style="background:var(--lajota)"></i><span id="leg-ench-t">Lajota</span></span><span><i style="background:var(--vigota)"></i>Vigota</span><span><i style="background:var(--parede)"></i>Parede</span><span id="leg-trav"><i style="background:var(--trav)"></i>Linha de travamento</span><span><i style="background:var(--concreto)"></i>Só concreto</span></div>
       <div id="alertas"></div>
       <p class="liberou" id="liberou" role="status" tabindex="-1" hidden>Pronto! A lista completa está liberada. Confira abaixo e mande o pedido no WhatsApp.</p>
       <div class="lista" id="lista"></div>
@@ -739,11 +739,11 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       });
     }
     // canto entre dois beirais perpendiculares: só concreto (sem vigota, sem enchimento)
-    var cantoArea=0, nCantos=0;
+    var cantoArea=0, nCantos=0, cantos=[];
     beiSegs.forEach(function(h){ if(h.lado!=='cima'&&h.lado!=='baixo') return;
       beiSegs.forEach(function(v){ if(v.lado!=='esq'&&v.lado!=='dir') return;
         var e2=1e-6, xOk=(v.lado==='esq'?Math.abs(h.a-v.coord)<e2:Math.abs(h.b-v.coord)<e2), yOk=(h.lado==='cima'?Math.abs(v.a-h.coord)<e2:Math.abs(v.b-h.coord)<e2);
-        if(xOk&&yOk){ cantoArea+=h.BB*v.BB; nCantos++; }
+        if(xOk&&yOk){ cantoArea+=h.BB*v.BB; nCantos++; cantos.push({hl:h.lado, vl:v.lado, hc:h.coord, vc:v.coord, BBh:h.BB, BBv:v.BB}); }
       }); });
     if(nCantos) beiLados.push(nCantos+(nCantos>1?' cantos':' canto')+' entre beirais: só concreto ('+fmt(cantoArea,2)+' m²)');
     var compPorVig = g.vigs.map(function(v,i){return Math.ceil((v.L+2*o.apoio+extra[i])*10-1e-6)/10});
@@ -768,7 +768,7 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     var inteirasEnch=Math.ceil(areaEnch/(E.pw*E.pl)*(1+(st.ench==='lajota'?DESPERDICIO_LAJ:DESPERDICIO_EPS))-1e-9);
     var meiaPecas = st.ench==='lajota'?meiasLaj:meiasEps;
     var areaLaje=area; area+=beiArea+cantoArea;
-    return {viz:viz, temBei:beiSegs.length>0, beiSegs:beiSegs, beiCurtas:beiCurtas, beiFerro:Math.round(beiFerro*10)/10, beiLados:beiLados, beiArea:beiArea, ext:ext, bei:bei, areaLaje:areaLaje,
+    return {cantos:cantos, viz:viz, temBei:beiSegs.length>0, beiSegs:beiSegs, beiCurtas:beiCurtas, beiFerro:Math.round(beiFerro*10)/10, beiLados:beiLados, beiArea:beiArea, ext:ext, bei:bei, areaLaje:areaLaje,
       g:g, rot:(g===B), R:R, composto:R.length>1, sobreposto:sobre>0.01, a:Math.max(0,c.a||0), b:Math.max(0,c.b||0),
       vao:g.maxVao, larg:g.maxX-g.minX, area:area, nVig:g.vigs.length, compPorVig:compPorVig,
       pecas:inteirasEnch, meias:temMeia?meiaPecas:0,
@@ -805,6 +805,10 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       if(z.lado==='esq') s+='<rect x="'+(X(z.coord)-esp-W2)+'" y="'+(Y(z.a)-esp)+'" width="'+W2+'" height="'+L+'" fill="'+fb+'" opacity=".75"/>';
       if(z.lado==='dir') s+='<rect x="'+(X(z.coord)+esp)+'" y="'+(Y(z.a)-esp)+'" width="'+W2+'" height="'+L+'" fill="'+fb+'" opacity=".75"/>';
     });
+    // canto entre beirais perpendiculares: concreto
+    (r.cantos||[]).forEach(function(k){ var wv=k.BBv*sx, wh=k.BBh*sx;
+      var x = k.vl==='esq' ? X(k.vc)-esp-wv : X(k.vc)+esp, y = k.hl==='cima' ? Y(k.hc)-esp-wh : Y(k.hc)+esp;
+      s+='<rect x="'+x+'" y="'+y+'" width="'+wv+'" height="'+wh+'" fill="var(--concreto)"/>'; });
     r.R.forEach(function(q){ s+='<rect x="'+(X(q.x)-esp)+'" y="'+(Y(q.y)-esp)+'" width="'+(q.w*sx+2*esp)+'" height="'+(q.h*sx+2*esp)+'" fill="var(--parede)" rx="2"/>'; });
     var ench = st.ench==='lajota'?'var(--lajota)':'var(--eps)', junta = st.ench==='lajota'?'rgba(0,0,0,.18)':'var(--eps-line)', pl=(st.ench==='lajota'?0.20:0.49);
     r.R.forEach(function(q){ s+='<rect x="'+X(q.x)+'" y="'+Y(q.y)+'" width="'+(q.w*sx)+'" height="'+(q.h*sx)+'" fill="'+ench+'"/>'; });
@@ -864,7 +868,8 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       else if(j.lado==='esq'){ x=P.X(j.coord-G-j.BB); y=P.Y(j.a); w=(j.BB+G)*sx; h=(j.b-j.a)*sx; vx=x; vy=y+h/2-cw/2; vw2=w; vh=cw; }
       else { x=P.X(j.coord); y=P.Y(j.a); w=(j.BB+G)*sx; h=(j.b-j.a)*sx; vx=x; vy=y+h/2-cw/2; vw2=w; vh=cw; }
       var pad2=6;
-      return (j.vig?'<rect x="'+vx+'" y="'+vy+'" width="'+vw2+'" height="'+vh+'" fill="var(--vigota)"/>':'')+
+      var bx = (j.lado==='cima'||j.lado==='baixo') ? {x:x,y:(j.lado==='cima'?y:y+G*sx),w:w,h:j.BB*sx} : {x:(j.lado==='esq'?x:x+G*sx),y:y,w:j.BB*sx,h:h};
+      return (j.vig?'':'<rect x="'+bx.x+'" y="'+bx.y+'" width="'+bx.w+'" height="'+bx.h+'" fill="var(--concreto)"/>')+(j.vig?'<rect x="'+vx+'" y="'+vy+'" width="'+vw2+'" height="'+vh+'" fill="var(--vigota)"/>':'')+
         '<rect class="emenda-hit" data-emenda="'+j.chave+'" x="'+(x-pad2)+'" y="'+(y-pad2)+'" width="'+(w+2*pad2)+'" height="'+(h+2*pad2)+'" fill="rgba(230,130,25,0)" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="3 2" rx="3"><title>Toque para escolher a emenda do beiral</title></rect>';
     }).join('');
     return '<svg id="planta" viewBox="0 0 '+Wp+' '+Hp+'" data-sx="'+sx+'" role="img" aria-label="Planta completa da laje">'+rs.map(function(r){return svgComodo(r,P)}).join('')+em+'</svg>';
