@@ -554,8 +554,13 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     calc();
   }
   // trechos de um lado que ficam para fora (onde não encosta em outra parte)
-  function expostosR(R,q,lado){
-    var e=1e-6, a,b,blk=[];
+  // viz: cômodos vizinhos na planta (coordenadas deste cômodo); a parede que divide com eles não é borda de fora
+  function expostosR(R,q,lado,viz){
+    var e=1e-6, a,b,blk=[], G=PAR_PLANTA, tol=0.03;
+    (viz||[]).forEach(function(t){
+      if(lado==='cima'||lado==='baixo'){ var d = lado==='cima' ? q.y-(t.y+t.h) : t.y-(q.y+q.h); if(Math.abs(d-G)<tol) blk.push([t.x,t.x+t.w]); }
+      else { var d2 = lado==='esq' ? q.x-(t.x+t.w) : t.x-(q.x+q.w); if(Math.abs(d2-G)<tol) blk.push([t.y,t.y+t.h]); }
+    });
     if(lado==='cima'||lado==='baixo'){ a=q.x; b=q.x+q.w; R.forEach(function(t){ if(t===q) return; var toca = lado==='cima'?Math.abs(t.y+t.h-q.y)<e:Math.abs(t.y-(q.y+q.h))<e; if(toca) blk.push([t.x,t.x+t.w]); }); }
     else { a=q.y; b=q.y+q.h; R.forEach(function(t){ if(t===q) return; var toca = lado==='esq'?Math.abs(t.x+t.w-q.x)<e:Math.abs(t.x-(q.x+q.w))<e; if(toca) blk.push([t.y,t.y+t.h]); }); }
     var sg=[[a,b]];
@@ -663,6 +668,13 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     return {nLin:nLin,linhas:linhas,R:R,vigs:vigs,fx:fx,maxVao:maxVao,nV:vigs.length,minX:minX,maxX:maxX,minY:minY,maxY:maxY};
   }
   function np0(L,P){return Math.max(1,Math.ceil((L-0.20)/(P-0.20)-1e-9))}
+  // retângulos dos outros cômodos da planta, nas coordenadas deste
+  function vizinhos(c){
+    if(!c.pos) return [];
+    var out=[]; st.comodos.forEach(function(oc){ if(oc===c||!oc.pos) return; var Ro=retangulos(oc); if(!Ro) return;
+      Ro.forEach(function(t){ out.push({x:oc.pos.x+t.x-c.pos.x, y:oc.pos.y+t.y-c.pos.y, w:t.w, h:t.h}); }); });
+    return out;
+  }
   function calcComodo(c,o){
     var R=retangulos(c); if(!R) return null;
     var sw=function(r){return {x:r.y,y:r.x,w:r.h,h:r.w}};
@@ -677,11 +689,12 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     // ---- Beiral: por parte e por lado, só no trecho do lado que fica para fora.
     // Na ponta da vigota ela passa direto; ao lado da vigota entram vigotas curtas com ferro de ligação (8 mm)
     var rotG=(g===B), extra=g.vigs.map(function(){return 0}), ext=g.vigs.map(function(){return {ini:0,fim:0}});
+    var viz=vizinhos(c);
     var bei=c.bei||{}, beiCurtas=[], beiNeg=0, beiFerro=0, beiArea=0, beiPain=0, beiEps=0, beiLados=[], beiSegs=[];
     if(bei){
       var PAR=+bei.par||0.15, e=1e-6;
       var nomesL={cima:'em cima',baixo:'embaixo',esq:'à esquerda',dir:'à direita'};
-      var expostos=function(q,lado){ return expostosR(R,q,lado); };
+      var expostos=function(q,lado){ return expostosR(R,q,lado,viz); };
       R.forEach(function(q,qi){ ['cima','baixo','esq','dir'].forEach(function(lado){
         var BB=larguraBeiral(q.bei,lado); if(!BB) return;
                 var coord = lado==='cima'?q.y : lado==='baixo'?q.y+q.h : lado==='esq'?q.x : q.x+q.w;
@@ -733,7 +746,7 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     var inteirasEnch=Math.ceil(areaEnch/(E.pw*E.pl)*(1+(st.ench==='lajota'?DESPERDICIO_LAJ:DESPERDICIO_EPS))-1e-9);
     var meiaPecas = st.ench==='lajota'?meiasLaj:meiasEps;
     var areaLaje=area; area+=beiArea+cantoArea;
-    return {temBei:beiSegs.length>0, beiSegs:beiSegs, beiCurtas:beiCurtas, beiFerro:Math.round(beiFerro*10)/10, beiLados:beiLados, beiArea:beiArea, ext:ext, bei:bei, areaLaje:areaLaje,
+    return {viz:viz, temBei:beiSegs.length>0, beiSegs:beiSegs, beiCurtas:beiCurtas, beiFerro:Math.round(beiFerro*10)/10, beiLados:beiLados, beiArea:beiArea, ext:ext, bei:bei, areaLaje:areaLaje,
       g:g, rot:(g===B), R:R, composto:R.length>1, sobreposto:sobre>0.01, a:Math.max(0,c.a||0), b:Math.max(0,c.b||0),
       vao:g.maxVao, larg:g.maxX-g.minX, area:area, nVig:g.vigs.length, compPorVig:compPorVig,
       pecas:inteirasEnch, meias:temMeia?meiaPecas:0,
@@ -795,7 +808,7 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       ['cima','baixo','esq','dir'].forEach(function(lado){
         var BB=larguraBeiral(q.bei,lado), T=Math.max(esp+BB*sx, 14);
         var coord = lado==='cima'?q.y : lado==='baixo'?q.y+q.h : lado==='esq'?q.x : q.x+q.w;
-        expostosR(r.R,q,lado).forEach(function(z){
+        expostosR(r.R,q,lado,r.viz).forEach(function(z){
           var x,y,w,h;
           if(lado==='cima'){x=X(z[0]);y=Y(coord)-T;w=(z[1]-z[0])*sx;h=T;}
           else if(lado==='baixo'){x=X(z[0]);y=Y(coord);w=(z[1]-z[0])*sx;h=T;}
@@ -826,14 +839,25 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
   }
   // encaixe: ao soltar perto de outro cômodo, cola nele (deixando a parede entre os dois) ou alinha as bordas
   function encaixa(i){
+    // ímã: encosta na parede do vizinho (deixando 15 cm de parede) só quando os dois ficam lado a lado;
+    // as pontas só alinham se estiverem a menos de 12 cm — um cômodo que não vai até a ponta da parede fica onde foi solto
     var rs=ultimo.rs, me=null; rs.forEach(function(r){ if(r.idx===i) me=r; }); if(!me) return;
-    var b=caixa(me), bx=null, by=null, lim=0.4;
+    var c=st.comodos[i], b=caixa(me), IMA=0.5, PONTA=0.12, bx=null, by=null, ladoX=null, ladoY=null;
+    var sobrepoe=function(a0,a1,b0,b1,folga){ return Math.min(a1,b1)-Math.max(a0,b0) > -folga; };
     rs.forEach(function(o){ if(o===me) return; var ob=caixa(o);
-      [ob.x1+PAR_PLANTA-b.x0, ob.x0-PAR_PLANTA-b.x1, ob.x0-b.x0, ob.x1-b.x1].forEach(function(d){ if(Math.abs(d)<lim && (bx===null||Math.abs(d)<Math.abs(bx))) bx=d; });
-      [ob.y1+PAR_PLANTA-b.y0, ob.y0-PAR_PLANTA-b.y1, ob.y0-b.y0, ob.y1-b.y1].forEach(function(d){ if(Math.abs(d)<lim && (by===null||Math.abs(d)<Math.abs(by))) by=d; });
+      if(sobrepoe(b.y0,b.y1,ob.y0,ob.y1,0)) [ob.x1+PAR_PLANTA-b.x0, ob.x0-PAR_PLANTA-b.x1].forEach(function(d){ if(Math.abs(d)<IMA && (bx===null||Math.abs(d)<Math.abs(bx))){ bx=d; ladoX=o; } });
+      if(sobrepoe(b.x0,b.x1,ob.x0,ob.x1,0)) [ob.y1+PAR_PLANTA-b.y0, ob.y0-PAR_PLANTA-b.y1].forEach(function(d){ if(Math.abs(d)<IMA && (by===null||Math.abs(d)<Math.abs(by))){ by=d; ladoY=o; } });
     });
-    var c=st.comodos[i]; if(bx!==null) c.pos.x+=bx; if(by!==null) c.pos.y+=by;
-    c.pos.x=Math.round(c.pos.x*100)/100; c.pos.y=Math.round(c.pos.y*100)/100;
+    // encostou de lado: alinha as pontas no outro sentido só se estiverem quase iguais
+    var alinha=function(o,eixo){ var ob=caixa(o), best=null;
+      (eixo==='y'?[ob.y0-b.y0, ob.y1-b.y1]:[ob.x0-b.x0, ob.x1-b.x1]).forEach(function(d){ if(Math.abs(d)<PONTA && (best===null||Math.abs(d)<Math.abs(best))) best=d; });
+      return best; };
+    if(bx!==null && by===null){ var ay=alinha(ladoX,'y'); if(ay!==null) by=ay; }
+    if(by!==null && bx===null){ var ax=alinha(ladoY,'x'); if(ax!==null) bx=ax; }
+    if(bx!==null) c.pos.x+=bx; if(by!==null) c.pos.y+=by;
+    // posição livre arredonda de 5 em 5 cm (as encostadas ficam exatas)
+    if(bx===null) c.pos.x=Math.round(c.pos.x*20)/20; if(by===null) c.pos.y=Math.round(c.pos.y*20)/20;
+    c.pos.x=Math.round(c.pos.x*1000)/1000; c.pos.y=Math.round(c.pos.y*1000)/1000;
   }
   var arrasto=null;
   function ptSvg(svg,e){ var m=svg.getScreenCTM(); if(!m) return {x:0,y:0}; var p=new DOMPoint(e.clientX,e.clientY).matrixTransform(m.inverse()); return {x:p.x,y:p.y}; }
