@@ -703,6 +703,14 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
         });
       }); });
     }
+    // canto entre dois beirais perpendiculares: só concreto (sem vigota, sem enchimento)
+    var cantoArea=0, nCantos=0;
+    beiSegs.forEach(function(h){ if(h.lado!=='cima'&&h.lado!=='baixo') return;
+      beiSegs.forEach(function(v){ if(v.lado!=='esq'&&v.lado!=='dir') return;
+        var e2=1e-6, xOk=(v.lado==='esq'?Math.abs(h.a-v.coord)<e2:Math.abs(h.b-v.coord)<e2), yOk=(h.lado==='cima'?Math.abs(v.a-h.coord)<e2:Math.abs(v.b-h.coord)<e2);
+        if(xOk&&yOk){ cantoArea+=h.BB*v.BB; nCantos++; }
+      }); });
+    if(nCantos) beiLados.push(nCantos+(nCantos>1?' cantos':' canto')+' entre beirais: só concreto ('+fmt(cantoArea,2)+' m²)');
     var compPorVig = g.vigs.map(function(v,i){return Math.ceil((v.L+2*o.apoio+extra[i])*10-1e-6)/10});
     var areaEnch=0, epsInteiras=0, meiasLaj=0, meiasEps=0, canaletas=0, metTrav=0, volTrav=0, nTrav=0, temMeia=false;
     g.fx.forEach(function(f){
@@ -724,13 +732,13 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     areaEnch += beiArea*(E.pw/E.ix);
     var inteirasEnch=Math.ceil(areaEnch/(E.pw*E.pl)*(1+(st.ench==='lajota'?DESPERDICIO_LAJ:DESPERDICIO_EPS))-1e-9);
     var meiaPecas = st.ench==='lajota'?meiasLaj:meiasEps;
-    var areaLaje=area; area+=beiArea;
+    var areaLaje=area; area+=beiArea+cantoArea;
     return {temBei:beiSegs.length>0, beiSegs:beiSegs, beiCurtas:beiCurtas, beiFerro:Math.round(beiFerro*10)/10, beiLados:beiLados, beiArea:beiArea, ext:ext, bei:bei, areaLaje:areaLaje,
       g:g, rot:(g===B), R:R, composto:R.length>1, sobreposto:sobre>0.01, a:Math.max(0,c.a||0), b:Math.max(0,c.b||0),
       vao:g.maxVao, larg:g.maxX-g.minX, area:area, nVig:g.vigs.length, compPorVig:compPorVig,
       pecas:inteirasEnch, meias:temMeia?meiaPecas:0,
       meiasLaj:meiasLaj, meiasEps:meiasEps, paineis:paineis,
-      vol: area*o.capa + volVig + volTrav + beiArea*((E.ix-E.pw)/E.ix)*hEnch, inicio:o.inicio,
+      vol: area*o.capa + volVig + volTrav + beiArea*((E.ix-E.pw)/E.ix)*hEnch + cantoArea*hEnch, inicio:o.inicio,
       nTrav:nTrav, canaletas:canaletas, metTrav:Math.round(metTrav*10)/10, bitola:bitola,
       fbN:fbN, fbBit:fbBit, fbMetros:fbN*somaComp};
   }
