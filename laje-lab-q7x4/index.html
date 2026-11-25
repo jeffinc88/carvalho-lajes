@@ -695,11 +695,21 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       var PAR=+bei.par||0.15, e=1e-6;
       var nomesL={cima:'em cima',baixo:'embaixo',esq:'à esquerda',dir:'à direita'};
       var expostos=function(q,lado){ return expostosR(R,q,lado,viz); };
+      // 1) trechos de fora de cada lado com beiral
+      var trechos=[];
       R.forEach(function(q,qi){ ['cima','baixo','esq','dir'].forEach(function(lado){
         var BB=larguraBeiral(q.bei,lado); if(!BB) return;
-                var coord = lado==='cima'?q.y : lado==='baixo'?q.y+q.h : lado==='esq'?q.x : q.x+q.w;
+        var coord = lado==='cima'?q.y : lado==='baixo'?q.y+q.h : lado==='esq'?q.x : q.x+q.w;
         var ponta = rotG ? (lado==='esq'||lado==='dir') : (lado==='cima'||lado==='baixo');
-        expostos(q,lado).forEach(function(sg){
+        expostos(q,lado).forEach(function(sg){ trechos.push({qi:qi,qs:[qi],lado:lado,coord:coord,a:sg[0],b:sg[1],BB:BB,ponta:ponta}); });
+      }); });
+      // 2) beirais no mesmo sentido que continuam na mesma linha viram um beiral só
+      trechos.sort(function(x,y){ return x.lado<y.lado?-1:x.lado>y.lado?1:(x.coord-y.coord)||(x.a-y.a); });
+      var jt=[]; trechos.forEach(function(t){ var u=jt[jt.length-1];
+        if(u && u.lado===t.lado && Math.abs(u.coord-t.coord)<e && Math.abs(u.BB-t.BB)<e && u.ponta===t.ponta && Math.abs(u.b-t.a)<0.01){ u.b=t.b; if(u.qs.indexOf(t.qi)<0) u.qs.push(t.qi); }
+        else jt.push(t); });
+      jt.forEach(function(t){
+        var lado=t.lado, coord=t.coord, BB=t.BB, ponta=t.ponta, sg=[t.a,t.b];
           var Ls=sg[1]-sg[0], txt, kF=ponta?2:3; // 2× quando a vigota do cômodo passa direto; 3× na vigota curta sozinha
           if(ponta){
             var m=(lado==='cima'||lado==='esq')?'ini':'fim', nn=0;
@@ -709,12 +719,12 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
             var n=Math.max(1,Math.ceil(Ls/E.ix-1e-9)), cc=Math.ceil((BB+PAR)*10-1e-6)/10;
             for(var k=0;k<n;k++) beiCurtas.push(cc);
             beiFerro+=n*kF*cc; txt=n+' vigotas curtas de '+fmt(cc,2)+' m (+1 ferro 8 mm de '+fmt(kF*cc,1)+' m em cada)';
+            t.n=n; t.cc=cc;
           }
-          beiSegs.push({lado:lado,coord:coord,a:sg[0],b:sg[1],BB:BB,ponta:ponta});
-          beiLados.push((R.length>1?'parte '+(qi+1)+', ':'')+nomesL[lado]+' ('+Math.round(BB*100)+' cm, '+fmt(Ls,2)+' m): '+txt);
+          beiSegs.push({lado:lado,coord:coord,a:sg[0],b:sg[1],BB:BB,ponta:ponta,n:t.n||0,cc:t.cc||0});
+          beiLados.push((R.length>1?(t.qs.length>1?'partes '+t.qs.map(function(x){return x+1}).join(' e '):'parte '+(t.qi+1))+', ':'')+nomesL[lado]+' ('+Math.round(BB*100)+' cm, '+fmt(Ls,2)+' m): '+txt);
           beiArea+=Ls*BB; beiPain+=Math.min(np0(Ls,2)*np0(BB,3), np0(Ls,3)*np0(BB,2)); beiEps+=Math.ceil(Ls*BB/(E.ix*0.49)-1e-9);
-        });
-      }); });
+      });
     }
     // canto entre dois beirais perpendiculares: só concreto (sem vigota, sem enchimento)
     var cantoArea=0, nCantos=0;
@@ -837,6 +847,30 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     var P={sx:sx, esp:PAR_PLANTA*sx, X:function(x){return pad+(x-x0)*sx}, Y:function(y){return pad+(y-y0)*sx}};
     return '<svg id="planta" viewBox="0 0 '+Wp+' '+Hp+'" data-sx="'+sx+'" role="img" aria-label="Planta completa da laje">'+rs.map(function(r){return svgComodo(r,P)}).join('')+'</svg>';
   }
+  function juntaBeirais(rs,o){
+    var out={n:0,area:0,vol:0,pecas:0,ferro:0,curtas:[],txt:[]}, E=o.ench, G=PAR_PLANTA, e=0.02, areaEnch=0;
+    var gl=[]; rs.forEach(function(r){ var c=st.comodos[r.idx]; if(!c.pos) return;
+      (r.beiSegs||[]).forEach(function(z){ var hz=(z.lado==='cima'||z.lado==='baixo');
+        gl.push({r:r, z:z, lado:z.lado, coord:z.coord+(hz?c.pos.y:c.pos.x), a:z.a+(hz?c.pos.x:c.pos.y), b:z.b+(hz?c.pos.x:c.pos.y)}); }); });
+    gl.forEach(function(A){ gl.forEach(function(B){
+      if(A.r===B.r || A.lado!==B.lado || Math.abs(A.coord-B.coord)>e || Math.abs(B.a-A.b-G)>0.03) return;
+      var BB=Math.min(A.z.BB,B.z.BB), igual=Math.abs(A.z.BB-B.z.BB)<1e-6, nomes=A.r.nome+' + '+B.r.nome;
+      out.n++; out.area+=G*BB;
+      if(igual && !A.z.ponta && !B.z.ponta && A.z.cc===B.z.cc){
+        // vigotas curtas: conta como um trecho só, passando por cima da parede
+        var nT=Math.max(1,Math.ceil((A.b-A.a+G+B.b-B.a)/E.ix-1e-9)), d=nT-A.z.n-B.z.n;
+        if(d) out.curtas.push({cc:A.z.cc,d:d}); out.ferro+=d*3*A.z.cc;
+        out.vol+=G*BB*(o.capa+((E.ix-E.pw)/E.ix)*E.h); areaEnch+=G*BB*(E.pw/E.ix);
+        out.txt.push([nomes, 'beiral contínuo por cima da parede: '+nT+' vigotas curtas no trecho todo'+(d?' ('+(d>0?'+'+d:d)+' em relação aos dois separados)':'')]);
+      } else {
+        // vigota passando direto (ou beirais de largura diferente): o pedaço sobre a parede é só concreto
+        out.vol+=G*BB*(o.capa+E.h);
+        out.txt.push([nomes, 'emenda do beiral sobre a parede: só concreto ('+fmt(G*BB,2)+' m²)']);
+      }
+    }); });
+    if(areaEnch) out.pecas=Math.ceil(areaEnch/(E.pw*E.pl)*(1+(st.ench==='lajota'?DESPERDICIO_LAJ:DESPERDICIO_EPS))-1e-9);
+    return out;
+  }
   // encaixe: ao soltar perto de outro cômodo, cola nele (deixando a parede entre os dois) ou alinha as bordas
   function encaixa(i){
     // ímã: encosta na parede do vizinho (deixando 15 cm de parede) só quando os dois ficam lado a lado;
@@ -916,6 +950,11 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     st.comodos.forEach(function(c,i){ if(temErro(c)) ruins.push({idx:i, nome:(c.nome||'').trim()||'Cômodo '+(i+1), fora:!retangulos(c)}); });
     ruins.forEach(function(q){ alertas.push(q.fora ? q.nome+' ficou fora da conta: confira a medida.' : q.nome+': uma parte juntada ficou fora da conta. Confira a medida.'); });
     st.comodos.forEach(function(c,i){var r=calcComodo(c,o); if(!r) return; r.idx=i; r.nome=(c.nome||'').trim()||'Cômodo '+(i+1); rs.push(r); area+=r.area; vol+=r.vol; pecas+=r.pecas; meias+=r.meias; mL+=r.meiasLaj; mE+=r.meiasEps; pain+=r.paineis; trav+=r.nTrav; canal+=r.canaletas; if(r.metTrav){var ka=r.bitola; aco[ka]=(aco[ka]||0)+r.metTrav;} r.compPorVig.forEach(function(k){vigs[k]=(vigs[k]||0)+1}); r.medidas=medidasTxt(r,c); if(r.temBei){beiF+=r.beiFerro; beiR.push(r); r.beiCurtas.forEach(function(k){vigsBei[k]=(vigsBei[k]||0)+1});} if(r.sobreposto) alertas.push(r.nome+': as partes se sobrepõem. Confira o lado e o recuo.'); if(r.fbN){acoBase[r.fbBit]=(acoBase[r.fbBit]||0)+r.fbMetros;} if(r.vao>6) alertas.push(r.nome+': vão de '+fmt(r.vao,2)+' m é grande. O vendedor vai indicar a treliça e o escoramento certos.');});
+    // beirais no mesmo sentido em cômodos vizinhos (parede de 15 cm no meio) viram um beiral só
+    var jun=juntaBeirais(rs,o);
+    if(jun.n){ area+=jun.area; vol+=jun.vol; pecas+=jun.pecas; beiF+=jun.ferro;
+      jun.curtas.forEach(function(x){ vigsBei[x.cc]=(vigsBei[x.cc]||0)+x.d; if(vigsBei[x.cc]<=0) delete vigsBei[x.cc]; });
+      jun.txt.forEach(function(t){ beiR.push({nome:t[0], beiLados:[t[1]], bei:{par:PAR_PLANTA}}); }); }
     $('area').innerHTML=fmt(area,2)+' <small>m²</small>';
     var vPlanta = st.vista!=='cada' && rs.length>1;
     $('vista').hidden = rs.length<2;
