@@ -684,11 +684,10 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
       var expostos=function(q,lado){ return expostosR(R,q,lado); };
       R.forEach(function(q,qi){ ['cima','baixo','esq','dir'].forEach(function(lado){
         var BB=larguraBeiral(q.bei,lado); if(!BB) return;
-        var kF=BB<=0.3+1e-9?2:3;
-        var coord = lado==='cima'?q.y : lado==='baixo'?q.y+q.h : lado==='esq'?q.x : q.x+q.w;
+                var coord = lado==='cima'?q.y : lado==='baixo'?q.y+q.h : lado==='esq'?q.x : q.x+q.w;
         var ponta = rotG ? (lado==='esq'||lado==='dir') : (lado==='cima'||lado==='baixo');
         expostos(q,lado).forEach(function(sg){
-          var Ls=sg[1]-sg[0], txt;
+          var Ls=sg[1]-sg[0], txt, kF=ponta?2:3; // 2× quando a vigota do cômodo passa direto; 3× na vigota curta sozinha
           if(ponta){
             var m=(lado==='cima'||lado==='esq')?'ini':'fim', nn=0;
             g.vigs.forEach(function(v,i){ var yEnd=m==='ini'?v.y1:v.y2; if(Math.abs(yEnd-coord)<e && v.x>=sg[0]-e && v.x<=sg[1]+e && !ext[i][m]){ extra[i]+=PAR+BB-o.apoio; ext[i][m]=BB; nn++; beiFerro+=kF*(BB+PAR); } });
