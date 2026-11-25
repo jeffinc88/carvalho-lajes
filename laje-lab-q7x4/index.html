@@ -745,7 +745,13 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
         var e2=1e-6, xOk=(v.lado==='esq'?Math.abs(h.a-v.coord)<e2:Math.abs(h.b-v.coord)<e2), yOk=(h.lado==='cima'?Math.abs(v.a-h.coord)<e2:Math.abs(v.b-h.coord)<e2);
         if(xOk&&yOk){ cantoArea+=h.BB*v.BB; nCantos++; cantos.push({hl:h.lado, vl:v.lado, hc:h.coord, vc:v.coord, BBh:h.BB, BBv:v.BB}); }
       }); });
-    if(nCantos) beiLados.push(nCantos+(nCantos>1?' cantos':' canto')+' entre beirais: só concreto ('+fmt(cantoArea,2)+' m²)');
+    // canto até 30 × 30 cm: só concreto; maior que isso: 2 ferros 8 mm em diagonal, metade no canto e metade ancorada na laje
+    cantos.forEach(function(k){
+      var dim=Math.round(k.BBh*100)+' × '+Math.round(k.BBv*100)+' cm';
+      if(Math.max(k.BBh,k.BBv)<=0.30+1e-6){ beiLados.push('canto entre beirais ('+dim+'): só concreto'); return; }
+      var lb=Math.ceil(2*Math.sqrt(k.BBh*k.BBh+k.BBv*k.BBv)*10-1e-6)/10; k.ferro=true;
+      beiFerro+=2*lb; beiLados.push('canto entre beirais ('+dim+'): concreto com 2 ferros 8 mm em diagonal de '+fmt(lb,1)+' m');
+    });
     var compPorVig = g.vigs.map(function(v,i){return Math.ceil((v.L+2*o.apoio+extra[i])*10-1e-6)/10});
     var areaEnch=0, epsInteiras=0, meiasLaj=0, meiasEps=0, canaletas=0, metTrav=0, volTrav=0, nTrav=0, temMeia=false;
     g.fx.forEach(function(f){
@@ -808,7 +814,9 @@ body.com-barra{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
     // canto entre beirais perpendiculares: concreto
     (r.cantos||[]).forEach(function(k){ var wv=k.BBv*sx, wh=k.BBh*sx;
       var x = k.vl==='esq' ? X(k.vc)-esp-wv : X(k.vc)+esp, y = k.hl==='cima' ? Y(k.hc)-esp-wh : Y(k.hc)+esp;
-      s+='<rect x="'+x+'" y="'+y+'" width="'+wv+'" height="'+wh+'" fill="var(--concreto)"/>'; });
+      s+='<rect x="'+x+'" y="'+y+'" width="'+wv+'" height="'+wh+'" fill="var(--concreto)"/>';
+      if(k.ferro){ var qx = k.vl==='esq' ? x+wv : x, qy = k.hl==='cima' ? y+wh : y, fx = k.vl==='esq' ? x : x+wv, fy = k.hl==='cima' ? y : y+wh;
+        s+='<line x1="'+(qx-(fx-qx)*0.6)+'" y1="'+(qy-(fy-qy)*0.6)+'" x2="'+(fx-(fx-qx)*0.08)+'" y2="'+(fy-(fy-qy)*0.08)+'" stroke="#c0392b" stroke-width="2" stroke-linecap="round"/>'; } });
     r.R.forEach(function(q){ s+='<rect x="'+(X(q.x)-esp)+'" y="'+(Y(q.y)-esp)+'" width="'+(q.w*sx+2*esp)+'" height="'+(q.h*sx+2*esp)+'" fill="var(--parede)" rx="2"/>'; });
     var ench = st.ench==='lajota'?'var(--lajota)':'var(--eps)', junta = st.ench==='lajota'?'rgba(0,0,0,.18)':'var(--eps-line)', pl=(st.ench==='lajota'?0.20:0.49);
     r.R.forEach(function(q){ s+='<rect x="'+X(q.x)+'" y="'+Y(q.y)+'" width="'+(q.w*sx)+'" height="'+(q.h*sx)+'" fill="'+ench+'"/>'; });
