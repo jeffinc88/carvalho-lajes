@@ -43,7 +43,14 @@
   .marca{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:26px;letter-spacing:.5px;text-decoration:none}
   .marca small{display:block;font-size:12px;font-weight:600;letter-spacing:2px;color:#a9c0e8;margin-top:-6px}
   .tel{color:#fff;text-decoration:none;font-weight:600;font-size:15px;display:inline-flex;align-items:center;min-height:44px;padding:0 4px}
-  .tel span{margin-right:.3em}
+  .tel .num > span{margin-right:.3em}
+  .topo-acoes{display:flex;align-items:center;gap:14px}
+  .btn-prof{color:#fff;text-decoration:none;font-weight:600;font-size:14px;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 14px;border:1.5px solid #8fb3f0;border-radius:99px}
+  .btn-prof:hover{background:rgba(143,179,240,.15)}
+  .btn-prof svg{width:16px;height:16px;flex:none}
+  .btn-prof .curto{display:none}
+  .tel{white-space:nowrap}
+  .tel svg{display:none;width:20px;height:20px}
   .hero{background:var(--azul-esc);color:#fff;padding:40px 0 56px}
   .hero .wrap{display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center}
   h1{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:54px;line-height:1.02;letter-spacing:.3px}
@@ -97,7 +104,20 @@
     h1{font-size:42px}
     .fotos{grid-template-columns:1fr}
     section{padding:48px 0}
-    .tel span{display:none}
+    .tel .num > span{display:none}
+    .topo-acoes{gap:8px}
+    .btn-prof{padding:0 10px;font-size:13px}
+    .btn-prof .longo{display:none}
+    .btn-prof .curto{display:inline}
+  }
+  @media (max-width:430px){
+    .tel .num{display:none}
+    .tel svg{display:block}
+    .tel{justify-content:center;width:34px;min-height:34px;height:34px;padding:0;border-radius:50%;background:rgba(255,255,255,.12)}
+    .tel svg{width:17px;height:17px}
+    .topo-acoes{gap:6px}
+    .btn-prof{min-height:34px;padding:0 9px;font-size:12px;gap:4px;border-width:1px}
+    .btn-prof svg{width:13px;height:13px}
     footer{padding-bottom:96px}
   }
 </style>
@@ -107,7 +127,10 @@
 <header>
   <div class="wrap">
     <a class="marca" href="/">CARVALHO<small>PRÉ-MOLDADOS</small></a>
-    <a class="tel" href="tel:+551637227029" data-conv="ligacao"><span>Ligue: </span>(16) 3722-7029</a>
+    <div class="topo-acoes">
+      <a class="btn-prof" href="profissionais/"><svg viewBox="0 0 24 24" fill="none" stroke="#8fb3f0" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><span class="longo">Encontre um profissional</span><span class="curto">Profissionais</span></a>
+      <a class="tel" href="tel:+551637227029" data-conv="ligacao" aria-label="Ligar para a fábrica: (16) 3722-7029"><svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1A17 17 0 0 1 3 4c0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2Z"/></svg><span class="num"><span>Ligue: </span>(16) 3722-7029</span></a>
+    </div>
   </div>
 </header>
 
